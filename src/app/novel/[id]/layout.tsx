@@ -1,0 +1,87 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useParams, useRouter, usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { BookOpen, Users, FileText, Sparkles, ChevronLeft } from "lucide-react"
+import Link from "next/link"
+
+interface Novel {
+  id: string
+  title: string
+}
+
+const navItems = [
+  { href: "", label: "概览", icon: BookOpen },
+  { href: "/chapters", label: "章节", icon: FileText },
+  { href: "/characters", label: "人物", icon: Users },
+  { href: "/polish", label: "润色", icon: Sparkles },
+]
+
+export default function NovelLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const params = useParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const [novel, setNovel] = useState<Novel | null>(null)
+  const id = params.id as string
+
+  useEffect(() => {
+    fetch(`/api/novels?id=${id}`)
+      .then(res => res.json())
+      .then(data => setNovel(data))
+      .catch(() => {})
+  }, [id])
+
+  const currentPath = pathname.replace(`/novel/${id}`, "") || ""
+
+  return (
+    <>
+      {/* 侧边栏 */}
+      <aside className="w-64 border-r bg-card flex flex-col">
+        <div className="p-4 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-2 -ml-2 text-muted-foreground"
+            onClick={() => router.push("/")}
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            返回
+          </Button>
+          <h2 className="font-semibold text-lg truncate">
+            {novel?.title || "加载中..."}
+          </h2>
+        </div>
+        <nav className="flex-1 p-2 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = currentPath === item.href
+            return (
+              <Link
+                key={item.href}
+                href={`/novel/${id}${item.href}`}
+                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                  isActive
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
+
+      {/* 主内容区 */}
+      <main className="flex-1 overflow-auto">
+        {children}
+      </main>
+    </>
+  )
+}

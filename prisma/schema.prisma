@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./novel.db"
+}
+
+model Novel {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  chapters    Chapter[]
+  characters  Character[]
+}
+
+model Chapter {
+  id                String          @id @default(cuid())
+  novelId           String
+  novel             Novel           @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  title             String
+  content           String
+  status            String          @default("draft")  // draft: 草稿, published: 定稿
+  relatedCharacters String?         // 关联人物ID列表，JSON数组格式 ["id1","id2"]
+  sortOrder         Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  polishHistories   PolishHistory[]
+}
+
+model Character {
+  id        String   @id @default(cuid())
+  novelId   String
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  name      String
+  gender    String?  // 男 / 女
+  age       String?  // XX岁
+  identity  String?  // 身份/职业/组织归属
+  traits    String?  // JSON - 包含所有特征数据
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PolishRule {
+  id              String          @id @default(cuid())
+  name            String
+  description     String?
+  prompt          String
+  createdAt       DateTime        @default(now())
+  polishHistories PolishHistory[]
+}
+
+model PolishHistory {
+  id           String   @id @default(cuid())
+  chapterId    String
+  chapter      Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  ruleId       String?
+  rule         PolishRule? @relation(fields: [ruleId], references: [id])
+  originalText String
+  polishedText String
+  createdAt    DateTime @default(now())
+}
