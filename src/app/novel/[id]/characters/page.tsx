@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2, User, Venus, X, Mars, PenTool } from "lucide-react"
-import { RadioGroup, type RadioOption } from "@/components/radio-group"
+import { Plus, Trash2, User, Venus, X, Mars, PenTool, UserRound, Shield, GraduationCap, Mail, Sparkles, Skull, Users, Mask, Gate, Heart, Home, Sword, Hand, Compass, Flag, Palette, PartyPopper, Crown, Wand2, BookOpen } from "lucide-react"
+import { RadioGroup, MultiRadioGroup, type RadioOption } from "@/components/radio-group"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { FormInput } from "@/components/form-input"
 import { 
@@ -21,6 +21,49 @@ const genderOptions: RadioOption[] = [
   { value: "男", icon: Mars },
   { value: "女", icon: Venus },
 ]
+
+// 叙事功能原型图标映射
+const narrativeFunctionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  Hero: Shield,
+  Mentor: GraduationCap,
+  Herald: Mail,
+  Shapeshifter: Sparkles,
+  Shadow: Skull,
+  Ally: Users,
+  Trickster: Mask,
+  "Threshold Guardian": Gate,
+}
+
+// 内在动机原型图标映射
+const innerMotivationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  Innocent: Heart,
+  Orphan: Home,
+  Warrior: Sword,
+  Caregiver: Hand,
+  Seeker: Compass,
+  Lover: Heart,
+  Rebel: Flag,
+  Creator: Palette,
+  Jester: PartyPopper,
+  Ruler: Crown,
+  Magician: Wand2,
+  Sage: BookOpen,
+}
+
+// 创建带图标的 RadioOption
+function createRadioOptionsWithIcons(
+  options: ArchetypeOption[],
+  iconMap: Record<string, React.ComponentType<{ className?: string }>>
+): RadioOption[] {
+  return options.map((opt) => ({
+    value: opt.name,
+    label: opt.label,
+    icon: iconMap[opt.name],
+  }))
+}
+
+const narrativeFunctionRadioOptions = createRadioOptionsWithIcons(narrativeFunctionOptions, narrativeFunctionIcons)
+const innerMotivationRadioOptions = createRadioOptionsWithIcons(innerMotivationOptions, innerMotivationIcons)
 
 interface Character {
   id: string
@@ -280,7 +323,7 @@ export default function CharactersPage() {
           <div className="max-w-3xl mx-auto p-6 space-y-8">
             {/* 基本信息 */}
             <Card>
-              <CardHeader icon={User} title="基本信息" />
+              <CardHeader icon={UserRound} title="基本信息" />
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <FormInput
@@ -323,50 +366,53 @@ export default function CharactersPage() {
                   />
                 </div>
 
-                {/* 叙事功能原型（沃格勒体系） */}
-                <div>
-                  <Label>叙事功能原型（沃格勒体系）</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {narrativeFunctionOptions.map((opt) => {
-                      const isSelected = editTraits.narrativeFunction.some((o) => o.name === opt.name)
-                      return (
-                        <button
-                          key={opt.name}
-                          onClick={() => toggleNarrativeFunction(opt)}
-                          className={`px-3 py-1 rounded-full text-xs border transition-colors ${isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-muted-foreground border-input hover:border-primary"
-                            }`}
-                          title={opt.description}
-                        >
-                          {opt.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
+                {/* 叙事功能原型 & 内在动机原型（双列布局） */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* 叙事功能原型（沃格勒体系） */}
+                  <Card>
+                    <CardHeader icon={Shield} title="叙事功能原型（沃格勒体系）" />
+                    <CardContent>
+                      <MultiRadioGroup
+                        options={narrativeFunctionRadioOptions}
+                        selectedValues={editTraits.narrativeFunction.map((o) => o.name)}
+                        onChange={(values) => {
+                          setEditTraits({
+                            ...editTraits,
+                            narrativeFunction: values.map((val) => ({
+                              label: narrativeFunctionOptions.find((o) => o.name === val)?.label || "",
+                              name: val,
+                              description: narrativeFunctionOptions.find((o) => o.name === val)?.description || "",
+                            })),
+                          })
+                        }}
+                        variant="box"
+                        columns={3}
+                      />
+                    </CardContent>
+                  </Card>
 
-                {/* 内在动机原型（皮尔逊体系） */}
-                <div>
-                  <Label>内在动机原型（皮尔逊体系）</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {innerMotivationOptions.map((opt) => {
-                      const isSelected = editTraits.innerMotivation.some((o) => o.name === opt.name)
-                      return (
-                        <button
-                          key={opt.name}
-                          onClick={() => toggleInnerMotivation(opt)}
-                          className={`px-3 py-1 rounded-full text-xs border transition-colors ${isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-muted-foreground border-input hover:border-primary"
-                            }`}
-                          title={opt.description}
-                        >
-                          {opt.label}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  {/* 内在动机原型（皮尔逊体系） */}
+                  <Card>
+                    <CardHeader icon={Heart} title="内在动机原型（皮尔逊体系）" />
+                    <CardContent>
+                      <MultiRadioGroup
+                        options={innerMotivationRadioOptions}
+                        selectedValues={editTraits.innerMotivation.map((o) => o.name)}
+                        onChange={(values) => {
+                          setEditTraits({
+                            ...editTraits,
+                            innerMotivation: values.map((val) => ({
+                              label: innerMotivationOptions.find((o) => o.name === val)?.label || "",
+                              name: val,
+                              description: innerMotivationOptions.find((o) => o.name === val)?.description || "",
+                            })),
+                          })
+                        }}
+                        variant="box"
+                        columns={3}
+                      />
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* 核心矛盾 */}

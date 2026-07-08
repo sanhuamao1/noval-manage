@@ -26,16 +26,23 @@ const CardHeader = React.forwardRef<
     icon?: LucideIcon
     title: string
   }
->(({ className, icon, title, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center gap-2 pb-4 mb-4 border-b border-border-subtle", className)}
-    {...props}
-  >
-    {icon && <icon className="w-5 h-5 text-accent-500" />}
-    <h3 className="text-base font-semibold">{title}</h3>
-  </div>
-))
+>(({ className, icon, title, ...props }, ref) => {
+    const Icon = icon
+    return (
+      <div
+        ref={ref}
+        className={cn("flex items-center gap-3 pb-4 mb-4 border-b border-border-subtle", className)}
+        {...props}
+      >
+        {Icon && (
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-bg-800 border border-amber-500/30">
+            <Icon className="w-5 h-5 text-amber-400" />
+          </div>
+        )}
+        <h3 className="text-base font-semibold text-fg-primary">{title}</h3>
+      </div>
+    )
+  })
 CardHeader.displayName = "CardHeader"
 
 const CardContent = React.forwardRef<
