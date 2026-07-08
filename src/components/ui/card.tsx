@@ -25,21 +25,25 @@ const CardHeader = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & {
     icon?: LucideIcon
     title: string
+    rightHandler?: React.ReactNode
   }
->(({ className, icon, title, ...props }, ref) => {
+>(({ className, icon, title, rightHandler, ...props }, ref) => {
     const Icon = icon
     return (
       <div
         ref={ref}
-        className={cn("flex items-center gap-3 pb-4 mb-4 border-b border-border-subtle", className)}
+        className={cn("flex items-center justify-between gap-3 pb-4 mb-4 border-b border-border-subtle", className)}
         {...props}
       >
-        {Icon && (
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-bg-800 border border-amber-500/30">
-            <Icon className="w-5 h-5 text-amber-400" />
-          </div>
-        )}
-        <h3 className="text-base font-semibold text-fg-primary">{title}</h3>
+        <div className="flex items-center gap-3">
+          {Icon && (
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-bg-800 border border-amber-500/30">
+              <Icon className="w-5 h-5 text-amber-400" />
+            </div>
+          )}
+          <h3 className="text-base font-semibold text-fg-primary">{title}</h3>
+        </div>
+        {rightHandler && <div className="flex-shrink-0">{rightHandler}</div>}
       </div>
     )
   })
@@ -57,4 +61,16 @@ const CardContent = React.forwardRef<
 ))
 CardContent.displayName = "CardContent"
 
-export { Card, CardHeader, CardContent }
+const CardEmpty = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-center py-6 text-fg-tertiary text-sm", className)}
+    {...props}
+  />
+))
+CardEmpty.displayName = "CardEmpty"
+
+export { Card, CardHeader, CardContent, CardEmpty }

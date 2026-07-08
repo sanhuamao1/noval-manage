@@ -5,6 +5,7 @@ import type { ComponentType } from "react"
 export interface RadioOption {
   value: string
   label?: string
+  description?: string
   icon?: ComponentType<{ className?: string }>
 }
 
@@ -20,8 +21,6 @@ interface MultiRadioGroupProps {
   options: RadioOption[]
   selectedValues: string[]
   onChange: (values: string[]) => void
-  variant?: "horizontal" | "box"
-  columns?: number
 }
 
 // 选中状态的样式
@@ -64,6 +63,7 @@ function RadioOptionButton({
       type="button"
       onClick={() => onChange(option.value)}
       className={getButtonClasses(isSelected, wrapperClasses)}
+      title={option.description}
     >
       {IconComponent && <IconComponent className={getIconClassName(isSelected, iconSize)} />}
       {showLabel && <span>{option.label || option.value}</span>}
@@ -92,6 +92,7 @@ function MultiRadioOptionButton({
       type="button"
       onClick={() => onToggle(option.value)}
       className={getButtonClasses(isSelected, wrapperClasses)}
+      title={option.description}
     >
       {IconComponent && <IconComponent className={getIconClassName(isSelected, iconSize)} />}
       {showLabel && <span>{option.label || option.value}</span>}
@@ -111,8 +112,8 @@ export function RadioGroup({ options, value, onChange, variant = "horizontal", c
             option={option}
             isSelected={value === option.value}
             onChange={onChange}
-            iconSize="w-6 h-6"
-            wrapperClasses="aspect-square rounded-lg flex flex-col items-center justify-center gap-2"
+            iconSize="w-4 h-4"
+            wrapperClasses="aspect-square rounded-lg flex flex-col items-center justify-center gap-2 text-xs"
           />
         ))}
       </div>
@@ -128,16 +129,14 @@ export function RadioGroup({ options, value, onChange, variant = "horizontal", c
           isSelected={value === option.value}
           onChange={onChange}
           iconSize="w-4 h-4"
-          wrapperClasses="flex-1 h-9 rounded-lg flex items-center justify-center gap-2"
+          wrapperClasses="flex-1 h-9 rounded-lg flex items-center justify-center gap-2 text-xs"
         />
       ))}
     </div>
   )
 }
 
-export function MultiRadioGroup({ options, selectedValues, onChange, variant = "box", columns = 3 }: MultiRadioGroupProps) {
-  // 使用映射避免动态类名问题
-  const colClass = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" } as const
+export function MultiRadioGroup({ options, selectedValues, onChange }: MultiRadioGroupProps) {
   function handleToggle(value: string) {
     if (selectedValues.includes(value)) {
       onChange(selectedValues.filter((v) => v !== value))
@@ -146,25 +145,8 @@ export function MultiRadioGroup({ options, selectedValues, onChange, variant = "
     }
   }
 
-  if (variant === "box") {
-    return (
-      <div className={`grid ${colClass[columns as keyof typeof colClass] || "grid-cols-3"} gap-3`}>
-        {options.map((option) => (
-          <MultiRadioOptionButton
-            key={option.value}
-            option={option}
-            isSelected={selectedValues.includes(option.value)}
-            onToggle={handleToggle}
-            iconSize="w-6 h-6"
-            wrapperClasses="aspect-square rounded-lg flex flex-col items-center justify-center gap-2"
-          />
-        ))}
-      </div>
-    )
-  }
-
   return (
-    <div className="flex gap-3">
+    <>
       {options.map((option) => (
         <MultiRadioOptionButton
           key={option.value}
@@ -172,9 +154,9 @@ export function MultiRadioGroup({ options, selectedValues, onChange, variant = "
           isSelected={selectedValues.includes(option.value)}
           onToggle={handleToggle}
           iconSize="w-4 h-4"
-          wrapperClasses="flex-1 h-9 rounded-lg flex items-center justify-center gap-2"
+          wrapperClasses="rounded-lg flex flex-col items-center justify-center gap-1 py-2.5 text-xs"
         />
       ))}
-    </div>
+    </>
   )
 }

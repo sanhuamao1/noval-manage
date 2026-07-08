@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2, User, Venus, X, Mars, PenTool, UserRound, Shield, GraduationCap, Mail, Sparkles, Skull, Users, Mask, Gate, Heart, Home, Sword, Hand, Compass, Flag, Palette, PartyPopper, Crown, Wand2, BookOpen } from "lucide-react"
+import { Plus, Trash2, User, Venus, X, Mars, PenTool, UserRound, Shield, Heart, Briefcase, Gem, Calendar, Zap } from "lucide-react"
 import { RadioGroup, MultiRadioGroup, type RadioOption } from "@/components/radio-group"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardContent, CardEmpty } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/tabs"
 import { FormInput } from "@/components/form-input"
 import { 
   narrativeFunctionOptions, 
   innerMotivationOptions, 
   emotionOptions,
+  archetypeIcons,
   type ArchetypeOption 
 } from "./data"
 
@@ -21,34 +23,6 @@ const genderOptions: RadioOption[] = [
   { value: "男", icon: Mars },
   { value: "女", icon: Venus },
 ]
-
-// 叙事功能原型图标映射
-const narrativeFunctionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  Hero: Shield,
-  Mentor: GraduationCap,
-  Herald: Mail,
-  Shapeshifter: Sparkles,
-  Shadow: Skull,
-  Ally: Users,
-  Trickster: Mask,
-  "Threshold Guardian": Gate,
-}
-
-// 内在动机原型图标映射
-const innerMotivationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  Innocent: Heart,
-  Orphan: Home,
-  Warrior: Sword,
-  Caregiver: Hand,
-  Seeker: Compass,
-  Lover: Heart,
-  Rebel: Flag,
-  Creator: Palette,
-  Jester: PartyPopper,
-  Ruler: Crown,
-  Magician: Wand2,
-  Sage: BookOpen,
-}
 
 // 创建带图标的 RadioOption
 function createRadioOptionsWithIcons(
@@ -58,12 +32,13 @@ function createRadioOptionsWithIcons(
   return options.map((opt) => ({
     value: opt.name,
     label: opt.label,
+    description: opt.description,
     icon: iconMap[opt.name],
   }))
 }
 
-const narrativeFunctionRadioOptions = createRadioOptionsWithIcons(narrativeFunctionOptions, narrativeFunctionIcons)
-const innerMotivationRadioOptions = createRadioOptionsWithIcons(innerMotivationOptions, innerMotivationIcons)
+const narrativeFunctionRadioOptions = createRadioOptionsWithIcons(narrativeFunctionOptions, archetypeIcons)
+const innerMotivationRadioOptions = createRadioOptionsWithIcons(innerMotivationOptions, archetypeIcons)
 
 interface Character {
   id: string
@@ -80,6 +55,7 @@ interface Traits {
   narrativeFunction: ArchetypeOption[]
   innerMotivation: ArchetypeOption[]
   coreConflict: string
+  emotionExpression: string
   abilities: { name: string; description: string }[]
   relationships: { characterId: string; characterName: string; description: string }[]
   growthArcs: { flaw: string; manifestation: string; direction: string }[]
@@ -91,13 +67,13 @@ const defaultTraits: Traits = {
   narrativeFunction: [],
   innerMotivation: [],
   coreConflict: "",
+  emotionExpression: "",
   abilities: [],
   relationships: [],
   growthArcs: [],
   notes: [
     { key: "破局方式", value: "" },
     { key: "关键行为模式", value: "" },
-    { key: "情感表达方式", value: "" },
     { key: "角色危险性或潜力", value: "" },
   ],
 }
@@ -145,6 +121,7 @@ export default function CharactersPage() {
         narrativeFunction: Array.isArray(parsed.narrativeFunction) ? parsed.narrativeFunction : [],
         innerMotivation: Array.isArray(parsed.innerMotivation) ? parsed.innerMotivation : [],
         coreConflict: parsed.coreConflict || "",
+        emotionExpression: parsed.emotionExpression || "",
         abilities: parsed.abilities || [],
         relationships: parsed.relationships || [],
         growthArcs: parsed.growthArcs || [],
@@ -256,26 +233,6 @@ export default function CharactersPage() {
     setEditTraits({ ...editTraits, notes })
   }
 
-  function toggleNarrativeFunction(option: ArchetypeOption) {
-    const current = editTraits.narrativeFunction
-    const exists = current.some((o) => o.name === option.name)
-    if (exists) {
-      setEditTraits({ ...editTraits, narrativeFunction: current.filter((o) => o.name !== option.name) })
-    } else {
-      setEditTraits({ ...editTraits, narrativeFunction: [...current, option] })
-    }
-  }
-
-  function toggleInnerMotivation(option: ArchetypeOption) {
-    const current = editTraits.innerMotivation
-    const exists = current.some((o) => o.name === option.name)
-    if (exists) {
-      setEditTraits({ ...editTraits, innerMotivation: current.filter((o) => o.name !== option.name) })
-    } else {
-      setEditTraits({ ...editTraits, innerMotivation: [...current, option] })
-    }
-  }
-
   return (
     <div className="flex h-full">
       {/* 左侧人物列表 */}
@@ -325,7 +282,7 @@ export default function CharactersPage() {
             <Card>
               <CardHeader icon={UserRound} title="基本信息" />
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <FormInput
                     label="姓名"
                     icon={PenTool}
@@ -338,15 +295,41 @@ export default function CharactersPage() {
                   </div>
                   <FormInput
                     label="年龄"
+                    icon={Calendar}
                     value={editAge}
                     onChange={(e) => setEditAge(e.target.value)}
                     placeholder="如：25岁"
                   />
                   <FormInput
                     label="身份"
+                    icon={Briefcase}
                     value={editIdentity}
                     onChange={(e) => setEditIdentity(e.target.value)}
                     placeholder="身份/职业/组织归属"
+                  />
+                  {/* 标志性物件 */}
+                  <FormInput
+                    label="标志性物件"
+                    icon={Gem}
+                    value={editTraits.item}
+                    onChange={(e) => setEditTraits({ ...editTraits, item: e.target.value })}
+                    placeholder="一件有故事的随身物品"
+                  />
+                </div>
+                {/* 核心矛盾 */}
+                <FormInput
+                  label="核心矛盾"
+                  value={editTraits.coreConflict}
+                  onChange={(e) => setEditTraits({ ...editTraits, coreConflict: e.target.value })}
+                  placeholder="一句话概括"
+                />
+                {/* 情感表达方式 */}
+                <div>
+                  <Label className="mb-0.5">情感表达方式</Label>
+                  <RadioGroup
+                    options={emotionOptions}
+                    value={editTraits.emotionExpression}
+                    onChange={(v) => setEditTraits({ ...editTraits, emotionExpression: v })}
                   />
                 </div>
               </CardContent>
@@ -354,40 +337,29 @@ export default function CharactersPage() {
 
             {/* 特征数据 */}
             <section>
-              <h3 className="text-lg font-semibold mb-4 text-muted-foreground">特征</h3>
               <div className="space-y-6">
-                {/* 标志性物件 */}
-                <div>
-                  <Label>标志性物件</Label>
-                  <Input
-                    value={editTraits.item}
-                    onChange={(e) => setEditTraits({ ...editTraits, item: e.target.value })}
-                    placeholder="一件有故事的随身物品"
-                  />
-                </div>
-
                 {/* 叙事功能原型 & 内在动机原型（双列布局） */}
                 <div className="grid grid-cols-2 gap-4">
                   {/* 叙事功能原型（沃格勒体系） */}
                   <Card>
                     <CardHeader icon={Shield} title="叙事功能原型（沃格勒体系）" />
                     <CardContent>
-                      <MultiRadioGroup
-                        options={narrativeFunctionRadioOptions}
-                        selectedValues={editTraits.narrativeFunction.map((o) => o.name)}
-                        onChange={(values) => {
-                          setEditTraits({
-                            ...editTraits,
-                            narrativeFunction: values.map((val) => ({
-                              label: narrativeFunctionOptions.find((o) => o.name === val)?.label || "",
-                              name: val,
-                              description: narrativeFunctionOptions.find((o) => o.name === val)?.description || "",
-                            })),
-                          })
-                        }}
-                        variant="box"
-                        columns={3}
-                      />
+                      <div className="grid grid-cols-3 gap-3">
+                        <MultiRadioGroup
+                          options={narrativeFunctionRadioOptions}
+                          selectedValues={editTraits.narrativeFunction.map((o) => o.name)}
+                          onChange={(values) => {
+                            setEditTraits({
+                              ...editTraits,
+                              narrativeFunction: values.map((val) => ({
+                                label: narrativeFunctionOptions.find((o) => o.name === val)?.label || "",
+                                name: val,
+                                description: narrativeFunctionOptions.find((o) => o.name === val)?.description || "",
+                              })),
+                            })
+                          }}
+                        />
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -395,177 +367,166 @@ export default function CharactersPage() {
                   <Card>
                     <CardHeader icon={Heart} title="内在动机原型（皮尔逊体系）" />
                     <CardContent>
-                      <MultiRadioGroup
-                        options={innerMotivationRadioOptions}
-                        selectedValues={editTraits.innerMotivation.map((o) => o.name)}
-                        onChange={(values) => {
-                          setEditTraits({
-                            ...editTraits,
-                            innerMotivation: values.map((val) => ({
-                              label: innerMotivationOptions.find((o) => o.name === val)?.label || "",
-                              name: val,
-                              description: innerMotivationOptions.find((o) => o.name === val)?.description || "",
-                            })),
-                          })
-                        }}
-                        variant="box"
-                        columns={3}
-                      />
+                      <div className="grid grid-cols-3 gap-3">
+                        <MultiRadioGroup
+                          options={innerMotivationRadioOptions}
+                          selectedValues={editTraits.innerMotivation.map((o) => o.name)}
+                          onChange={(values) => {
+                            setEditTraits({
+                              ...editTraits,
+                              innerMotivation: values.map((val) => ({
+                                label: innerMotivationOptions.find((o) => o.name === val)?.label || "",
+                                name: val,
+                                description: innerMotivationOptions.find((o) => o.name === val)?.description || "",
+                              })),
+                            })
+                          }}
+                        />
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* 核心矛盾 */}
-                <div>
-                  <Label>核心矛盾</Label>
-                  <Input
-                    value={editTraits.coreConflict}
-                    onChange={(e) => setEditTraits({ ...editTraits, coreConflict: e.target.value })}
-                    placeholder="一句话概括"
-                  />
-                </div>
+                {/* 能力 / 关系网络 / 成长弧光 */}
+                <Tabs defaultValue="abilities">
+                  <TabsList>
+                    <TabsTrigger value="abilities" icon={Zap} label="能力" />
+                    <TabsTrigger value="relationships" icon={Heart} label="关系网络" />
+                    <TabsTrigger value="growthArcs" icon={Gem} label="成长弧光" />
+                  </TabsList>
 
-                {/* 能力 */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>能力</Label>
-                    <Button variant="outline" size="sm" onClick={addAbility}>
-                      <Plus className="w-3 h-3 mr-1" />添加能力
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {editTraits.abilities.map((ability, i) => (
-                      <div key={i} className="flex gap-2 items-start">
-                        <Input
-                          className="w-1/3"
-                          value={ability.name}
-                          onChange={(e) => updateAbility(i, "name", e.target.value)}
-                          placeholder="擅长什么"
-                        />
-                        <Input
-                          className="flex-1"
-                          value={ability.description}
-                          onChange={(e) => updateAbility(i, "description", e.target.value)}
-                          placeholder="具体表现"
-                        />
-                        <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => removeAbility(i)}>
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* 关系网络 */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>关系网络</Label>
-                    <Button variant="outline" size="sm" onClick={addRelationship}>
-                      <Plus className="w-3 h-3 mr-1" />添加关系
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {editTraits.relationships.map((rel, i) => (
-                      <div key={i} className="flex gap-2 items-start">
-                        <Select
-                          value={rel.characterId}
-                          onValueChange={(v) => updateRelationship(i, "characterId", v)}
-                        >
-                          <SelectTrigger className="w-1/3">
-                            <SelectValue placeholder="选择角色" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allChars
-                              .filter((c) => c.id !== selectedChar.id)
-                              .map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                  {c.name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          className="flex-1"
-                          value={rel.description}
-                          onChange={(e) => updateRelationship(i, "description", e.target.value)}
-                          placeholder="与 TA 的关系"
-                        />
-                        <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => removeRelationship(i)}>
-                          <X className="w-4 h-4" />
-                        </Button>
+                  {/* 能力 */}
+                  <TabsContent value="abilities" actionIcon={Plus} onAction={addAbility}>
+                    {editTraits.abilities.length === 0 ? (
+                      <CardEmpty>还没有能力，点击右上角"添加能力"</CardEmpty>
+                    ) : (
+                      <div className="space-y-2 pt-1">
+                        {editTraits.abilities.map((ability, i) => (
+                          <div key={i} className="flex gap-2 items-center">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-semibold flex-shrink-0">
+                              {i + 1}
+                            </span>
+                            <Input
+                              className="w-1/3"
+                              value={ability.name}
+                              onChange={(e) => updateAbility(i, "name", e.target.value)}
+                              placeholder="擅长什么"
+                            />
+                            <Input
+                              className="flex-1"
+                              value={ability.description}
+                              onChange={(e) => updateAbility(i, "description", e.target.value)}
+                              placeholder="具体表现"
+                            />
+                            <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-fg-tertiary hover:bg-danger/10 hover:text-danger-light" onClick={() => removeAbility(i)}>
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    )}
+                  </TabsContent>
 
-                {/* 成长弧光 */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label>成长弧光</Label>
-                    <Button variant="outline" size="sm" onClick={addGrowthArc}>
-                      <Plus className="w-3 h-3 mr-1" />添加弧光
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {editTraits.growthArcs.map((arc, i) => (
-                      <div key={i} className="flex gap-2 items-start">
-                        <Input
-                          className="w-1/4"
-                          value={arc.flaw}
-                          onChange={(e) => updateGrowthArc(i, "flaw", e.target.value)}
-                          placeholder="缺陷"
-                        />
-                        <Input
-                          className="w-1/3"
-                          value={arc.manifestation}
-                          onChange={(e) => updateGrowthArc(i, "manifestation", e.target.value)}
-                          placeholder="表现"
-                        />
-                        <Input
-                          className="w-1/3"
-                          value={arc.direction}
-                          onChange={(e) => updateGrowthArc(i, "direction", e.target.value)}
-                          placeholder="成长方向"
-                        />
-                        <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0" onClick={() => removeGrowthArc(i)}>
-                          <X className="w-4 h-4" />
-                        </Button>
+                  {/* 关系网络 */}
+                  <TabsContent value="relationships" actionIcon={Plus} onAction={addRelationship}>
+                    {editTraits.relationships.length === 0 ? (
+                      <CardEmpty>还没有关系，点击右上角"添加关系"</CardEmpty>
+                    ) : (
+                      <div className="space-y-2 pt-1">
+                        {editTraits.relationships.map((rel, i) => (
+                          <div key={i} className="flex gap-2 items-center">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-semibold flex-shrink-0">
+                              {i + 1}
+                            </span>
+                            <Select
+                              value={rel.characterId}
+                              onValueChange={(v) => updateRelationship(i, "characterId", v)}
+                            >
+                              <SelectTrigger className="w-1/3">
+                                <SelectValue placeholder="选择角色" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {allChars
+                                  .filter((c) => c.id !== selectedChar.id)
+                                  .map((c) => (
+                                    <SelectItem key={c.id} value={c.id}>
+                                      {c.name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              className="flex-1"
+                              value={rel.description}
+                              onChange={(e) => updateRelationship(i, "description", e.target.value)}
+                              placeholder="与 TA 的关系"
+                            />
+                            <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-fg-tertiary hover:bg-danger/10 hover:text-danger-light" onClick={() => removeRelationship(i)}>
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    )}
+                  </TabsContent>
+
+                  {/* 成长弧光 */}
+                  <TabsContent value="growthArcs" actionIcon={Plus} onAction={addGrowthArc}>
+                    {editTraits.growthArcs.length === 0 ? (
+                      <CardEmpty>还没有弧光，点击右上角"添加弧光"</CardEmpty>
+                    ) : (
+                      <div className="space-y-2 pt-1">
+                        {editTraits.growthArcs.map((arc, i) => (
+                          <div key={i} className="flex gap-2 items-center">
+                            <span className="flex items-center justify-center w-7 h-7 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-semibold flex-shrink-0">
+                              {i + 1}
+                            </span>
+                            <Input
+                              className="w-1/4"
+                              value={arc.flaw}
+                              onChange={(e) => updateGrowthArc(i, "flaw", e.target.value)}
+                              placeholder="缺陷"
+                            />
+                            <Input
+                              className="w-1/3"
+                              value={arc.manifestation}
+                              onChange={(e) => updateGrowthArc(i, "manifestation", e.target.value)}
+                              placeholder="表现"
+                            />
+                            <Input
+                              className="w-1/3"
+                              value={arc.direction}
+                              onChange={(e) => updateGrowthArc(i, "direction", e.target.value)}
+                              placeholder="成长方向"
+                            />
+                            <Button variant="ghost" size="icon" className="w-8 h-8 flex-shrink-0 text-fg-tertiary hover:bg-danger/10 hover:text-danger-light" onClick={() => removeGrowthArc(i)}>
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                </Tabs>
 
                 {/* 写作注意事项 */}
-                <div>
-                  <Label>写作注意事项</Label>
-                  <div className="space-y-3 mt-2">
+                <Card>
+                  <CardHeader icon={PenTool} title="写作注意事项" />
+                  <CardContent className="grid grid-cols-2 gap-4 space-y-0">
                     {editTraits.notes.map((note, i) => (
-                      <div key={i}>
-                        <Label className="text-xs text-muted-foreground">{note.key}</Label>
-                        {note.key === "情感表达方式" ? (
-                          <Select value={note.value} onValueChange={(v) => updateNote(i, v)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="选择情感表达方式" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {emotionOptions.map((opt) => (
-                                <SelectItem key={opt} value={opt}>
-                                  {opt}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input
-                            value={note.value}
-                            onChange={(e) => updateNote(i, e.target.value)}
-                            placeholder={`输入${note.key}`}
-                          />
-                        )}
+                      <div key={i} className="space-y-1.5">
+                        <Label className="text-xs text-fg-tertiary">{note.key}</Label>
+                        <Input
+                          value={note.value}
+                          onChange={(e) => updateNote(i, e.target.value)}
+                          placeholder={`${note.key}`}
+                        />
                       </div>
                     ))}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </div>

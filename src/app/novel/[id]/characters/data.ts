@@ -1,7 +1,60 @@
+import {
+  Shield,
+  GraduationCap,
+  Mail,
+  Sparkles,
+  Skull,
+  Users,
+  Mask,
+  Gate,
+  Heart,
+  Home,
+  Sword,
+  Hand,
+  Compass,
+  Flag,
+  Palette,
+  PartyPopper,
+  Crown,
+  Wand2,
+  BookOpen,
+  ShieldCheck,
+  TriangleAlert,
+  Flame,
+  CloudRain,
+  ArrowBigLeftDash,
+} from "lucide-react"
+
 export interface ArchetypeOption {
   label: string
   name: string
   description: string
+}
+
+// 原型图标映射（叙事功能 + 内在动机共用）
+export const archetypeIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  // 叙事功能原型
+  Hero: Shield,
+  Mentor: GraduationCap,
+  Herald: Mail,
+  Shapeshifter: Sparkles,
+  Shadow: Skull,
+  Ally: Users,
+  Trickster: Mask,
+  "Threshold Guardian": Gate,
+  // 内在动机原型
+  Innocent: Heart,
+  Orphan: Home,
+  Warrior: Sword,
+  Caregiver: Hand,
+  Seeker: Compass,
+  Lover: Heart,
+  Rebel: Flag,
+  Creator: Palette,
+  Jester: PartyPopper,
+  Ruler: Crown,
+  Magician: Wand2,
+  Sage: BookOpen,
 }
 
 export const narrativeFunctionOptions: ArchetypeOption[] = [
@@ -30,4 +83,10 @@ export const innerMotivationOptions: ArchetypeOption[] = [
   { label: "贤者", name: "Sage", description: "追求真理与智慧，无尽的好奇心，以认知世界、传播知识、洞悉本质为乐。" },
 ]
 
-export const emotionOptions = ["成熟克制", "笨拙", "热烈", "压抑", "回避"]
+export const emotionOptions = [
+  { value: "成熟克制", icon: ShieldCheck },
+  { value: "笨拙", icon: TriangleAlert },
+  { value: "热烈", icon: Flame },
+  { value: "压抑", icon: CloudRain },
+  { value: "回避", icon: ArrowBigLeftDash },
+]
