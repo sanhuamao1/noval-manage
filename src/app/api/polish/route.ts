@@ -4,7 +4,7 @@ import { callAI, buildPolishPrompt } from '@/lib/ai'
 
 export async function POST(req: NextRequest) {
   try {
-    const { chapterId, ruleId, text } = await req.json()
+    const { ruleId, text } = await req.json()
 
     if (!text) {
       return NextResponse.json({ error: '请提供要润色的文本' }, { status: 400 })
@@ -22,18 +22,6 @@ export async function POST(req: NextRequest) {
     // 调用 AI
     const prompt = buildPolishPrompt(rule, text)
     const polishedText = await callAI(prompt)
-
-    // 保存润色历史
-    if (chapterId) {
-      await prisma.polishHistory.create({
-        data: {
-          chapterId,
-          ruleId,
-          originalText: text,
-          polishedText,
-        },
-      })
-    }
 
     return NextResponse.json({ originalText: text, polishedText })
   } catch (error: any) {

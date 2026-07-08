@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2, Edit2, Sparkles, Wand2 } from "lucide-react"
+import { Plus, Trash2, Edit2 } from "lucide-react"
 
 interface PolishRule {
   id: string
@@ -24,12 +23,6 @@ export default function PolishPage() {
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<PolishRule | null>(null)
   const [form, setForm] = useState({ name: "", description: "", prompt: "" })
-  const [inputText, setInputText] = useState("")
-  const [selectedRule, setSelectedRule] = useState("")
-  const [result, setResult] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-
   useEffect(() => {
     fetchRules()
   }, [])
@@ -79,35 +72,6 @@ export default function PolishPage() {
     fetchRules()
   }
 
-  async function polish() {
-    if (!inputText.trim() || !selectedRule) return
-    setLoading(true)
-    setError("")
-    setResult("")
-
-    try {
-      const res = await fetch("/api/polish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chapterId: id,
-          ruleId: selectedRule,
-          text: inputText,
-        }),
-      })
-      const data = await res.json()
-      if (data.error) {
-        setError(data.error)
-      } else {
-        setResult(data.polishedText)
-      }
-    } catch (err: any) {
-      setError(err.message || "润色失败")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="p-8 overflow-auto">
       <div className="max-w-5xl mx-auto">
@@ -151,76 +115,6 @@ export default function PolishPage() {
               ))}
             </div>
           )}
-        </div>
-
-        {/* 润色工具 */}
-        <div className="border rounded-lg p-6">
-          <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <Wand2 className="w-4 h-4" />
-            润色工具
-          </h2>
-
-          <div className="space-y-4">
-            <div>
-              <Label>选择润色规则</Label>
-              <Select value={selectedRule} onValueChange={setSelectedRule}>
-                <SelectTrigger>
-                  <SelectValue placeholder="请选择润色规则" />
-                </SelectTrigger>
-                <SelectContent>
-                  {rules.map((rule) => (
-                    <SelectItem key={rule.id} value={rule.id}>
-                      {rule.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>输入要润色的文本</Label>
-              <Textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="粘贴或输入需要润色的文本..."
-                rows={6}
-              />
-            </div>
-
-            <Button
-              onClick={polish}
-              disabled={loading || !inputText.trim() || !selectedRule}
-              className="w-full"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              {loading ? "润色中..." : "开始润色"}
-            </Button>
-
-            {error && (
-              <div className="p-4 bg-destructive/10 text-destructive rounded-md text-sm">
-                {error}
-              </div>
-            )}
-
-            {result && (
-              <div>
-                <Label>润色结果</Label>
-                <div className="mt-1 p-4 bg-muted rounded-md whitespace-pre-wrap text-sm">
-                  {result}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => {
-                    navigator.clipboard.writeText(result)
-                  }}
-                >
-                  复制结果
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* 编辑规则对话框 */}
