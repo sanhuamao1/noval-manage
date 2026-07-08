@@ -4,56 +4,53 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
+    /* ═══════════ Shadcn/UI 兼容变量 ═══════════ */
+    --background: 15 30% 5%;
+    --foreground: 40 20% 90%;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --card: 30 15% 13%;
+    --card-foreground: 40 20% 90%;
+
+    --popover: 30 15% 13%;
+    --popover-foreground: 40 20% 90%;
+
+    --primary: 28 45% 60%;
+    --primary-foreground: 15 30% 5%;
+
+    --secondary: 30 10% 15%;
+    --secondary-foreground: 40 20% 90%;
+
+    --muted: 30 10% 15%;
+    --muted-foreground: 30 10% 42%;
+
+    --accent: 28 45% 60%;
+    --accent-foreground: 15 30% 5%;
+
+    --destructive: 0 60% 55%;
+    --destructive-foreground: 40 20% 90%;
+
+    --border: 30 15% 18%;
+    --input: 30 15% 18%;
+    --ring: 28 45% 60%;
+
+    --radius: 0.5rem;
+
+    /* ═══════════ 阴影 · Shadow ═══════════ */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(200, 149, 108, 0.15);
+    --shadow-glow-lg: 0 0 40px rgba(200, 149, 108, 0.2);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-bg-950 text-fg-primary;
   }
 }

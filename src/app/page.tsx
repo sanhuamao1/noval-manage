@@ -4,9 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Plus, BookOpen, Trash2 } from "lucide-react"
 
 interface Novel {
@@ -66,41 +65,32 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold">我的作品</h1>
             <p className="text-muted-foreground mt-1">管理你的小说创作项目</p>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                新建作品
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button size="icon" className="rounded-lg">
+                <Plus className="w-4 h-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>新建作品</DialogTitle>
-              </DialogHeader>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
               <div className="space-y-4">
-                <div>
-                  <Label>作品名称</Label>
+                <div className="space-y-1">
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="输入小说名称"
-                  />
-                </div>
-                <div>
-                  <Label>作品简介</Label>
-                  <Textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="简单描述你的小说..."
-                    rows={3}
+                    placeholder="作品名称"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        createNovel()
+                      }
+                    }}
                   />
                 </div>
                 <Button onClick={createNovel} className="w-full">
                   创建
                 </Button>
               </div>
-            </DialogContent>
-          </Dialog>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {novels.length === 0 ? (

@@ -133,9 +133,8 @@ export default function ChaptersPage() {
             <h2 className="font-semibold">章节列表</h2>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm">
-                  <Plus className="w-4 h-4 mr-1" />
-                  新建
+                <Button size="icon" className="rounded-lg" >
+                  <Plus className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
               <DialogContent>

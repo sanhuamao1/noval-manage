@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss"
 
 const config: Config = {
-  darkMode: ["class"],
   content: [
     './src/pages/**/*.{ts,tsx}',
     './src/components/**/*.{ts,tsx}',
@@ -18,6 +17,63 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // 琥珀设计系统主色 - amber 前缀避免与 shadcn/ui accent 冲突
+        amber: {
+          50: "#fdf6ef",
+          100: "#f9e6d2",
+          200: "#f0c9a3",
+          300: "#e4a76e",
+          400: "#daa882",
+          500: "#c8956c",
+          600: "#a06b3e",
+          700: "#855534",
+          800: "#6d4530",
+          900: "#5b3b2b",
+        },
+        // 背景色阶
+        bg: {
+          950: "#0f0e0c",
+          900: "#131210",
+          850: "#16140f",
+          800: "#1a1815",
+          700: "#211f1a",
+          600: "#2a2722",
+          500: "#3a352c",
+          400: "#4a4438",
+          300: "#6a6258",
+          200: "#9a9080",
+          100: "#c4baa8",
+          50: "#e8e0d0",
+        },
+        // 文字色阶
+        fg: {
+          primary: "#e8e0d0",
+          secondary: "#9a9080",
+          tertiary: "#6a6258",
+          disabled: "#4a4438",
+        },
+        // 语义色
+        success: {
+          DEFAULT: "#6bab72",
+          light: "#a8d5ab",
+          deep: "#4a8a52",
+        },
+        warning: {
+          DEFAULT: "#d4a843",
+          light: "#e8c96a",
+          deep: "#b08a2e",
+        },
+        danger: {
+          DEFAULT: "#c76060",
+          light: "#e89898",
+          deep: "#a34545",
+        },
+        info: {
+          DEFAULT: "#5a96be",
+          light: "#8ab4d4",
+          deep: "#3d7499",
+        },
+        // Shadcn/UI 兼容变量
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -52,10 +108,18 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      borderRadius: {
+      radius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      shadow: {
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
+        glow: "var(--shadow-glow)",
+        glowLg: "var(--shadow-glow-lg)",
       },
       keyframes: {
         "accordion-down": {

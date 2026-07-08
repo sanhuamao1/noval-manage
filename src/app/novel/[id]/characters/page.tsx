@@ -4,10 +4,23 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2, User, GripVertical, X } from "lucide-react"
+import { Plus, Trash2, User, Venus, X, Mars, PenTool } from "lucide-react"
+import { RadioGroup, type RadioOption } from "@/components/radio-group"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { FormInput } from "@/components/form-input"
+import { 
+  narrativeFunctionOptions, 
+  innerMotivationOptions, 
+  emotionOptions,
+  type ArchetypeOption 
+} from "./data"
+
+const genderOptions: RadioOption[] = [
+  { value: "男", icon: Mars },
+  { value: "女", icon: Venus },
+]
 
 interface Character {
   id: string
@@ -18,9 +31,11 @@ interface Character {
   traits: string | null
 }
 
+
 interface Traits {
   item: string
-  archetype: string[]
+  narrativeFunction: ArchetypeOption[]
+  innerMotivation: ArchetypeOption[]
   coreConflict: string
   abilities: { name: string; description: string }[]
   relationships: { characterId: string; characterName: string; description: string }[]
@@ -30,7 +45,8 @@ interface Traits {
 
 const defaultTraits: Traits = {
   item: "",
-  archetype: [],
+  narrativeFunction: [],
+  innerMotivation: [],
   coreConflict: "",
   abilities: [],
   relationships: [],
@@ -43,18 +59,14 @@ const defaultTraits: Traits = {
   ],
 }
 
-const archetypeOptions = ["成长型", "反英雄型", "救赎型", "导师型", "守护者型", "破坏者型", "牺牲者型"]
-
-const emotionOptions = ["成熟克制", "笨拙", "热烈", "压抑", "回避"]
 
 export default function CharactersPage() {
   const params = useParams()
   const id = params.id as string
   const [characters, setCharacters] = useState<Character[]>([])
   const [selectedChar, setSelectedChar] = useState<Character | null>(null)
-  const [allChars, setAllChars] = useState<Character[]>([]) // 用于关系选择器
+  const [allChars, setAllChars] = useState<Character[]>([])
 
-  // 编辑状态
   const [editName, setEditName] = useState("")
   const [editGender, setEditGender] = useState("")
   const [editAge, setEditAge] = useState("")
@@ -87,7 +99,8 @@ export default function CharactersPage() {
       const parsed = JSON.parse(traits)
       return {
         item: parsed.item || "",
-        archetype: parsed.archetype || [],
+        narrativeFunction: Array.isArray(parsed.narrativeFunction) ? parsed.narrativeFunction : [],
+        innerMotivation: Array.isArray(parsed.innerMotivation) ? parsed.innerMotivation : [],
         coreConflict: parsed.coreConflict || "",
         abilities: parsed.abilities || [],
         relationships: parsed.relationships || [],
@@ -143,7 +156,6 @@ export default function CharactersPage() {
     fetchCharacters()
   }
 
-  // 自动保存
   useEffect(() => {
     const timer = setTimeout(() => {
       if (selectedChar) saveCharacter()
@@ -151,7 +163,6 @@ export default function CharactersPage() {
     return () => clearTimeout(timer)
   }, [editName, editGender, editAge, editIdentity, editTraits])
 
-  // 辅助函数
   function addAbility() {
     setEditTraits({ ...editTraits, abilities: [...editTraits.abilities, { name: "", description: "" }] })
   }
@@ -202,12 +213,23 @@ export default function CharactersPage() {
     setEditTraits({ ...editTraits, notes })
   }
 
-  function toggleArchetype(val: string) {
-    const current = editTraits.archetype
-    if (current.includes(val)) {
-      setEditTraits({ ...editTraits, archetype: current.filter((a) => a !== val) })
+  function toggleNarrativeFunction(option: ArchetypeOption) {
+    const current = editTraits.narrativeFunction
+    const exists = current.some((o) => o.name === option.name)
+    if (exists) {
+      setEditTraits({ ...editTraits, narrativeFunction: current.filter((o) => o.name !== option.name) })
     } else {
-      setEditTraits({ ...editTraits, archetype: [...current, val] })
+      setEditTraits({ ...editTraits, narrativeFunction: [...current, option] })
+    }
+  }
+
+  function toggleInnerMotivation(option: ArchetypeOption) {
+    const current = editTraits.innerMotivation
+    const exists = current.some((o) => o.name === option.name)
+    if (exists) {
+      setEditTraits({ ...editTraits, innerMotivation: current.filter((o) => o.name !== option.name) })
+    } else {
+      setEditTraits({ ...editTraits, innerMotivation: [...current, option] })
     }
   }
 
@@ -216,22 +238,22 @@ export default function CharactersPage() {
       {/* 左侧人物列表 */}
       <div className="w-64 border-r p-4 overflow-auto flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold">人物列表</h2>
-          <Button size="sm" onClick={createCharacter}>
-            <Plus className="w-4 h-4 mr-1" />
-            添加
+          <div className="flex items-center">
+            <User className="w-4 h-4" />
+            <h2 className="font-semibold ml-1">人物列表</h2>
+          </div>
+          <Button size="icon" className="rounded-lg" onClick={createCharacter}>
+            <Plus className="w-4 h-4" />
           </Button>
         </div>
         <div className="space-y-1">
           {characters.map((char) => (
             <div
               key={char.id}
-              className={`group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer text-sm transition-colors ${
-                selectedChar?.id === char.id ? "bg-primary/10 text-primary" : "hover:bg-accent"
-              }`}
+              className={`group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer text-sm transition-colors ${selectedChar?.id === char.id ? "bg-primary/10 text-primary" : "hover:bg-accent"
+                }`}
               onClick={() => selectCharacter(char)}
             >
-              <User className="w-4 h-4 flex-shrink-0" />
               <span className="flex-1 truncate">{char.name}</span>
               <Button
                 variant="ghost"
@@ -257,35 +279,35 @@ export default function CharactersPage() {
         {selectedChar ? (
           <div className="max-w-3xl mx-auto p-6 space-y-8">
             {/* 基本信息 */}
-            <section>
-              <h3 className="text-lg font-semibold mb-4 text-muted-foreground">基本信息</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>姓名</Label>
-                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <Card>
+              <CardHeader icon={User} title="基本信息" />
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label="姓名"
+                    icon={PenTool}
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                  />
+                  <div className="space-y-2">
+                    <Label>性别</Label>
+                    <RadioGroup options={genderOptions} value={editGender} onChange={setEditGender} />
+                  </div>
+                  <FormInput
+                    label="年龄"
+                    value={editAge}
+                    onChange={(e) => setEditAge(e.target.value)}
+                    placeholder="如：25岁"
+                  />
+                  <FormInput
+                    label="身份"
+                    value={editIdentity}
+                    onChange={(e) => setEditIdentity(e.target.value)}
+                    placeholder="身份/职业/组织归属"
+                  />
                 </div>
-                <div>
-                  <Label>性别</Label>
-                  <Select value={editGender} onValueChange={setEditGender}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="选择性别" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="男">男</SelectItem>
-                      <SelectItem value="女">女</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>年龄</Label>
-                  <Input value={editAge} onChange={(e) => setEditAge(e.target.value)} placeholder="如：25岁" />
-                </div>
-                <div>
-                  <Label>身份</Label>
-                  <Input value={editIdentity} onChange={(e) => setEditIdentity(e.target.value)} placeholder="身份/职业/组织归属" />
-                </div>
-              </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* 特征数据 */}
             <section>
@@ -301,23 +323,49 @@ export default function CharactersPage() {
                   />
                 </div>
 
-                {/* 主角原型 */}
+                {/* 叙事功能原型（沃格勒体系） */}
                 <div>
-                  <Label>主角原型（可多选）</Label>
+                  <Label>叙事功能原型（沃格勒体系）</Label>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {archetypeOptions.map((opt) => (
-                      <button
-                        key={opt}
-                        onClick={() => toggleArchetype(opt)}
-                        className={`px-3 py-1 rounded-full text-xs border transition-colors ${
-                          editTraits.archetype.includes(opt)
+                    {narrativeFunctionOptions.map((opt) => {
+                      const isSelected = editTraits.narrativeFunction.some((o) => o.name === opt.name)
+                      return (
+                        <button
+                          key={opt.name}
+                          onClick={() => toggleNarrativeFunction(opt)}
+                          className={`px-3 py-1 rounded-full text-xs border transition-colors ${isSelected
                             ? "bg-primary text-primary-foreground border-primary"
                             : "bg-background text-muted-foreground border-input hover:border-primary"
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
+                            }`}
+                          title={opt.description}
+                        >
+                          {opt.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* 内在动机原型（皮尔逊体系） */}
+                <div>
+                  <Label>内在动机原型（皮尔逊体系）</Label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {innerMotivationOptions.map((opt) => {
+                      const isSelected = editTraits.innerMotivation.some((o) => o.name === opt.name)
+                      return (
+                        <button
+                          key={opt.name}
+                          onClick={() => toggleInnerMotivation(opt)}
+                          className={`px-3 py-1 rounded-full text-xs border transition-colors ${isSelected
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-muted-foreground border-input hover:border-primary"
+                            }`}
+                          title={opt.description}
+                        >
+                          {opt.label}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 
