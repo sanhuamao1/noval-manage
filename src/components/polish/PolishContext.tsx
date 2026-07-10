@@ -35,6 +35,7 @@ interface PolishContextType {
   showResultPopover: boolean
 
   handleTextSelection: () => void
+  handleTextareaMouseUp: (e: React.MouseEvent<HTMLTextAreaElement>) => void
   handlePolishClick: () => void
   executePolish: (ruleId: string) => Promise<void>
   confirmPolish: () => void
@@ -72,20 +73,19 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
   const [selectionMenuPos, setSelectionMenuPos] = useState({ x: 0, y: 0 })
 
   const resultRef = useRef<HTMLDivElement>(null)
+  const mousePosRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     fetchRules()
   }, [])
 
-  // 监听全局选中状态变化：当用户点击其他区域导致选区消失时，自动隐藏菜单
+  // 监听全局选中状态变化：选中消失时隐藏菜单，但不清空选中文本（防止点击面板时丢失）
   useEffect(() => {
     function handleSelectionChange() {
       const selection = window.getSelection()
       if (!selection || selection.isCollapsed) {
         if (showSelectionMenu) {
           setShowSelectionMenu(false)
-          setSelectedText("")
-          setSelectionRange(null)
         }
       }
     }
@@ -125,19 +125,14 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
 
     setSelectedText(text)
     setSelectionRange({ start, end })
-
-    const rect = textarea.getBoundingClientRect()
-    const textBeforeCursor = editContent.substring(0, start)
-    const lines = textBeforeCursor.split("\n")
-    const lineHeight = 20
-    const charWidth = 8
-
-    const y = rect.top + lines.length * lineHeight + 8
-    const x = rect.left + (lines[lines.length - 1].length * charWidth) % rect.width
-
-    setSelectionMenuPos({ x, y })
+    setSelectionMenuPos(mousePosRef.current)
     setShowSelectionMenu(true)
   }, [editContent, editorRef])
+
+  const handleTextareaMouseUp = useCallback((e: React.MouseEvent<HTMLTextAreaElement>) => {
+    mousePosRef.current = { x: e.clientX, y: e.clientY }
+    handleTextSelection()
+  }, [handleTextSelection])
 
   function handlePolishClick() {
     setShowSelectionMenu(false)
@@ -223,6 +218,7 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
         showResultPopover,
         setPolishResult,
         handleTextSelection,
+        handleTextareaMouseUp,
         handlePolishClick,
         executePolish,
         confirmPolish,

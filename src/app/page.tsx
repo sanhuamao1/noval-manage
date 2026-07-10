@@ -117,15 +117,14 @@ export default function HomePage() {
                     )}
                   </div>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity ml-2"
+                    variant="destructive"
+                    size="auto"
                     onClick={(e) => {
                       e.stopPropagation()
                       deleteNovel(novel.id)
                     }}
                   >
-                    <Trash2 className="w-4 h-4 text-destructive" />
+                    <Trash2 className="w-3 h-3 text-destructive" />
                   </Button>
                 </div>
                 <div className="flex gap-4 mt-4 text-sm text-muted-foreground">

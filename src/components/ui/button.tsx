@@ -2,6 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { Plus } from "lucide-react"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -9,17 +10,18 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-background bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive: "text-danger hover:bg-danger/10",
+        outline: "hover:bg-primary/10",
+        secondary: "text-secondary-foreground hover:bg-primary/90 hover:text-primary-foreground",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        radio: "text-muted-foreground",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "px-4 py-2",
+        sm: "px-2 text-xs py-1",
+        auto: "p-1",
+        icon: "p-2",
       },
     },
     defaultVariants: {
@@ -33,14 +35,26 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  /** 激活态：显示 hover 背景色 */
+  isActive?: boolean
+}
+
+const activeBgMap: Record<string, string> = {
+  default: "bg-primary/90",
+  destructive: "bg-danger/10",
+  outline: "bg-primary/10",
+  secondary: "bg-primary/90 text-primary-foreground",
+  ghost: "bg-accent",
+  link: "",
+  radio: "text-primary"
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, isActive, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }), isActive && activeBgMap[variant || "default"])}
         ref={ref}
         {...props}
       />
@@ -49,4 +63,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-export { Button, buttonVariants }
+const AddButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, ...props }, ref) => (
+    <Button
+      ref={ref}
+      size="icon"
+      className={cn("rounded-lg", className)}
+      {...props}
+    >
+      <Plus className="w-3 h-3" />
+    </Button>
+  )
+)
+AddButton.displayName = "AddButton"
+
+export { Button, buttonVariants, AddButton }

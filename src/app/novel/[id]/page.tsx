@@ -3,14 +3,14 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { FormInput } from "@/components/form-input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioOption } from "@/components/radio-group"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Tag } from "@/components/ui/tag"
 import {
-  Info, FileText, Users, Sparkles, Edit3, Save, X,
+  Info, Sparkles, Edit3, Save, X,
   BookMarked, Rocket, Building2, Heart, Book, Search,
   Wand2, Sword, Shield, Gamepad2, Globe, Clock
 } from "lucide-react"
@@ -136,24 +136,22 @@ export default function NovelOverview() {
           <div className="mb-8 space-y-6">
             <Card>
               <CardHeader icon={Info} title="基本信息" rightHandler={
-                <Button variant="outline" size="sm" onClick={cancelEditing}>
-                  <X className="w-4 h-4 mr-1.5" />
-                  取消
-                </Button>
+                <>
+                  <Button variant="link" onClick={cancelEditing}>
+                    <X className="w-4 h-4 mr-1.5" />
+                    取消
+                  </Button>
+                  <Button onClick={saveChanges} disabled={saving || !editTitle.trim()}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {saving ? "保存中..." : "保存"}
+                  </Button>
+                </>
               } />
               <CardContent>
                 {/* 作品名称 + 状态 一行两列 */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>作品名称</Label>
-                    <Input
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      placeholder="作品名称"
-                      className="bg-bg-850 border-border-subtle"
-                    />
-                  </div>
-                  <div className="space-y-3">
+                  <FormInput label="作品名称" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="作品名称" />
+                  <div className="space-y-2">
                     <Label>状态</Label>
                     <div className="flex gap-2">
                       {statusOptions.map((opt) => {
@@ -164,11 +162,10 @@ export default function NovelOverview() {
                             key={opt.value}
                             type="button"
                             onClick={() => setEditStatus(opt.value)}
-                            className={`flex items-center justify-center gap-1 flex-1 h-7 rounded-md text-xs transition-all ${
-                              isSelected
+                            className={`flex items-center justify-center gap-1 flex-1 h-7 rounded-md text-xs transition-all ${isSelected
                                 ? "bg-bg-600 border border-amber-500 text-amber-400"
                                 : "bg-bg-900 border border-transparent text-fg-tertiary hover:text-fg-secondary"
-                            }`}
+                              }`}
                           >
                             {Icon && <Icon className="w-3 h-3" />}
                             <span>{opt.value}</span>
@@ -192,7 +189,7 @@ export default function NovelOverview() {
                 </div>
 
                 {/* 题材（多选） */}
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   <Label>题材（可多选）</Label>
                   <div className="grid grid-cols-6 gap-2">
                     {genreOptions.map((opt) => {
@@ -203,11 +200,10 @@ export default function NovelOverview() {
                           key={opt.value}
                           type="button"
                           onClick={() => toggleGenre(opt.value)}
-                          className={`flex items-center justify-center gap-1 h-7 rounded-md text-xs transition-all ${
-                            isSelected
+                          className={`flex items-center justify-center gap-1 h-7 rounded-md text-xs transition-all ${isSelected
                               ? "bg-bg-600 border border-amber-500 text-amber-400"
                               : "bg-bg-900 border border-transparent text-fg-tertiary hover:text-fg-secondary"
-                          }`}
+                            }`}
                         >
                           {Icon && <Icon className="w-3 h-3" />}
                           <span>{opt.value}</span>
@@ -215,14 +211,6 @@ export default function NovelOverview() {
                       )
                     })}
                   </div>
-                </div>
-
-                {/* 操作按钮 */}
-                <div className="flex gap-3 pt-2">
-                  <Button onClick={saveChanges} disabled={saving || !editTitle.trim()}>
-                    <Save className="w-4 h-4 mr-2" />
-                    {saving ? "保存中..." : "保存"}
-                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -21,6 +21,8 @@ interface MultiRadioGroupProps {
   options: RadioOption[]
   selectedValues: string[]
   onChange: (values: string[]) => void
+  /** 可选：限制最多可选数量 */
+  max?: number
 }
 
 // 选中状态的样式
@@ -33,7 +35,7 @@ const SELECTED_ICON_COLOR = "text-amber-400"
 const UNSELECTED_ICON_COLOR = "text-fg-tertiary"
 
 function getButtonClasses(isSelected: boolean, extraClasses: string) {
-  return `${extraClasses} transition-all duration-200 ${
+  return `${extraClasses} rounded-md flex items-center justify-center text-xs transition-all duration-200 ${
     isSelected ? SELECTED_CLASSES : UNSELECTED_CLASSES
   }`
 }
@@ -42,60 +44,34 @@ function getIconClassName(isSelected: boolean, baseSize: string) {
   return `${baseSize} ${isSelected ? SELECTED_ICON_COLOR : UNSELECTED_ICON_COLOR}`
 }
 
-function RadioOptionButton({
+function OptionButton({
   option,
   isSelected,
-  onChange,
+  onClick,
   iconSize = "w-4 h-4",
   wrapperClasses = "",
   showLabel = true,
+  disabled,
 }: {
   option: RadioOption
   isSelected: boolean
-  onChange: (value: string) => void
+  onClick: (value: string) => void
   iconSize?: string
   wrapperClasses?: string
   showLabel?: boolean
+  disabled?: boolean
 }) {
   const IconComponent = option.icon
   return (
     <button
       type="button"
-      onClick={() => onChange(option.value)}
-      className={getButtonClasses(isSelected, wrapperClasses)}
+      disabled={disabled}
+      onClick={() => onClick(option.value)}
+      className={`${getButtonClasses(isSelected, wrapperClasses)} ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}
       title={option.description}
     >
       {IconComponent && <IconComponent className={getIconClassName(isSelected, iconSize)} />}
-      {showLabel && <span>{option.label || option.value}</span>}
-    </button>
-  )
-}
-
-function MultiRadioOptionButton({
-  option,
-  isSelected,
-  onToggle,
-  iconSize = "w-4 h-4",
-  wrapperClasses = "",
-  showLabel = true,
-}: {
-  option: RadioOption
-  isSelected: boolean
-  onToggle: (value: string) => void
-  iconSize?: string
-  wrapperClasses?: string
-  showLabel?: boolean
-}) {
-  const IconComponent = option.icon
-  return (
-    <button
-      type="button"
-      onClick={() => onToggle(option.value)}
-      className={getButtonClasses(isSelected, wrapperClasses)}
-      title={option.description}
-    >
-      {IconComponent && <IconComponent className={getIconClassName(isSelected, iconSize)} />}
-      {showLabel && <span>{option.label || option.value}</span>}
+      {showLabel && <span className="whitespace-nowrap">{option.label || option.value}</span>}
     </button>
   )
 }
@@ -107,13 +83,13 @@ export function RadioGroup({ options, value, onChange, variant = "horizontal", c
     return (
       <div className={`grid ${colClass[columns as keyof typeof colClass] || "grid-cols-3"} gap-3`}>
         {options.map((option) => (
-          <RadioOptionButton
+          <OptionButton
             key={option.value}
             option={option}
             isSelected={value === option.value}
-            onChange={onChange}
+            onClick={onChange}
             iconSize="w-4 h-4"
-            wrapperClasses="aspect-square rounded-lg flex flex-col items-center justify-center gap-2 text-xs"
+            wrapperClasses="aspect-square flex-col gap-2"
           />
         ))}
       </div>
@@ -123,40 +99,46 @@ export function RadioGroup({ options, value, onChange, variant = "horizontal", c
   return (
     <div className="flex gap-3">
       {options.map((option) => (
-        <RadioOptionButton
+        <OptionButton
           key={option.value}
           option={option}
           isSelected={value === option.value}
-          onChange={onChange}
+          onClick={onChange}
           iconSize="w-4 h-4"
-          wrapperClasses="flex-1 h-9 rounded-lg flex items-center justify-center gap-2 text-xs"
+          wrapperClasses="flex-1 gap-2 py-1 px-3.5"
         />
       ))}
     </div>
   )
 }
 
-export function MultiRadioGroup({ options, selectedValues, onChange }: MultiRadioGroupProps) {
+export function MultiRadioGroup({ options, selectedValues, onChange, max }: MultiRadioGroupProps) {
   function handleToggle(value: string) {
     if (selectedValues.includes(value)) {
       onChange(selectedValues.filter((v) => v !== value))
     } else {
+      if (max && selectedValues.length >= max) return
       onChange([...selectedValues, value])
     }
   }
 
   return (
     <>
-      {options.map((option) => (
-        <MultiRadioOptionButton
-          key={option.value}
-          option={option}
-          isSelected={selectedValues.includes(option.value)}
-          onToggle={handleToggle}
-          iconSize="w-4 h-4"
-          wrapperClasses="rounded-lg flex flex-col items-center justify-center gap-1 py-2.5 text-xs"
-        />
-      ))}
+      {options.map((option) => {
+        const isSelected = selectedValues.includes(option.value)
+        const isDisabled = max ? selectedValues.length >= max && !isSelected : false
+        return (
+          <OptionButton
+            key={option.value}
+            option={option}
+            isSelected={isSelected}
+            onClick={handleToggle}
+            disabled={isDisabled}
+            iconSize="w-4 h-4"
+            wrapperClasses="flex-col gap-1 py-1 px-3.5"
+          />
+        )
+      })}
     </>
   )
 }

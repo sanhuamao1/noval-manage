@@ -2,22 +2,23 @@
 
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { Button, AddButton } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Plus, Trash2, User, Venus, X, Mars, PenTool, UserRound, Shield, Heart, Briefcase, Gem, Calendar, Zap } from "lucide-react"
+import { Trash2, User, Venus, X, Mars, PenTool, UserRound, Shield, Heart, Briefcase, Gem, Calendar, Zap, Plus } from "lucide-react"
 import { RadioGroup, MultiRadioGroup, type RadioOption } from "@/components/radio-group"
 import { Card, CardHeader, CardContent, CardEmpty } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/tabs"
 import { FormInput } from "@/components/form-input"
-import { 
-  narrativeFunctionOptions, 
-  innerMotivationOptions, 
+import { SlidingDrawer } from "@/components/ui/drawer"
+import {
+  narrativeFunctionOptions,
+  innerMotivationOptions,
   emotionOptions,
   archetypeIcons,
-  type ArchetypeOption 
+  type ArchetypeOption
 } from "./data"
 
 const genderOptions: RadioOption[] = [
@@ -241,78 +242,77 @@ export default function CharactersPage() {
     <div className="flex h-full">
       {/* 左侧：人物卡片网格 */}
       <div className="flex-1 min-w-0 overflow-auto p-6">
-        <div className="flex items-center mb-6">
-          <User className="w-4 h-4" />
-          <h2 className="font-semibold ml-1">人物列表</h2>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {/* 添加人物卡片 */}
-          <Popover open={createOpen} onOpenChange={setCreateOpen}>
-            <PopoverTrigger asChild>
-              <button
-                className="flex items-center gap-2 px-4 py-3 bg-bg-700 border border-border-default border-dashed rounded-lg cursor-pointer text-sm text-fg-tertiary hover:text-fg-primary hover:border-amber-500/50 hover:bg-bg-600 transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                <span>添加人物</span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72" align="start">
-              <div className="space-y-3">
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="人物姓名"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      createCharacter()
-                    }
-                  }}
-                />
-                <Button onClick={createCharacter} className="w-full">
-                  创建
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-          {characters.map((char) => (
-            <div
-              key={char.id}
-              className={`group flex items-center gap-2 px-4 py-3 bg-bg-700 border rounded-lg cursor-pointer text-sm transition-all hover:bg-bg-600 hover:border-border-strong ${
-                selectedChar?.id === char.id
-                  ? "border-amber-500 shadow-glow"
-                  : "border-border-default"
-              }`}
-              onClick={() => selectCharacter(char)}
-            >
-              <span className="flex-1">{char.name}</span>
-              <button
-                className="w-6 h-6 flex items-center justify-center rounded hover:bg-danger/10 text-fg-tertiary hover:text-danger-light opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  deleteCharacter(char.id)
-                }}
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-          {characters.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center w-full py-8">还没有人物，点击上方按钮添加</p>
-          )}
+        <div className="flex flex-col gap-4">
+          {/* 标题行 */}
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <h2 className="font-semibold ml-1">人物列表</h2>
+            <Popover open={createOpen} onOpenChange={setCreateOpen}>
+              <PopoverTrigger asChild>
+                <AddButton />
+              </PopoverTrigger>
+              <PopoverContent className="w-72" align="start">
+                <div className="space-y-3">
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="人物姓名"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        createCharacter()
+                      }
+                    }}
+                  />
+                  <Button onClick={createCharacter} className="w-full">
+                    创建
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* 人物卡片列表 */}
+          <div className="flex flex-col gap-2">
+            {characters.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">还没有人物，点击上方按钮添加</p>
+            ) : (
+              characters.map((char) => (
+                <div
+                  key={char.id}
+                  className={`group flex items-center gap-2 px-4 py-3 bg-bg-700 border rounded-lg cursor-pointer text-sm transition-all hover:bg-bg-600 hover:border-border-strong ${selectedChar?.id === char.id
+                    ? "border-amber-500 shadow-glow"
+                    : "border-border-default"
+                    }`}
+                  onClick={() => selectCharacter(char)}
+                >
+                  <span className="flex-1">{char.name}</span>
+                  <button
+                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-danger/10 text-fg-tertiary hover:text-danger-light opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteCharacter(char.id)
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 
       {/* 右侧：编辑面板（抽拉展开） */}
-      <div
-        className={`overflow-hidden flex-shrink-0 border-l transition-[width,opacity] duration-300 ease-out ${
-          selectedChar ? "w-[1060px] opacity-100" : "w-0 opacity-0 border-l-0"
-        }`}
+      <SlidingDrawer
+        open={selectedChar !== null}
+        onClose={() => setSelectedChar(null)}
+        width={1060}
       >
-        <div className="w-[1060px] h-full overflow-auto px-20 py-6">
+        <div className="px-14">
           {selectedChar ? (
             <div className="flex gap-8">
-                      <div className="flex-1 min-w-0 space-y-8">
+              <div className="flex-1 min-w-0 space-y-8">
                 {/* 基本信息 */}
                 <Card>
                   <CardHeader icon={UserRound} title="基本信息" />
@@ -558,11 +558,11 @@ export default function CharactersPage() {
                   </CardContent>
                 </Card>
               </div>
-  
+
             </div>
-        ) : null}
+          ) : null}
         </div>
-      </div>
+      </SlidingDrawer>
     </div>
   )
 }

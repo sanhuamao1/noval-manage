@@ -48,9 +48,7 @@ export default function NovelLayout({
       <aside className="w-64 border-r bg-card flex flex-col">
         <div className="p-4 border-b">
           <Button
-            variant="ghost"
-            size="sm"
-            className="mb-2 -ml-2 text-muted-foreground"
+            variant="outline"
             onClick={() => router.push("/")}
           >
             <ChevronLeft className="w-4 h-4 mr-1" />

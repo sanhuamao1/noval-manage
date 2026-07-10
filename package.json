@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:reset": "npx prisma migrate reset",
+    "db:push": "npx prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0",

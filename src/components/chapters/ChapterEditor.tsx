@@ -11,14 +11,14 @@ interface ChapterEditorProps {
 }
 
 export function ChapterEditor({ editContent, setEditContent, editorRef }: ChapterEditorProps) {
-  const { handleTextSelection } = usePolishContext()
+  const { handleTextSelection, handleTextareaMouseUp } = usePolishContext()
 
   return (
     <Textarea
       ref={editorRef}
       value={editContent}
       onChange={(e) => setEditContent(e.target.value)}
-      onMouseUp={handleTextSelection}
+      onMouseUp={handleTextareaMouseUp}
       onKeyUp={handleTextSelection}
       onKeyDown={(e) => {
         if (e.key === "Tab") {
@@ -26,14 +26,15 @@ export function ChapterEditor({ editContent, setEditContent, editorRef }: Chapte
           const textarea = e.currentTarget
           const start = textarea.selectionStart
           const end = textarea.selectionEnd
-          const newValue = editContent.substring(0, start) + "    " + editContent.substring(end)
+          const newValue = editContent.substring(0, start) + "\t" + editContent.substring(end)
           setEditContent(newValue)
           requestAnimationFrame(() => {
-            textarea.selectionStart = textarea.selectionEnd = start + 4
+            textarea.selectionStart = textarea.selectionEnd = start + 1
           })
         }
       }}
-      className="min-h-full border-0 resize-none focus-visible:ring-0 text-base leading-relaxed mx-auto max-w-[800px]"
+      className="min-h-full border-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-transparent focus:outline-none text-base leading-relaxed text-foreground/85 font-serif mx-auto max-w-[800px] [tab-size:4] [&::-webkit-scrollbar]:hidden"
+      style={{ scrollbarWidth: "none" } as React.CSSProperties}
       placeholder="开始写作..."
     />
   )
