@@ -3,6 +3,27 @@
 import { Sparkles, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { usePolishContext } from "./PolishContext"
+import { parsePolishConfig } from "@/types/polish"
+
+/** 生成简短的配置摘要 */
+function ConfigSummary(raw: string | null | undefined) {
+  const cfg = parsePolishConfig(raw)
+  const parts: string[] = []
+
+  if (cfg.pace) parts.push(`节奏：${cfg.pace}`)
+  if (cfg.mood.length > 0) parts.push(`氛围：${cfg.mood.join("/")}`)
+  if (cfg.senses.length > 0) parts.push(cfg.senses.join("/"))
+  if (cfg.character.length > 0) parts.push(cfg.character.join("/"))
+  if (cfg.rhetoric) parts.push(cfg.rhetoric)
+
+  if (parts.length === 0) return null
+
+  return (
+    <div className="text-[10px] text-muted-foreground/70 mt-1 line-clamp-1">
+      {parts.join(" | ")}
+    </div>
+  )
+}
 
 const TABS = [
   { id: "polish", label: "润色", icon: Sparkles },
@@ -63,12 +84,9 @@ export function PolishPanel() {
           )
         })}
       </div>
-      {/* 展开态：侧边栏 + 浮动按钮在面板左侧 */}
       {panelOpen && (
         <>
-          {/* 侧边栏（占用空间） */}
           <div className="w-72 border-l bg-background flex flex-col flex-shrink-0 relative">
-            {/* 面板头部：返回 + 标题 */}
             <div className="flex items-center gap-2 p-4 border-b">
               <Button
                 variant="ghost"
@@ -83,7 +101,6 @@ export function PolishPanel() {
             </div>
 
             <div className="flex-1 p-4 overflow-auto">
-              {/* 当前选中文本预览 */}
               {selectedText && (
                 <div className="mb-4 p-3 bg-muted/50 rounded-lg border">
                   <p className="text-xs text-muted-foreground mb-1">选中文本：</p>
@@ -97,7 +114,6 @@ export function PolishPanel() {
                 </p>
               ) : (
                 <>
-                  {/* 规则列表 */}
                   <div className="space-y-1">
                     {rules.length === 0 ? (
                       <p className="text-sm text-muted-foreground">暂无润色规则</p>
@@ -118,12 +134,12 @@ export function PolishPanel() {
                               {rule.description}
                             </div>
                           )}
+                          {ConfigSummary(rule.config)}
                         </button>
                       ))
                     )}
                   </div>
 
-                  {/* 加载状态 */}
                   {polishing && (
                     <div className="mt-4 p-3 bg-muted rounded-lg text-sm text-muted-foreground text-center">
                       <Sparkles className="w-4 h-4 inline-block mr-1 animate-pulse" />
@@ -131,7 +147,6 @@ export function PolishPanel() {
                     </div>
                   )}
 
-                  {/* 错误信息 */}
                   {polishError && (
                     <div className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
                       {polishError}

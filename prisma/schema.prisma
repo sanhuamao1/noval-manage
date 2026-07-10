@@ -54,6 +54,7 @@ model PolishRule {
   name        String
   description String?
   prompt      String
+  config      String   @default("{}")
   type        String   @default("polish")  // polish: 润色, continue: 续写, expand: 扩写
   createdAt   DateTime @default(now())
 }

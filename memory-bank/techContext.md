@@ -136,6 +136,7 @@
 | name | String | 规则名称 |
 | description | String? | 规则描述 |
 | prompt | String | AI 提示词 |
+| config | String (JSON) | 结构化配置（界限/侧重点/手法/高级设置），默认 "{}" |
 | type | String (default: "polish") | polish: 润色, continue: 续写, expand: 扩写 |
 | createdAt | DateTime | 创建时间 |
 

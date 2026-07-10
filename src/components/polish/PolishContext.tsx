@@ -7,6 +7,7 @@ interface PolishRule {
   name: string
   description: string | null
   prompt: string
+  config: string | null
 }
 
 interface SelectionRange {

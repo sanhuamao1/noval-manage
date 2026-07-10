@@ -5,6 +5,17 @@
 
 ## 最近完成的工作
 
+### 润色规则配置化改造 ✅
+- **Prisma 模型**：PolishRule 新增 `config` 字段（JSON 字符串），存储结构化配置
+- **类型定义**：`src/types/polish.ts` — `PolishRuleConfig` 接口 + 默认值
+- **配置元数据**：`src/lib/polish-config-meta.ts` — 每个配置选项的 AI 可读语义说明
+- **配置编辑器组件**：`PolishRuleConfigEditor` — 4 个分类区块（界限/侧重点/手法/高级设置），支持单选/多选（上限2）/开关
+- **AI 提示词封装**：`buildPolishPrompt` 将 config 转为结构化 AI 指令，未设置的选项自动跳过
+- **规则管理页面**：创建/编辑弹窗集成配置编辑器，规则卡片显示配置摘要标签
+- **侧边栏面板**：规则列表项显示精简配置摘要
+- **API 和初始化脚本**：CRUD 支持 config，4 条默认规则配合理默认配置
+- **修复**：修复 lucide-react 1.23.0 中 `Mask`/`Gate` 图标缺失导致的构建错误
+
 ### 作品概览编辑功能 ✅
 - **Prisma 模型**：Novel 新增 `genre`（题材，JSON 数组存储）、`status`（连载中/已完结/暂停）字段
 - **API**：新增 `PATCH /api/novels/[id]` 更新接口，GET 兼容序列化/纯字符串

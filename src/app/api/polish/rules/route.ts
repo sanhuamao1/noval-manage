@@ -9,18 +9,28 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, description, prompt } = await req.json()
+  const { name, description, prompt, config } = await req.json()
   const rule = await prisma.polishRule.create({
-    data: { name, description, prompt },
+    data: {
+      name,
+      description,
+      prompt: prompt || '',
+      config: config || '{}',
+    },
   })
   return NextResponse.json(rule)
 }
 
 export async function PUT(req: NextRequest) {
-  const { id, name, description, prompt } = await req.json()
+  const { id, name, description, prompt, config } = await req.json()
   const rule = await prisma.polishRule.update({
     where: { id },
-    data: { name, description, prompt },
+    data: {
+      name,
+      description,
+      prompt: prompt || '',
+      ...(config !== undefined ? { config } : {}),
+    },
   })
   return NextResponse.json(rule)
 }

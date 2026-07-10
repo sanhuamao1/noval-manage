@@ -5,15 +5,45 @@ import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Plus, Trash2, Edit2 } from "lucide-react"
+import { PolishRuleConfigEditor } from "@/components/polish/PolishRuleConfigEditor"
+import { parsePolishConfig, DEFAULT_POLISH_CONFIG, type PolishRuleConfig } from "@/types/polish"
 
 interface PolishRule {
   id: string
   name: string
   description: string | null
   prompt: string
+  config: string | null
+}
+
+/** 将配置项渲染为摘要标签 */
+function ConfigBadges(config: PolishRuleConfig) {
+  const badges: string[] = []
+
+  if (config.pace) badges.push(`节奏：${config.pace}`)
+  if (config.mood.length > 0) badges.push(`氛围：${config.mood.join("/")}`)
+  if (config.narrative) badges.push(`叙事：${config.narrative}`)
+  if (config.senses.length > 0) badges.push(`五感：${config.senses.join("/")}`)
+  if (config.character.length > 0) badges.push(`人物：${config.character.join("/")}`)
+  if (config.environment.length > 0) badges.push(`环境：${config.environment.join("/")}`)
+  if (config.rhetoric) badges.push(`修辞：${config.rhetoric}`)
+  if (config.timeVariation) badges.push("节奏变奏")
+  if (config.contrastInsertion) badges.push("反差插入")
+
+  if (badges.length === 0) return null
+
+  return (
+    <div className="flex flex-wrap gap-1 mt-1.5">
+      {badges.map((b) => (
+        <span key={b} className="inline-block px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground">
+          {b}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export default function PolishPage() {
@@ -22,7 +52,13 @@ export default function PolishPage() {
   const [rules, setRules] = useState<PolishRule[]>([])
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<PolishRule | null>(null)
-  const [form, setForm] = useState({ name: "", description: "", prompt: "" })
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    prompt: "",
+    config: DEFAULT_POLISH_CONFIG,
+  })
+
   useEffect(() => {
     fetchRules()
   }, [])
@@ -35,30 +71,43 @@ export default function PolishPage() {
 
   function openCreate() {
     setEditing(null)
-    setForm({ name: "", description: "", prompt: "" })
+    setForm({ name: "", description: "", prompt: "", config: { ...DEFAULT_POLISH_CONFIG } })
     setOpen(true)
   }
 
   function openEdit(rule: PolishRule) {
     setEditing(rule)
-    setForm({ name: rule.name, description: rule.description || "", prompt: rule.prompt })
+    setForm({
+      name: rule.name,
+      description: rule.description || "",
+      prompt: rule.prompt,
+      config: parsePolishConfig(rule.config),
+    })
     setOpen(true)
   }
 
   async function saveRule() {
-    if (!form.name.trim() || !form.prompt.trim()) return
+    if (!form.name.trim()) return
+
+    const payload = {
+      ...(editing ? { id: editing.id } : {}),
+      name: form.name,
+      description: form.description,
+      prompt: form.prompt,
+      config: JSON.stringify(form.config),
+    }
 
     if (editing) {
       await fetch("/api/polish/rules", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editing.id, ...form }),
+        body: JSON.stringify(payload),
       })
     } else {
       await fetch("/api/polish/rules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
     }
 
@@ -88,38 +137,40 @@ export default function PolishPage() {
           </Button>
         </div>
 
-        {/* 润色规则列表 */}
         <div className="mb-8">
           <h2 className="font-semibold mb-3">润色规则</h2>
           {rules.length === 0 ? (
             <p className="text-sm text-muted-foreground">还没有润色规则，请先创建</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {rules.map((rule) => (
-                <div key={rule.id} className="border rounded-lg p-4 group hover:border-primary/50 transition-colors">
-                  <div className="flex items-start justify-between mb-1">
-                    <h3 className="font-medium text-sm">{rule.name}</h3>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => openEdit(rule)}>
-                        <Edit2 className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => deleteRule(rule.id)}>
-                        <Trash2 className="w-3 h-3 text-destructive" />
-                      </Button>
+              {rules.map((rule) => {
+                const cfg = parsePolishConfig(rule.config)
+                return (
+                  <div key={rule.id} className="border rounded-lg p-4 group hover:border-primary/50 transition-colors">
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 className="font-medium text-sm">{rule.name}</h3>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => openEdit(rule)}>
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="w-6 h-6" onClick={() => deleteRule(rule.id)}>
+                          <Trash2 className="w-3 h-3 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
+                    {rule.description && (
+                      <p className="text-xs text-muted-foreground">{rule.description}</p>
+                    )}
+                    <ConfigBadges {...cfg} />
                   </div>
-                  {rule.description && (
-                    <p className="text-xs text-muted-foreground">{rule.description}</p>
-                  )}
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
 
-        {/* 编辑规则对话框 */}
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editing ? "编辑规则" : "新建规则"}</DialogTitle>
             </DialogHeader>
@@ -141,14 +192,24 @@ export default function PolishPage() {
                 />
               </div>
               <div>
-                <Label>AI 提示词 *</Label>
+                <Label>自定义补充说明</Label>
                 <Textarea
-                  value={form.prompt}
-                  onChange={(e) => setForm({ ...form, prompt: e.target.value })}
-                  placeholder="描述 AI 应该如何润色文本..."
-                  rows={4}
+                  value={form.config.prompt || ""}
+                  onChange={(e) =>
+                    setForm({ ...form, config: { ...form.config, prompt: e.target.value } })
+                  }
+                  placeholder="可在此补充额外的润色要求..."
+                  rows={2}
                 />
               </div>
+
+              <div className="border-t pt-4">
+                <PolishRuleConfigEditor
+                  config={form.config}
+                  onChange={(cfg) => setForm({ ...form, config: { ...form.config, ...cfg } })}
+                />
+              </div>
+
               <Button onClick={saveRule} className="w-full">
                 {editing ? "保存修改" : "创建"}
               </Button>
