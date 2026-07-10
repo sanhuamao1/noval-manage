@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
+function parseGenres(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : [parsed]
+  } catch {
+    return [raw]
+  }
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
@@ -14,7 +23,7 @@ export async function GET(req: NextRequest) {
         },
       },
     })
-    return NextResponse.json(novel)
+    return NextResponse.json(novel ? { ...novel, genre: parseGenres(novel.genre) } : novel)
   }
 
   const novels = await prisma.novel.findMany({
@@ -25,7 +34,7 @@ export async function GET(req: NextRequest) {
     },
     orderBy: { updatedAt: 'desc' },
   })
-  return NextResponse.json(novels)
+  return NextResponse.json(novels.map((n) => ({ ...n, genre: parseGenres(n.genre) })))
 }
 
 export async function POST(req: NextRequest) {
@@ -33,7 +42,7 @@ export async function POST(req: NextRequest) {
   const novel = await prisma.novel.create({
     data: { title, description },
   })
-  return NextResponse.json(novel)
+  return NextResponse.json({ ...novel, genre: parseGenres(novel.genre) })
 }
 
 export async function DELETE(req: NextRequest) {

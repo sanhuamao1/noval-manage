@@ -122,7 +122,7 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
           <Button
             variant="outline"
             size="icon"
-            className="absolute top-0 -right-14 w-8 h-8 bg-bg-700 border-border-subtle border-l-0 rounded-l-none"
+            className="absolute -top-0 -left-14 w-8 h-8 bg-bg-700 border-border-subtle border-r-0 rounded-r-none"
             onClick={onAction}
           >
             {ActionIcon && <ActionIcon className="w-4 h-4" />}

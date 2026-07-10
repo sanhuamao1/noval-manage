@@ -8,39 +8,45 @@ datasource db {
 }
 
 model Novel {
-  id          String      @id @default(cuid())
+  id          String            @id @default(cuid())
   title       String
   description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  genre       String            @default("[\"玄幻\"]")
+  status      String            @default("连载中")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   chapters    Chapter[]
   characters  Character[]
+  outlines    Outline[]
+  brainstorms Brainstorm[]
 }
 
 model Chapter {
-  id                String      @id @default(cuid())
+  id                String             @id @default(cuid())
   novelId           String
-  novel             Novel       @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  novel             Novel              @relation(fields: [novelId], references: [id], onDelete: Cascade)
   title             String
   content           String
-  status            String      @default("draft")  // draft: 草稿, published: 定稿
-  relatedCharacters String?     // 关联人物ID列表，JSON数组格式 ["id1","id2"]
-  sortOrder         Int         @default(0)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  status            String             @default("draft")  // draft: 草稿, published: 定稿
+  relatedCharacters String?            // 关联人物ID列表，JSON数组格式 ["id1","id2"]
+  sortOrder         Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  characterEmotions CharacterEmotion[]
 }
 
 model Character {
-  id        String   @id @default(cuid())
-  novelId   String
-  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  name      String
-  gender    String?  // 男 / 女
-  age       String?  // XX岁
-  identity  String?  // 身份/职业/组织归属
-  traits    String?  // JSON - 包含所有特征数据
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String             @id @default(cuid())
+  novelId          String
+  novel            Novel              @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  name             String
+  gender           String?            // 男 / 女
+  age              String?            // XX岁
+  identity         String?            // 身份/职业/组织归属
+  traits           String?            // JSON - 包含所有特征数据
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  characterEmotions CharacterEmotion[]
 }
 
 model PolishRule {
@@ -48,6 +54,52 @@ model PolishRule {
   name        String
   description String?
   prompt      String
+  type        String   @default("polish")  // polish: 润色, continue: 续写, expand: 扩写
   createdAt   DateTime @default(now())
 }
 
+// === 大纲 (用户计划的功能) ===
+// 支持层级结构（parentId 实现树形），用于故事大纲、情节设计、时间线
+model Outline {
+  id          String    @id @default(cuid())
+  novelId     String
+  novel       Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  parentId    String?   // 父节点ID，支持层级结构
+  title       String
+  content     String?   // 详细内容/描述
+  type        String    @default("chapter")  // chapter: 章, arc: 弧光, plot: 情节, scene: 场景
+  sortOrder   Int       @default(0)
+  startChapterId String? // 关联起始章节
+  endChapterId   String? // 关联结束章节
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// === 人物情感/状态追踪 (用户计划的功能) ===
+// 记录人物在具体章节/场景中的情感状态和情绪变化
+model CharacterEmotion {
+  id          String    @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  chapterId   String?
+  chapter     Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  emotion     String    // 情绪类型：喜悦/悲伤/愤怒/恐惧/惊讶/厌恶/爱/恨/焦虑/平静/...
+  intensity   Int       @default(5)   // 情绪强度 1-10
+  state       String?   // 人物状态/处境描述
+  description String?   // 具体场景描述或触发原因
+  createdAt   DateTime  @default(now())
+}
+
+// === 头脑风暴 (用户计划的功能) ===
+// 灵感卡片/写作点子/情节构思
+model Brainstorm {
+  id          String   @id @default(cuid())
+  novelId     String
+  novel       Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  title       String
+  content     String
+  tags        String?  // JSON 标签数组 ["人物","情节"]
+  type        String   @default("idea")  // idea: 灵感, twist: 反转, setting: 设定, note: 笔记
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

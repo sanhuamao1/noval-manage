@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Plus, Trash2, User, Venus, X, Mars, PenTool, UserRound, Shield, Heart, Briefcase, Gem, Calendar, Zap } from "lucide-react"
 import { RadioGroup, MultiRadioGroup, type RadioOption } from "@/components/radio-group"
 import { Card, CardHeader, CardContent, CardEmpty } from "@/components/ui/card"
@@ -85,6 +86,8 @@ export default function CharactersPage() {
   const [characters, setCharacters] = useState<Character[]>([])
   const [selectedChar, setSelectedChar] = useState<Character | null>(null)
   const [allChars, setAllChars] = useState<Character[]>([])
+  const [createOpen, setCreateOpen] = useState(false)
+  const [newName, setNewName] = useState("")
 
   const [editName, setEditName] = useState("")
   const [editGender, setEditGender] = useState("")
@@ -150,20 +153,21 @@ export default function CharactersPage() {
   }
 
   async function createCharacter() {
-    const name = prompt("请输入人物姓名")
-    if (!name?.trim()) return
+    if (!newName.trim()) return
     await fetch("/api/characters", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         novelId: id,
-        name: name.trim(),
+        name: newName.trim(),
         gender: null,
         age: null,
         identity: null,
         traits: JSON.stringify(defaultTraits),
       }),
     })
+    setCreateOpen(false)
+    setNewName("")
     fetchCharacters()
   }
 
@@ -235,157 +239,136 @@ export default function CharactersPage() {
 
   return (
     <div className="flex h-full">
-      {/* 左侧人物列表 */}
-      <div className="w-64 border-r p-4 overflow-auto flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <User className="w-4 h-4" />
-            <h2 className="font-semibold ml-1">人物列表</h2>
-          </div>
-          <Button size="icon" className="rounded-lg" onClick={createCharacter}>
-            <Plus className="w-4 h-4" />
-          </Button>
+      {/* 左侧：人物卡片网格 */}
+      <div className="flex-1 min-w-0 overflow-auto p-6">
+        <div className="flex items-center mb-6">
+          <User className="w-4 h-4" />
+          <h2 className="font-semibold ml-1">人物列表</h2>
         </div>
-        <div className="space-y-1">
+        <div className="flex flex-wrap gap-3">
+          {/* 添加人物卡片 */}
+          <Popover open={createOpen} onOpenChange={setCreateOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className="flex items-center gap-2 px-4 py-3 bg-bg-700 border border-border-default border-dashed rounded-lg cursor-pointer text-sm text-fg-tertiary hover:text-fg-primary hover:border-amber-500/50 hover:bg-bg-600 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>添加人物</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72" align="start">
+              <div className="space-y-3">
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="人物姓名"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      createCharacter()
+                    }
+                  }}
+                />
+                <Button onClick={createCharacter} className="w-full">
+                  创建
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
           {characters.map((char) => (
             <div
               key={char.id}
-              className={`group flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer text-sm transition-colors ${selectedChar?.id === char.id ? "bg-primary/10 text-primary" : "hover:bg-accent"
-                }`}
+              className={`group flex items-center gap-2 px-4 py-3 bg-bg-700 border rounded-lg cursor-pointer text-sm transition-all hover:bg-bg-600 hover:border-border-strong ${
+                selectedChar?.id === char.id
+                  ? "border-amber-500 shadow-glow"
+                  : "border-border-default"
+              }`}
               onClick={() => selectCharacter(char)}
             >
-              <span className="flex-1 truncate">{char.name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-6 h-6 opacity-0 group-hover:opacity-100"
+              <span className="flex-1">{char.name}</span>
+              <button
+                className="w-6 h-6 flex items-center justify-center rounded hover:bg-danger/10 text-fg-tertiary hover:text-danger-light opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={(e) => {
                   e.stopPropagation()
                   deleteCharacter(char.id)
                 }}
               >
-                <Trash2 className="w-3 h-3 text-destructive" />
-              </Button>
+                <Trash2 className="w-3 h-3" />
+              </button>
             </div>
           ))}
           {characters.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">还没有人物，点击上方按钮添加</p>
+            <p className="text-sm text-muted-foreground text-center w-full py-8">还没有人物，点击上方按钮添加</p>
           )}
         </div>
       </div>
 
-      {/* 右侧编辑区 */}
-      <div className="flex-1 overflow-auto">
-        {selectedChar ? (
-          <div className="max-w-3xl mx-auto p-6 space-y-8">
-            {/* 基本信息 */}
-            <Card>
-              <CardHeader icon={UserRound} title="基本信息" />
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4">
-                  <FormInput
-                    label="姓名"
-                    icon={PenTool}
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                  />
-                  <div className="space-y-2">
-                    <Label>性别</Label>
-                    <RadioGroup options={genderOptions} value={editGender} onChange={setEditGender} />
-                  </div>
-                  <FormInput
-                    label="年龄"
-                    icon={Calendar}
-                    value={editAge}
-                    onChange={(e) => setEditAge(e.target.value)}
-                    placeholder="如：25岁"
-                  />
-                  <FormInput
-                    label="身份"
-                    icon={Briefcase}
-                    value={editIdentity}
-                    onChange={(e) => setEditIdentity(e.target.value)}
-                    placeholder="身份/职业/组织归属"
-                  />
-                  {/* 标志性物件 */}
-                  <FormInput
-                    label="标志性物件"
-                    icon={Gem}
-                    value={editTraits.item}
-                    onChange={(e) => setEditTraits({ ...editTraits, item: e.target.value })}
-                    placeholder="一件有故事的随身物品"
-                  />
-                </div>
-                {/* 核心矛盾 */}
-                <FormInput
-                  label="核心矛盾"
-                  value={editTraits.coreConflict}
-                  onChange={(e) => setEditTraits({ ...editTraits, coreConflict: e.target.value })}
-                  placeholder="一句话概括"
-                />
-                {/* 情感表达方式 */}
-                <div>
-                  <Label className="mb-0.5">情感表达方式</Label>
-                  <RadioGroup
-                    options={emotionOptions}
-                    value={editTraits.emotionExpression}
-                    onChange={(v) => setEditTraits({ ...editTraits, emotionExpression: v })}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 特征数据 */}
-            <section>
-              <div className="space-y-6">
-                {/* 叙事功能原型 & 内在动机原型（双列布局） */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* 叙事功能原型（沃格勒体系） */}
-                  <Card>
-                    <CardHeader icon={Shield} title="叙事功能原型（沃格勒体系）" />
-                    <CardContent>
-                      <div className="grid grid-cols-3 gap-3">
-                        <MultiRadioGroup
-                          options={narrativeFunctionRadioOptions}
-                          selectedValues={editTraits.narrativeFunction.map((o) => o.name)}
-                          onChange={(values) => {
-                            setEditTraits({
-                              ...editTraits,
-                              narrativeFunction: values.map((val) => ({
-                                label: narrativeFunctionOptions.find((o) => o.name === val)?.label || "",
-                                name: val,
-                                description: narrativeFunctionOptions.find((o) => o.name === val)?.description || "",
-                              })),
-                            })
-                          }}
-                        />
+      {/* 右侧：编辑面板（抽拉展开） */}
+      <div
+        className={`overflow-hidden flex-shrink-0 border-l transition-[width,opacity] duration-300 ease-out ${
+          selectedChar ? "w-[1060px] opacity-100" : "w-0 opacity-0 border-l-0"
+        }`}
+      >
+        <div className="w-[1060px] h-full overflow-auto px-20 py-6">
+          {selectedChar ? (
+            <div className="flex gap-8">
+                      <div className="flex-1 min-w-0 space-y-8">
+                {/* 基本信息 */}
+                <Card>
+                  <CardHeader icon={UserRound} title="基本信息" />
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormInput
+                        label="姓名"
+                        icon={PenTool}
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+                      <div className="space-y-2">
+                        <Label>性别</Label>
+                        <RadioGroup options={genderOptions} value={editGender} onChange={setEditGender} />
                       </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* 内在动机原型（皮尔逊体系） */}
-                  <Card>
-                    <CardHeader icon={Heart} title="内在动机原型（皮尔逊体系）" />
-                    <CardContent>
-                      <div className="grid grid-cols-3 gap-3">
-                        <MultiRadioGroup
-                          options={innerMotivationRadioOptions}
-                          selectedValues={editTraits.innerMotivation.map((o) => o.name)}
-                          onChange={(values) => {
-                            setEditTraits({
-                              ...editTraits,
-                              innerMotivation: values.map((val) => ({
-                                label: innerMotivationOptions.find((o) => o.name === val)?.label || "",
-                                name: val,
-                                description: innerMotivationOptions.find((o) => o.name === val)?.description || "",
-                              })),
-                            })
-                          }}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                      <FormInput
+                        label="年龄"
+                        icon={Calendar}
+                        value={editAge}
+                        onChange={(e) => setEditAge(e.target.value)}
+                        placeholder="如：25岁"
+                      />
+                      <FormInput
+                        label="身份"
+                        icon={Briefcase}
+                        value={editIdentity}
+                        onChange={(e) => setEditIdentity(e.target.value)}
+                        placeholder="身份/职业/组织归属"
+                      />
+                      {/* 标志性物件 */}
+                      <FormInput
+                        label="标志性物件"
+                        icon={Gem}
+                        value={editTraits.item}
+                        onChange={(e) => setEditTraits({ ...editTraits, item: e.target.value })}
+                        placeholder="一件有故事的随身物品"
+                      />
+                    </div>
+                    {/* 核心矛盾 */}
+                    <FormInput
+                      label="核心矛盾"
+                      value={editTraits.coreConflict}
+                      onChange={(e) => setEditTraits({ ...editTraits, coreConflict: e.target.value })}
+                      placeholder="一句话概括"
+                    />
+                    {/* 情感表达方式 */}
+                    <div>
+                      <Label className="mb-0.5">情感表达方式</Label>
+                      <RadioGroup
+                        options={emotionOptions}
+                        value={editTraits.emotionExpression}
+                        onChange={(v) => setEditTraits({ ...editTraits, emotionExpression: v })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* 能力 / 关系网络 / 成长弧光 */}
                 <Tabs defaultValue="abilities">
@@ -528,17 +511,57 @@ export default function CharactersPage() {
                   </CardContent>
                 </Card>
               </div>
-            </section>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <User className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold text-muted-foreground mb-2">选择一个角色开始编辑</h3>
-              <p className="text-sm text-muted-foreground">从左侧列表中选择一个角色，或添加新角色</p>
+              <div className="w-[300px] flex-shrink-0 space-y-6">
+                {/* 叙事功能原型（沃格勒体系） */}
+                <Card>
+                  <CardHeader icon={Shield} title="叙事功能原型（沃格勒体系）" />
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-3">
+                      <MultiRadioGroup
+                        options={narrativeFunctionRadioOptions}
+                        selectedValues={editTraits.narrativeFunction.map((o) => o.name)}
+                        onChange={(values) => {
+                          setEditTraits({
+                            ...editTraits,
+                            narrativeFunction: values.map((val) => ({
+                              label: narrativeFunctionOptions.find((o) => o.name === val)?.label || "",
+                              name: val,
+                              description: narrativeFunctionOptions.find((o) => o.name === val)?.description || "",
+                            })),
+                          })
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 内在动机原型（皮尔逊体系） */}
+                <Card>
+                  <CardHeader icon={Heart} title="内在动机原型（皮尔逊体系）" />
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-3">
+                      <MultiRadioGroup
+                        options={innerMotivationRadioOptions}
+                        selectedValues={editTraits.innerMotivation.map((o) => o.name)}
+                        onChange={(values) => {
+                          setEditTraits({
+                            ...editTraits,
+                            innerMotivation: values.map((val) => ({
+                              label: innerMotivationOptions.find((o) => o.name === val)?.label || "",
+                              name: val,
+                              description: innerMotivationOptions.find((o) => o.name === val)?.description || "",
+                            })),
+                          })
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+  
             </div>
-          </div>
-        )}
+        ) : null}
+        </div>
       </div>
     </div>
   )

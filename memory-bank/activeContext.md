@@ -1,37 +1,52 @@
 # 当前工作上下文
 
 ## 当前状态
-项目处于**第一阶段开发中**，核心基础功能已完成，正在进行细节完善和优化。
+项目**第一阶段基础功能已全部完成**，数据库 Schema 已扩展到第二阶段所需模型（Outline / CharacterEmotion / Brainstorm），待实现对应的功能和页面。
 
 ## 最近完成的工作
-1. **项目骨架搭建完成** — Next.js 14 + Tailwind + shadcn/ui + Prisma/SQLite
-2. **作品管理模块** — CRUD API + 列表页 + 详情页
-3. **章节管理模块** — CRUD API + 编辑器联动 + 状态过滤 + 自动保存防抖
-4. **人物管理模块** — CRUD API + 结构化特征数据 + 自动保存防抖
-5. **AI 润色模块重构完成** ✅
-   - 润色规则 CRUD（独立管理页面 `/polish`）
-   - 章节编辑器内润色：选中文本 → 浮动菜单 → 右侧面板选择规则 → AI 润色 → 结果浮层确认替换
-   - 组件：`PolishContext`(状态管理) + `SelectionMenu` + `PolishResultPopover` + `PolishPanel` + `ChapterEditor`
-   - 删除 `PolishHistory` 模型
-6. **润色面板布局优化** ✅
-   - 收缩态：按钮浮动在编辑器右上角，不占布局空间
-   - 展开态：侧边栏占用空间（w-72 border-l），按钮浮动在面板左侧
-   - 从选中文本菜单点击润色时，tab 按钮正确高亮
-7. **编辑器居中布局** ✅
-   - Textarea 添加 `mx-auto max-w-[800px]` 样式，内容水平居中
+
+### 作品概览编辑功能 ✅
+- **Prisma 模型**：Novel 新增 `genre`（题材，JSON 数组存储）、`status`（连载中/已完结/暂停）字段
+- **API**：新增 `PATCH /api/novels/[id]` 更新接口，GET 兼容序列化/纯字符串
+- **概览页**：支持预览/编辑双模式
+  - 编辑模式：Card 内联表单（标题 + 简介 + 题材多选网格 + 状态单选）
+  - 预览模式：标题 / 状态 Tag / 题材 Tag 一行展示
+- **题材多选**：12 种题材可选，JSON 数组存储于数据库
+- **Tag 组件**：`src/components/ui/tag.tsx` — 封装复用，支持 `primary/success/warn/default` 四色 + 图标
+
+### 侧边栏导航计数 ✅
+- 章节/人物数量显示在导航项右侧
+
+### Prisma Schema 扩展 ✅
+- 添加 `PolishRule.type` 字段区分润色/续写/扩写
+- 新增 `Outline` 模型（层级大纲，parentId 树形结构，支持关联章节）
+- 新增 `CharacterEmotion` 模型（人物场景级情感标记）
+- 新增 `Brainstorm` 模型（灵感卡片/头脑风暴）
 
 ## 接下来要处理的工作
+
+### 短期（第二阶段核心功能）
+1. **故事大纲** — 树形大纲编辑器（卷→章→情节→场景），拖拽排序，关联章节
+2. **人物情感追踪** — 在章节编辑器中标记人物情感，情感变化曲线可视化
+3. **头脑风暴** — 灵感卡片 CRUD + AI 点子生成
+4. **AI 续写** — 基于上文自动续写，类似润色交互
+5. **AI 扩写** — 选中文本智能扩写
+
+### 优化项
 1. 章节编辑器增强（Markdown 预览 / 关联人物选择）
-2. 深色模式切换
-3. 章节排序拖拽功能
-4. 数据导出功能
-5. 第二阶段：时间线管理、关系图谱、伏笔追踪、情节看板
+2. 章节列表拖拽排序视觉反馈
+3. 数据导出功能
+4. 深色模式切换
+
+### 第三阶段（远期）
+- 多 Agent 协作（规划 + 写作 + 审稿）
+- 事实核查
+- RAG 知识库
+- 版本管理
 
 ## 已知问题/待办事项
 - [ ] 需创建 `.env.local` 配置文件才能使用 AI 功能
-- [ ] 作品编辑功能（缺少修改名称/简介）
 - [ ] 章节列表缺少拖拽排序视觉反馈
-- [ ] 人物关系网络缺少可视化
 - [ ] 未配置 ESLint 规则
 - [ ] 数据库初始化脚本需要验证
 
@@ -45,15 +60,33 @@
 7. **PolishHistory 移除**：润色不记录历史
 8. **润色面板布局**：收缩态按钮浮动在编辑器右上角；展开态侧边栏占用空间，按钮浮动在面板左侧
 9. **编辑器居中**：Textarea 最大宽度 800px，水平居中
+10. **题材多选存储**：JSON 数组字符串，兼容旧纯字符串格式
+11. **Tag 组件**：通用可复用标签，支持 icon + 预设色值
+12. **侧边栏计数**：从 API 的 `_count` 获取，导航项右侧展示
+13. **大纲层级设计**：Outline 使用 parentId 实现树形结构，type 字段区分层级类型，关联起始/结束章节
+14. **情感追踪设计**：CharacterEmotion 关联 Character + Chapter，支持场景级情绪标记和强度量化
 
 ## 关键文件映射
 | 路径 | 说明 |
 |------|------|
+| `prisma/schema.prisma` | 数据库模型定义（含 Outline / CharacterEmotion / Brainstorm） |
+| `src/app/novel/[id]/page.tsx` | 作品概览（预览 + 编辑双模式） |
+| `src/app/novel/[id]/layout.tsx` | 作品内布局（侧边栏导航 + 导航计数） |
 | `src/app/novel/[id]/chapters/page.tsx` | 章节管理（布局编排） |
+| `src/app/novel/[id]/characters/page.tsx` | 人物管理 |
+| `src/app/novel/[id]/polish/page.tsx` | 润色规则管理 |
 | `src/components/polish/PolishContext.tsx` | 润色状态管理 Context |
-| `src/components/polish/PolishPanel.tsx` | 右侧润色面板（浮动按钮 + 侧边栏） |
+| `src/components/polish/PolishPanel.tsx` | 右侧润色面板 |
 | `src/components/polish/SelectionMenu.tsx` | 选中文本后的浮动"润色"按钮 |
-| `src/components/polish/PolishResultPopover.tsx` | 润色结果浮层（可编辑 + 确认/取消） |
+| `src/components/polish/PolishResultPopover.tsx` | 润色结果浮层 |
 | `src/components/chapters/ChapterEditor.tsx` | 编辑器 Textarea 组件 |
-| `src/app/api/polish/route.ts` | AI 润色调用 |
+| `src/components/ui/tag.tsx` | Tag 标签组件 |
+| `src/components/ui/card.tsx` | Card 卡片组件 |
+| `src/components/radio-group.tsx` | 单选/多选按钮组 |
+| `src/components/form-input.tsx` | 带图标表单输入 |
+| `src/app/api/novels/route.ts` | 作品 API（含 JSON 兼容解析） |
+| `src/app/api/novels/[id]/route.ts` | 作品更新 API |
+| `src/app/api/polish/route.ts` | AI 润色/续写/扩写调用 |
 | `src/app/api/polish/rules/route.ts` | 润色规则 CRUD |
+| `src/lib/db.ts` | Prisma Client 封装 |
+| `src/lib/ai.ts` | AI API 封装 |

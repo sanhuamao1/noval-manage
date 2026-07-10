@@ -9,6 +9,10 @@ import Link from "next/link"
 interface Novel {
   id: string
   title: string
+  _count: {
+    chapters: number
+    characters: number
+  }
 }
 
 const navItems = [
@@ -71,7 +75,13 @@ export default function NovelLayout({
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.href === "/chapters" && (
+                  <span className="text-xs text-muted-foreground/60">{novel?._count.chapters ?? 0}</span>
+                )}
+                {item.href === "/characters" && (
+                  <span className="text-xs text-muted-foreground/60">{novel?._count.characters ?? 0}</span>
+                )}
               </Link>
             )
           })}
