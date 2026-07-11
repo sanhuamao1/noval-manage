@@ -2,13 +2,10 @@
 
 import { useState, forwardRef, useImperativeHandle } from "react";
 import { renderSections } from "@/lib/configs/render-utils";
-import {
-  CHARACTER_CONFIG_SECTIONS,
-  type CharacterConfig,
-} from "@/lib/configs/character-defs";
+import { CHARACTER_CONFIG_SECTIONS, type CharacterConfig } from "@/lib/configs/character-defs";
 
 export interface CharacterEditorHandle {
-  getData: () => { name: string; config: Omit<CharacterConfig, 'name' | 'prompt'> };
+  getData: () => { name: string; config: Omit<CharacterConfig, "name" | "prompt"> };
 }
 
 interface CharacterEditorProps {
@@ -35,13 +32,13 @@ export const CharacterEditor = forwardRef<CharacterEditorHandle, CharacterEditor
     );
 
     return (
-      <div className="px-8 py-6">
+      <>
         {renderSections(
           CHARACTER_CONFIG_SECTIONS,
           config as unknown as Record<string, unknown>,
           (c) => setConfig(c as unknown as CharacterConfig),
         )}
-      </div>
+      </>
     );
   },
 );

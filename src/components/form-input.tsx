@@ -30,7 +30,7 @@ export function FormInput({
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="bg-bg-850 border-border-subtle rounded-md"
+                className="bg-bg-850 border-border-subtle rounded-md focus-visible:ring-0 focus-visible:border-primary"
                 {...props}
             />
         </div>

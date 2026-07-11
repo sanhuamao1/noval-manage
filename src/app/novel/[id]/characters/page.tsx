@@ -9,7 +9,8 @@ import { CardList } from "@/components/CardList";
 import { SimpleCard } from "@/components/ui/card";
 import { CharacterEditor, type CharacterEditorHandle } from "@/components/character/CharacterEditor";
 import { parseConfig } from "@/lib/configs/config-utils";
-import { ConfigBadges, buildConfigTags } from "@/lib/configs/render-utils";
+import { ConfigBadges } from "@/lib/configs/render-utils";
+import { buildConfigTags } from "@/lib/configs/render-utils";
 import { DEFAULT_CHARACTER_CONFIG } from "@/lib/configs/character-defs";
 
 interface Character {

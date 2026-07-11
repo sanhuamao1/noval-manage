@@ -40,6 +40,29 @@ export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) 
 
 
 
+/** 构建风格样本注入 Prompt（只塞标题 + 注释 + 原文，不塞数值特征） */
+export function buildStylePrompt(
+  samples: { title: string; annotation?: string | null; text: string; is_negative: boolean }[],
+): string {
+  if (samples.length === 0) return ""
+
+  let prompt = "【风格参考】\n\n"
+
+  samples.forEach((s, i) => {
+    if (s.is_negative) {
+      prompt += `【反例 ${i + 1} - 请避免】${s.title}\n`
+    } else {
+      prompt += `【样本 ${i + 1}】${s.title}\n`
+    }
+    if (s.annotation) {
+      prompt += `提示：${s.annotation}\n`
+    }
+    prompt += `${s.text}\n\n`
+  })
+
+  return prompt
+}
+
 export function buildPolishPrompt(
   rule: { name: string; description?: string | null; prompt?: string; config?: string },
   text: string,

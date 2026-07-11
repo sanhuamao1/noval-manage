@@ -17,48 +17,29 @@ import * as LucideIcons from "lucide-react";
 import { NoBorderInput } from "@/components/ui/no-border-input";
 import { FormItem } from "@/components/form-item";
 import type { ReactNode } from "react";
+import { LongTextField } from "@/components/long-text-field";
 
 /** 从配置对象中提取标签文本数组 */
 export function buildConfigTags(
-  config: Record<string, unknown>,
-  items: [string, string][],
+    config: Record<string, unknown>,
+    items: [string, string][],
 ): string[] {
-  const tags: string[] = [];
-  for (const [label, key] of items) {
-    const value = config[key];
-    if (typeof value === "boolean") {
-      if (value) tags.push(label);
-    } else if (typeof value === "string") {
-      if (value) tags.push(`${label}：${value}`);
-    } else if (Array.isArray(value)) {
-      if (value.length > 0) tags.push(`${label}：${value.filter(Boolean).join("/")}`);
+    const tags: string[] = [];
+    for (const [label, key] of items) {
+        const value = config[key];
+        if (typeof value === "boolean") {
+            if (value) tags.push(label);
+        } else if (typeof value === "string") {
+            if (value) tags.push(`${label}：${value}`);
+        } else if (Array.isArray(value)) {
+            if (value.length > 0) tags.push(`${label}：${value.filter(Boolean).join("/")}`);
+        }
     }
-  }
-  return tags;
-}
-
-/** 将配置对象的指定字段渲染为摘要标签 */
-export function ConfigBadges({ tags }: { tags: string[] }) {
-  if (tags.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-1 mt-1.5">
-      {tags.map((t) => (
-        <span
-          key={t}
-          className="inline-block px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground"
-        >
-          {t}
-        </span>
-      ))}
-    </div>
-  );
+    return tags;
 }
 
 /** 将 icon 名称字符串映射到 LucideIcon */
-export function resolveIcon(
-    name: string | undefined,
-): LucideIcon | undefined {
+export function resolveIcon(name: string | undefined): LucideIcon | undefined {
     if (!name) return undefined;
     const icon = LucideIcons[name as keyof typeof LucideIcons];
     return (icon as LucideIcon) ?? undefined;
@@ -68,6 +49,15 @@ export function resolveIcon(
 function toRadioOption(opt: ConfigOption) {
     const Icon = resolveIcon(opt.icon);
     return { ...opt, icon: Icon };
+}
+
+/** 过滤掉指定 key 的字段 */
+function filterFields(
+    fields: (ConfigFieldDef | TabGroup)[],
+    skipKeys?: string[],
+): (ConfigFieldDef | TabGroup)[] {
+    if (!skipKeys || skipKeys.length === 0) return fields;
+    return fields.filter((f) => !skipKeys.includes(f.key));
 }
 
 /** 渲染单个配置字段 */
@@ -122,7 +112,6 @@ export function renderField<T extends Record<string, unknown>>(
         const selected = value as string[];
         const isAllSelected = selected.length === radioOptions.length;
 
-
         const sholdShowHandler = field.max === undefined;
 
         const handlerEl = sholdShowHandler ? (
@@ -153,7 +142,7 @@ export function renderField<T extends Record<string, unknown>>(
                 variant={field.variant as "box" | undefined}
             />
         );
-        if (hideLabel) return <FormItem  {...sharedProps}>{control}</FormItem>;
+        if (hideLabel) return <FormItem {...sharedProps}>{control}</FormItem>;
         return (
             <FormItem label={field.label} {...sharedProps} handler={handlerEl}>
                 {control}
@@ -176,6 +165,22 @@ export function renderField<T extends Record<string, unknown>>(
         return <div className={sharedProps.className}>{control}</div>;
     }
 
+    // longtext (多行文本，带字数限制)
+    if (field.type === "longtext") {
+        const textValue = (value as string) ?? "";
+        const maxLength = field.maxLength ?? 1000;
+        const control = (
+            <LongTextField
+                value={textValue}
+                maxLength={maxLength}
+                placeholder={field.placeholder}
+                label={field.label}
+                onChange={(v) => set(field.key as keyof T, v as any)}
+            />
+        );
+        return <div className={sharedProps.className}>{control}</div>;
+    }
+
     // list
     const listValues = (value as string[]) || [];
     const isEmpty = listValues.length === 0 || listValues.every((v) => !v.trim());
@@ -194,15 +199,6 @@ export function renderField<T extends Record<string, unknown>>(
     );
     if (hideLabel) return <FormItem {...sharedProps}>{control}</FormItem>;
     return <FormItem label={field.label} {...sharedProps}>{control}</FormItem>;
-}
-
-/** 过滤掉指定 key 的字段 */
-function filterFields(
-    fields: (ConfigFieldDef | TabGroup)[],
-    skipKeys?: string[]
-): (ConfigFieldDef | TabGroup)[] {
-    if (!skipKeys || skipKeys.length === 0) return fields;
-    return fields.filter((f) => !skipKeys.includes(f.key));
 }
 
 /** 渲染配置 sections */
@@ -319,4 +315,22 @@ export function renderSections<T extends Record<string, unknown>>(
         }
         return null;
     });
+}
+
+/** 将配置对象的指定字段渲染为摘要标签 */
+export function ConfigBadges({ tags }: { tags: string[] }) {
+    if (tags.length === 0) return null;
+
+    return (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+            {tags.map((t) => (
+                <span
+                    key={t}
+                    className="inline-block px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground"
+                >
+                    {t}
+                </span>
+            ))}
+        </div>
+    );
 }

@@ -52,6 +52,7 @@ model PolishRule {
   prompt      String
   config      String   @default("{}")
   type        String   @default("base")  // base: 基础规则, sample: 文风示例
+  useCount    Int      @default(0)
   createdAt   DateTime @default(now())
 }
 

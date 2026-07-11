@@ -21,7 +21,7 @@ export interface ListSubField {
 export interface ConfigFieldDef<K extends string = string> {
   key: K
   label: string
-  type: "single" | "multi" | "toggle" | "list" | "text"
+  type: "single" | "multi" | "toggle" | "list" | "text" | "longtext"
   options?: readonly ConfigOption[]
   max?: number
   display?: "default" | "flex" | "grid" | "between"
@@ -30,8 +30,10 @@ export interface ConfigFieldDef<K extends string = string> {
   cols?: number
   /** 字段图标（lucide 组件名），在 tabs 中显示在 tab trigger 上 */
   icon?: string
-  /** type="text" 时输入框的占位文本 */
+  /** type="text"/"longtext" 时输入框的占位文本 */
   placeholder?: string
+  /** type="longtext" 时的文本最大长度 */
+  maxLength?: number
   /** type="list" 时的子字段定义 */
   subFields?: ListSubField[]
   /** 自定义 Tailwind 类名，会附加到 FormItem 的外层 div 上 */
@@ -112,11 +114,12 @@ interface TypeValueMap {
   single: string | undefined
   list: string[]
   text: string | undefined
+  longtext: string | undefined
 }
 
 /** 从字段定义数组推导配置对象类型 */
 export type ConfigOf<
-  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" }[],
+  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" | "longtext" }[],
 > = {
   [K in T[number] as K["key"]]: TypeValueMap[K["type"]]
 }
@@ -128,7 +131,7 @@ export type ConfigOf<
  * toggle → false, multi → [], list → [], single → undefined, text → undefined
  */
 export function buildDefaultValues<
-  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" }[],
+  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" | "longtext" }[],
 >(fields: T): ConfigOf<T> & { prompt?: string } {
   const result: Record<string, unknown> = {}
   for (const field of fields) {

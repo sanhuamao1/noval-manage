@@ -1,6 +1,55 @@
 import { buildDefaultValues, flattenFields, type ConfigOf, type ConfigSection } from "@/lib/configs/config-utils";
 
-// ─── 配置定义（单一数据源） ──
+// ─── 风格样本 配置定义 ──
+// 样本数据存储在 PolishRule.config JSON 中
+export interface SampleConfig {
+  scene_type: string  // 场景类型：战斗/对话/环境/心理
+  text: string        // 样本正文（≤600字）
+  is_negative: boolean // 是否为反例
+}
+
+export const SCENE_TYPE_OPTIONS = [
+  { value: "战斗" },
+  { value: "对话" },
+  { value: "环境" },
+  { value: "心理" },
+  { value: "其他" },
+] as const
+
+export const SAMPLE_CONFIG_SECTIONS: ConfigSection[] = [
+  {
+    type: "card",
+    title: "样本内容",
+    class: "space-y-3",
+    children: [
+      {
+        key: "scene_type",
+        label: "场景类型",
+        type: "single",
+        options: SCENE_TYPE_OPTIONS as any,
+        display: "flex",
+      },
+      {
+        key: "text",
+        label: "样本正文",
+        type: "longtext",
+        maxLength: 600,
+        placeholder: "粘贴样本正文（不超过 600 字）...",
+      },
+      {
+        key: "is_negative",
+        label: "设为反例（请避免的风格）",
+        type: "toggle",
+        display: "between",
+      },
+    ],
+  },
+]
+
+export const SAMPLE_CONFIG_FIELDS = flattenFields(SAMPLE_CONFIG_SECTIONS)
+export const DEFAULT_SAMPLE_CONFIG = buildDefaultValues(SAMPLE_CONFIG_FIELDS) as unknown as SampleConfig & { prompt?: string }
+
+// ─── 润色规则 配置定义（原有） ──
 
 export const CONFIG_SECTIONS: ConfigSection[] = [
     {
@@ -10,7 +59,8 @@ export const CONFIG_SECTIONS: ConfigSection[] = [
             {
                 title: "界限",
                 type: "card",
-                class: "space-y-3",
+                class: "space-y-4",
+
                 children: [
                     {
                         key: "pace",
@@ -34,8 +84,7 @@ export const CONFIG_SECTIONS: ConfigSection[] = [
                             { value: "悬疑" },
                             { value: "悲怆" },
                         ],
-                        display: "flex",
-                        handler: "全选",
+                        display: "flex"
                     },
                     {
                         key: "narrative",
@@ -49,7 +98,7 @@ export const CONFIG_SECTIONS: ConfigSection[] = [
             {
                 title: "侧重点",
                 type: "card",
-                class: "space-y-3",
+                class: "space-y-4",
                 children: [
                     {
                         key: "senses",

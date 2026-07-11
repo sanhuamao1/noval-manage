@@ -9,6 +9,7 @@ interface PolishRule {
   prompt: string
   config: string | null
   type: string
+  useCount: number
 }
 
 interface SelectionRange {
@@ -28,6 +29,12 @@ interface PolishContextType {
 
   rules: PolishRule[]
   selectedRuleId: string
+
+  // 风格样本
+  samples: PolishRule[]
+  selectedSampleIds: string[]
+  toggleSampleId: (id: string) => void
+
   polishing: boolean
   polishError: string
 
@@ -63,7 +70,9 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
   const [panelOpen, setPanelOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [rules, setRules] = useState<PolishRule[]>([])
+  const [samples, setSamples] = useState<PolishRule[]>([])
   const [selectedRuleId, setSelectedRuleId] = useState("")
+  const [selectedSampleIds, setSelectedSampleIds] = useState<string[]>([])
   const [polishing, setPolishing] = useState(false)
   const [polishResult, setPolishResult] = useState("")
   const [polishError, setPolishError] = useState("")
@@ -77,7 +86,7 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
   const mousePosRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
-    fetchRules()
+    fetchAllRules()
   }, [])
 
   // 监听全局选中状态变化：选中消失时隐藏菜单，但不清空选中文本（防止点击面板时丢失）
@@ -94,13 +103,22 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
     return () => document.removeEventListener("selectionchange", handleSelectionChange)
   }, [showSelectionMenu])
 
-  async function fetchRules() {
+  async function fetchAllRules() {
     try {
       const res = await fetch("/api/polish/rules")
       const data = await res.json()
-      setRules(data)
+      setRules(data.filter((r: any) => r.type === "base"))
+      setSamples(data.filter((r: any) => r.type === "sample"))
     } catch {}
   }
+
+  const toggleSampleId = useCallback((id: string) => {
+    setSelectedSampleIds((prev) => {
+      if (prev.includes(id)) return prev.filter((s) => s !== id)
+      if (prev.length >= 3) return prev
+      return [...prev, id]
+    })
+  }, [])
 
   const handleTextSelection = useCallback(() => {
     const textarea = editorRef.current
@@ -142,6 +160,7 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
     setShowResultPopover(false)
     setPolishResult("")
     setSelectedRuleId("")
+    setSelectedSampleIds([])
     setPolishError("")
   }
 
@@ -153,11 +172,21 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
     setPolishError("")
     setPolishResult("")
 
+    const body: Record<string, unknown> = { text: selectedText }
+
+    if (ruleId) {
+      body.type = "rule"
+      body.ruleId = ruleId
+    } else if (selectedSampleIds.length > 0) {
+      body.type = "sample"
+      body.sampleIds = selectedSampleIds
+    }
+
     try {
       const res = await fetch("/api/polish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ruleId, text: selectedText }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (data.error) {
@@ -165,6 +194,8 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
       } else {
         setPolishResult(data.polishedText)
         setShowResultPopover(true)
+        // 刷新数据
+        fetchAllRules()
       }
     } catch (err: any) {
       setPolishError(err.message || "润色失败")
@@ -198,6 +229,7 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
     setSelectedText("")
     setPolishResult("")
     setSelectedRuleId("")
+    setSelectedSampleIds([])
     setPolishError("")
   }
 
@@ -213,6 +245,9 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
         setActiveTab,
         rules,
         selectedRuleId,
+        samples,
+        selectedSampleIds,
+        toggleSampleId,
         polishing,
         polishError,
         polishResult,
