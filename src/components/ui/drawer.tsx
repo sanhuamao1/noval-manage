@@ -18,12 +18,12 @@ interface SlidingDrawerProps {
   children?: React.ReactNode
 }
 
-function SlidingDrawer({ open, onClose, width = 680, title, onCreate, onUpdate, rightHandler, children }: SlidingDrawerProps) {
+function SlidingDrawer({ open, onClose, width = 620, title, onCreate, onUpdate, rightHandler, children }: SlidingDrawerProps) {
   const bookmarkBtnClass =
     "w-8 h-8 flex items-center justify-center rounded-l-lg shadow-md transition-opacity"
 
   return (
-    <div className="relative flex-shrink-0 border-l">
+    <div className="relative flex-shrink-0 h-full border-l border-border-subtle bg-bg-800/50">
       {/* 书签式按钮组 */}
       {open && (onClose || onCreate || onUpdate) && (
         <div className="absolute -left-4 top-8 -translate-x-1/2 z-10 flex flex-col gap-3">
@@ -59,25 +59,27 @@ function SlidingDrawer({ open, onClose, width = 680, title, onCreate, onUpdate, 
 
       <div
         className={cn(
-          "overflow-hidden transition-[width,opacity] duration-300 ease-out",
+          "overflow-hidden transition-[width,opacity] duration-300 ease-out h-full",
           open ? "opacity-100" : "w-0 opacity-0 ",
         )}
         style={{ width: open ? width : 0 }}
       >
         <div
-          className="h-full overflow-auto p-6"
+          className="h-full p-6 flex flex-col"
           style={{ width }}
         >
           {open ? (
-            <div className="space-y-6">
+            <>
               {(title || rightHandler) && (
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">{title}</div>
+                <div className="flex items-center justify-between gap-4 flex-shrink-0 mb-2">
+                  <div className="flex items-center gap-2 text-lg font-semibold">{title}</div>
                   {rightHandler && <div className="flex items-center gap-2 flex-shrink-0">{rightHandler}</div>}
                 </div>
               )}
-              {children}
-            </div>
+              <div className="flex-1 overflow-auto [&::-webkit-scrollbar]:hidden space-y-6">
+                {children}
+              </div>
+            </>
           ) : null}
         </div>
       </div>

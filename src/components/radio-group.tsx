@@ -1,6 +1,7 @@
 "use client"
 
 import type { ComponentType } from "react"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export interface RadioOption {
   value: string
@@ -11,17 +12,11 @@ export interface RadioOption {
 
 interface RadioGroupProps {
   options: RadioOption[]
-  value: string
-  onChange: (value: string) => void
+  type?: "single" | "multi"
+  value: string | string[]
+  onChange: (value: string | string[]) => void
   variant?: "horizontal" | "box"
-  columns?: number
-}
-
-interface MultiRadioGroupProps {
-  options: RadioOption[]
-  selectedValues: string[]
-  onChange: (values: string[]) => void
-  /** 可选：限制最多可选数量 */
+  /** multi 模式下可选：最多可选数量 */
   max?: number
 }
 
@@ -33,6 +28,12 @@ const UNSELECTED_CLASSES = "bg-bg-900 border border-transparent text-fg-tertiary
 const SELECTED_ICON_COLOR = "text-amber-400"
 // 图标未选中时的颜色
 const UNSELECTED_ICON_COLOR = "text-fg-tertiary"
+
+// ── 变体样式常量 ──
+const BOX_WRAPPER = "w-18 h-18 flex-col gap-1"
+const HORIZONTAL_WRAPPER = "flex-1 gap-2 py-1 px-3.5"
+const BOX_ICON_SIZE = "w-5 h-5"
+const HORIZONTAL_ICON_SIZE = "w-4 h-4"
 
 function getButtonClasses(isSelected: boolean, extraClasses: string) {
   return `${extraClasses} rounded-md flex items-center justify-center text-xs transition-all duration-200 ${
@@ -62,83 +63,92 @@ function OptionButton({
   disabled?: boolean
 }) {
   const IconComponent = option.icon
-  return (
+  const btn = (
     <button
       type="button"
       disabled={disabled}
       onClick={() => onClick(option.value)}
       className={`${getButtonClasses(isSelected, wrapperClasses)} ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}
-      title={option.description}
     >
       {IconComponent && <IconComponent className={getIconClassName(isSelected, iconSize)} />}
       {showLabel && <span className="whitespace-nowrap">{option.label || option.value}</span>}
     </button>
   )
+
+  if (option.description) {
+    return <Tooltip content={option.description}>{btn}</Tooltip>
+  }
+
+  return btn
 }
 
-export function RadioGroup({ options, value, onChange, variant = "horizontal", columns = 2 }: RadioGroupProps) {
-  // 使用映射避免动态类名问题
-  const colClass = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4" } as const
-  if (variant === "box") {
+export function RadioGroup({
+  options,
+  type = "single",
+  value,
+  onChange,
+  variant = "horizontal",
+  max,
+}: RadioGroupProps) {
+  if (type === "multi") {
+    const selectedValues = value as string[]
+
+    const handleToggle = (val: string) => {
+      const current = value as string[]
+      if (current.includes(val)) {
+        onChange(current.filter((v) => v !== val))
+      } else {
+        if (max && current.length >= max) return
+        onChange([...current, val])
+      }
+    }
+
+    const wrapperClasses = variant === "box" ? BOX_WRAPPER : HORIZONTAL_WRAPPER
+
     return (
-      <div className={`grid ${colClass[columns as keyof typeof colClass] || "grid-cols-3"} gap-3`}>
-        {options.map((option) => (
-          <OptionButton
-            key={option.value}
-            option={option}
-            isSelected={value === option.value}
-            onClick={onChange}
-            iconSize="w-4 h-4"
-            wrapperClasses="aspect-square flex-col gap-2"
-          />
-        ))}
-      </div>
+      <>
+        {options.map((option) => {
+          const isSelected = selectedValues.includes(option.value)
+          const isDisabled = max ? selectedValues.length >= max && !isSelected : false
+          return (
+            <OptionButton
+              key={option.value}
+              option={option}
+              isSelected={isSelected}
+              onClick={handleToggle}
+              disabled={isDisabled}
+              iconSize={variant === "box" ? BOX_ICON_SIZE : HORIZONTAL_ICON_SIZE}
+              wrapperClasses={wrapperClasses}
+            />
+          )
+        })}
+      </>
     )
   }
 
-  return (
-    <div className="flex gap-3">
-      {options.map((option) => (
-        <OptionButton
-          key={option.value}
-          option={option}
-          isSelected={value === option.value}
-          onClick={onChange}
-          iconSize="w-4 h-4"
-          wrapperClasses="flex-1 gap-2 py-1 px-3.5"
-        />
-      ))}
-    </div>
-  )
-}
-
-export function MultiRadioGroup({ options, selectedValues, onChange, max }: MultiRadioGroupProps) {
-  function handleToggle(value: string) {
-    if (selectedValues.includes(value)) {
-      onChange(selectedValues.filter((v) => v !== value))
-    } else {
-      if (max && selectedValues.length >= max) return
-      onChange([...selectedValues, value])
-    }
+  // single
+  const currentValue = value as string
+  if (variant === "box") {
+    return options.map((option) => (
+      <OptionButton
+        key={option.value}
+        option={option}
+        isSelected={currentValue === option.value}
+        onClick={onChange as (v: string) => void}
+        iconSize={BOX_ICON_SIZE}
+        wrapperClasses={BOX_WRAPPER}
+      />
+    ))
   }
 
-  return (
-    <>
-      {options.map((option) => {
-        const isSelected = selectedValues.includes(option.value)
-        const isDisabled = max ? selectedValues.length >= max && !isSelected : false
-        return (
-          <OptionButton
-            key={option.value}
-            option={option}
-            isSelected={isSelected}
-            onClick={handleToggle}
-            disabled={isDisabled}
-            iconSize="w-4 h-4"
-            wrapperClasses="flex-col gap-1 py-1 px-3.5"
-          />
-        )
-      })}
-    </>
-  )
+  return options.map((option) => (
+    <OptionButton
+      key={option.value}
+      option={option}
+      isSelected={currentValue === option.value}
+      onClick={onChange as (v: string) => void}
+      iconSize={HORIZONTAL_ICON_SIZE}
+      wrapperClasses={HORIZONTAL_WRAPPER}
+    />
+  ))
 }

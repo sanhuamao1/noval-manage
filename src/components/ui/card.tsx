@@ -24,9 +24,9 @@ Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
+  Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> & {
     icon?: LucideIcon
-    title: string
+    title: React.ReactNode
     rightHandler?: React.ReactNode
   }
 >(({ className, icon, title, rightHandler, ...props }, ref) => {
@@ -37,13 +37,13 @@ const CardHeader = React.forwardRef<
       className={cn("flex items-center justify-between gap-3 pb-3 mb-4 border-b border-border-subtle", className)}
       {...props}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         {Icon && (
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-bg-800 border border-amber-500/30">
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-bg-800 border border-amber-500/30 shrink-0">
             <Icon className="w-5 h-5 text-amber-400" />
           </div>
         )}
-        <h3 className="text-base font-semibold text-fg-primary">{title}</h3>
+        <div className="text-base font-semibold text-fg-primary truncate">{title}</div>
       </div>
       {rightHandler && <div className="flex-shrink-0">{rightHandler}</div>}
     </div>
@@ -57,7 +57,7 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("space-y-4", className)}
+    className={cn(className)}
     {...props}
   />
 ))
@@ -78,6 +78,7 @@ CardEmpty.displayName = "CardEmpty"
 interface SimpleCardProps {
   title: string
   description?: string | null
+  icon?: LucideIcon
   selected?: boolean
   onClick?: () => void
   onDelete?: () => void
@@ -85,29 +86,37 @@ interface SimpleCardProps {
 }
 
 const SimpleCard = React.forwardRef<HTMLDivElement, SimpleCardProps>(
-  ({ title, description, selected, onClick, onDelete, children }, ref) => (
+  ({ title, description, selected, icon: Icon, onClick, onDelete, children }, ref) => (
     <div
       ref={ref}
-      className={`border rounded-lg p-4 group cursor-pointer transition-colors ${selected ? "border-primary shadow-sm" : "hover:border-primary/50"
+      className={`border rounded-lg p-4 bg-bg-800 group cursor-pointer transition-colors ${selected ? "border-primary shadow-sm" : "hover:border-primary/50"
         }`}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between mb-1">
-        <h3 className="font-medium text-sm">{title}</h3>
-        {onDelete && (
-          <Button variant="destructive" size="auto" onClick={(e) => {
-            e.stopPropagation()
-            onDelete()
-          }}>
-            <Trash2 className="w-3 h-3 text-destructive" />
-          </Button>
-
+      <div className="flex gap-3">
+        {Icon && (
+          <div className="flex items-start pt-0.5 shrink-0">
+            <Icon className="w-4 h-4 text-muted-foreground" />
+          </div>
         )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between mb-1">
+            <h3 className="font-medium text-sm truncate">{title}</h3>
+            {onDelete && (
+              <Button variant="destructive" size="auto" onClick={(e) => {
+                e.stopPropagation()
+                onDelete()
+              }}>
+                <Trash2 className="w-3 h-3 text-destructive" />
+              </Button>
+            )}
+          </div>
+          {description && (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          )}
+          {children}
+        </div>
       </div>
-      {description && (
-        <p className="text-xs text-muted-foreground">{description}</p>
-      )}
-      {children}
     </div>
   ),
 )

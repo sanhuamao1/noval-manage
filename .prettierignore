@@ -1,0 +1,14 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.git/
+.gitignore
+*.md
+*.mdx
+prisma/
+public/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

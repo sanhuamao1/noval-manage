@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import type { LucideIcon } from "lucide-react"
+import { Plus, type LucideIcon } from "lucide-react"
 
 // ── Context ──────────────────────────────────────────
 
@@ -43,7 +43,7 @@ function Tabs({ defaultValue, className, children }: TabsProps) {
     <TabsContext.Provider value={{ active, setActive }}>
       <div className={cn("rounded-xl", className)}>
         {tabsList}
-        <div className="p-6 bg-bg-700 rounded-b-xl border border-border-subtle">
+        <div className="p-6 bg-bg-700 rounded-b-xl border border-border-subtle relative">
           {contentChildren}
         </div>
       </div>
@@ -103,29 +103,28 @@ TabsTrigger.displayName = "TabsTrigger"
 
 interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string
-  actionIcon?: LucideIcon
-  onAction?: () => void
+  onAdd?: () => void
 }
 
 const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
-  ({ className, value, actionIcon: ActionIcon, onAction, children, ...props }, ref) => {
+  ({ className, value, onAdd, children, ...props }, ref) => {
     const { active } = useTabs()
     if (active !== value) return null
 
     return (
       <div
         ref={ref}
-        className={cn("relative", className)}
+        className={className}
         {...props}
       >
-        {onAction && (
+        {onAdd && (
           <Button
             variant="outline"
             size="icon"
-            className="absolute -top-0 -left-14 w-8 h-8 bg-bg-700 border-border-subtle border-r-0 rounded-r-none"
-            onClick={onAction}
+            className="absolute -top-8 -right-0 w-8 h-8 bg-bg-700 border-border-subtle border-b-0 rounded-b-none"
+            onClick={onAdd}
           >
-            {ActionIcon && <ActionIcon className="w-4 h-4" />}
+            <Plus className="w-4 h-4" />
           </Button>
         )}
         {children}
@@ -135,4 +134,43 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
 )
 TabsContent.displayName = "TabsContent"
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent, SimpleTabs }
+
+// ── SimpleTabs ─────────────────────────────────────────
+
+interface SimpleTab {
+  key: string
+  label: string
+}
+
+interface SimpleTabsProps {
+  tabs: SimpleTab[]
+  value: string
+  onChange: (key: string) => void
+  counts?: Record<string, number>
+  className?: string
+}
+
+function SimpleTabs({ tabs, value, onChange, counts, className }: SimpleTabsProps) {
+  return (
+    <div className={cn("flex gap-1 bg-muted rounded-lg p-1", className)}>
+      {tabs.map((tab) => (
+        <button
+          key={tab.key}
+          onClick={() => onChange(tab.key)}
+          className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${
+            value === tab.key
+              ? "bg-background text-foreground font-medium shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {tab.label}
+          {counts && counts[tab.key] !== undefined && (
+            <span className="ml-1">({counts[tab.key]})</span>
+          )}
+        </button>
+      ))}
+    </div>
+  )
+}
+SimpleTabs.displayName = "SimpleTabs"

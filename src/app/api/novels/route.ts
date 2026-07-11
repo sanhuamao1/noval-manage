@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-function parseGenres(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : [parsed]
-  } catch {
-    return [raw]
-  }
+/** 计算章节内容字数 */
+function calculateWordCount(chapters: { content: string }[]): number {
+  return chapters.reduce((count, chapter) => {
+    return count + chapter.content.length
+  }, 0)
 }
 
 export async function GET(req: NextRequest) {
@@ -18,23 +16,43 @@ export async function GET(req: NextRequest) {
     const novel = await prisma.novel.findUnique({
       where: { id },
       include: {
+        chapters: {
+          select: { content: true },
+        },
         _count: {
           select: { chapters: true, characters: true },
         },
       },
     })
-    return NextResponse.json(novel ? { ...novel, genre: parseGenres(novel.genre) } : novel)
+    if (novel) {
+      // 添加 wordCount 字段
+      const novelWithWordCount = {
+        ...novel,
+        wordCount: calculateWordCount(novel.chapters),
+        chapters: undefined, // 移除原始 chapters 数据
+      }
+      return NextResponse.json(novelWithWordCount)
+    }
+    return NextResponse.json(novel, { status: 404 })
   }
 
   const novels = await prisma.novel.findMany({
     include: {
+      chapters: {
+        select: { content: true },
+      },
       _count: {
         select: { chapters: true, characters: true },
       },
     },
     orderBy: { updatedAt: 'desc' },
   })
-  return NextResponse.json(novels.map((n) => ({ ...n, genre: parseGenres(n.genre) })))
+  // 为每个作品添加 wordCount
+  const novelsWithWordCount = novels.map(({ chapters, ...novel }) => ({
+    ...novel,
+    wordCount: calculateWordCount(chapters),
+  }))
+  return NextResponse.json(novelsWithWordCount)
 }
 
 export async function POST(req: NextRequest) {
@@ -42,7 +60,7 @@ export async function POST(req: NextRequest) {
   const novel = await prisma.novel.create({
     data: { title, description },
   })
-  return NextResponse.json({ ...novel, genre: parseGenres(novel.genre) })
+  return NextResponse.json(novel)
 }
 
 export async function DELETE(req: NextRequest) {

@@ -1,18 +1,106 @@
 // ─── 类型定义 ───
+export type OptionColor = "primary" | "success" | "warn" | "default"
 
 export interface ConfigOption {
   value: string
-  /** AI-readable meta（可选，无 meta 则直接用 value） */
-  meta?: string
+  /** Lucide icon 名称（可选） */
+  icon?: string
+  /** 选项颜色（可选） */
+  color?: OptionColor
+  /** 选项说明文案（可选，无 description 则直接用 value） */
+  description?: string
+}
+
+export interface ListSubField {
+  /** 输入框占位文本 */
+  placeholder: string
+  /** Tailwind 宽度类，如 "w-1/3"、"flex-1"（可选，默认 "flex-1"） */
+  width?: string
 }
 
 export interface ConfigFieldDef<K extends string = string> {
   key: K
   label: string
-  section: string
-  type: "single" | "multi" | "toggle"
-  options?: ConfigOption[]
+  type: "single" | "multi" | "toggle" | "list" | "text"
+  options?: readonly ConfigOption[]
   max?: number
+  display?: "default" | "flex" | "grid" | "between"
+  handler?: string
+  /** display="grid" 时的列数，默认 3 */
+  cols?: number
+  /** 字段图标（lucide 组件名），在 tabs 中显示在 tab trigger 上 */
+  icon?: string
+  /** type="text" 时输入框的占位文本 */
+  placeholder?: string
+  /** type="list" 时的子字段定义 */
+  subFields?: ListSubField[]
+  /** 自定义 Tailwind 类名，会附加到 FormItem 的外层 div 上 */
+  className?: string
+  /** 不显示 label，优先级高于 renderField 的 noLabel 参数 */
+  noLabel?: boolean
+  /** 控件变体，如 "box"（multi/single 类型适用） */
+  variant?: string
+}
+
+export interface TabGroup<K extends string = string> {
+  key: K
+  label: string
+  icon?: string
+  type: "tab-group"
+  children: ConfigFieldDef[]
+  /** 该 tab 内容区域的自定义 Tailwind 类名 */
+  class?: string
+}
+
+export interface SectionBase {
+  title: string
+  icon?: string
+  class?: string
+  children: (ConfigFieldDef | TabGroup)[]
+  /** 在 grid 布局中跨越的列数，默认 1 */
+  colspan?: number
+  /** 从 config 中取值的 key，用于动态标题（如使用角色姓名作为卡片标题） */
+  titleKey?: string
+  /** 标题是否可编辑（需配合 titleKey 使用） */
+  titleEditable?: boolean
+}
+
+export interface CardSection extends SectionBase {
+  type: "card"
+}
+
+export interface TabsSection extends SectionBase {
+  type: "tabs"
+}
+
+export interface GridSection {
+  type: "grid"
+  cols: number
+  class?: string
+  sections: ConfigSection[]
+  /** 在 grid 布局中跨越的列数，默认 1 */
+  colspan?: number
+}
+
+export type ConfigSection = CardSection | TabsSection | GridSection
+
+/** 递归展开 sections 中的所有字段定义 */
+export function flattenFields(sections: ConfigSection[]): ConfigFieldDef[] {
+  const result: ConfigFieldDef[] = []
+  for (const section of sections) {
+    if (section.type === "grid") {
+      result.push(...flattenFields(section.sections))
+    } else {
+      for (const child of section.children) {
+        if (child.type === "tab-group") {
+          result.push(...child.children)
+        } else {
+          result.push(child)
+        }
+      }
+    }
+  }
+  return result
 }
 
 // ─── 类型推导 ───
@@ -22,11 +110,13 @@ interface TypeValueMap {
   toggle: boolean
   multi: string[]
   single: string | undefined
+  list: string[]
+  text: string | undefined
 }
 
 /** 从字段定义数组推导配置对象类型 */
 export type ConfigOf<
-  T extends readonly { key: string; type: "single" | "multi" | "toggle" }[],
+  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" }[],
 > = {
   [K in T[number] as K["key"]]: TypeValueMap[K["type"]]
 }
@@ -35,16 +125,16 @@ export type ConfigOf<
 
 /**
  * 根据字段定义列表生成默认值对象。
- * toggle → false, multi → [], single → undefined
+ * toggle → false, multi → [], list → [], single → undefined, text → undefined
  */
 export function buildDefaultValues<
-  T extends readonly { key: string; type: "single" | "multi" | "toggle" }[],
+  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" }[],
 >(fields: T): ConfigOf<T> & { prompt?: string } {
   const result: Record<string, unknown> = {}
   for (const field of fields) {
     if (field.type === "toggle") {
       result[field.key] = false
-    } else if (field.type === "multi") {
+    } else if (field.type === "multi" || field.type === "list") {
       result[field.key] = []
     } else {
       result[field.key] = undefined
@@ -67,29 +157,3 @@ export function parseConfig<T extends Record<string, unknown>>(
   }
 }
 
-/** 从字段定义数组生成 key → label 映射 */
-export function buildLabelMap(
-  fields: readonly { key: string; label: string }[],
-): Record<string, string> {
-  return Object.fromEntries(fields.map((f) => [f.key, f.label]))
-}
-
-/** 根据运行时值类型生成摘要文本数组（通用，不依赖 type 字段） */
-export function buildBadgeTexts(
-  config: Record<string, unknown>,
-  labels: Record<string, string>,
-): string[] {
-  const badges: string[] = []
-  for (const [key, value] of Object.entries(config)) {
-    const label = labels[key]
-    if (!label) continue
-    if (typeof value === "boolean") {
-      if (value) badges.push(label)
-    } else if (typeof value === "string") {
-      if (value) badges.push(`${label}：${value}`)
-    } else if (Array.isArray(value)) {
-      if (value.length > 0) badges.push(`${label}：${value.join("/")}`)
-    }
-  }
-  return badges
-}

@@ -3,7 +3,8 @@ import { prisma } from '@/lib/db'
 
 export async function GET() {
   const rules = await prisma.polishRule.findMany({
-    orderBy: { createdAt: 'desc' },
+    where: { type: "base" },
+    orderBy: { createdAt: "desc" },
   })
   return NextResponse.json(rules)
 }
@@ -14,8 +15,9 @@ export async function POST(req: NextRequest) {
     data: {
       name,
       description,
-      prompt: prompt || '',
-      config: config || '{}',
+      prompt: prompt || "",
+      config: config || "{}",
+      type: "base",
     },
   })
   return NextResponse.json(rule)

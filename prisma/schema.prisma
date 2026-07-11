@@ -11,8 +11,7 @@ model Novel {
   id          String            @id @default(cuid())
   title       String
   description String?
-  genre       String            @default("[\"玄幻\"]")
-  status      String            @default("连载中")
+  config      String            @default("{\"genre\":[\"玄幻\"],\"status\":\"连载中\"}")
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   chapters    Chapter[]
@@ -40,10 +39,7 @@ model Character {
   novelId          String
   novel            Novel              @relation(fields: [novelId], references: [id], onDelete: Cascade)
   name             String
-  gender           String?            // 男 / 女
-  age              String?            // XX岁
-  identity         String?            // 身份/职业/组织归属
-  traits           String?            // JSON - 包含所有特征数据
+  config           String             @default("{}")     // JSON - 包含所有角色特征数据
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   characterEmotions CharacterEmotion[]
@@ -55,7 +51,7 @@ model PolishRule {
   description String?
   prompt      String
   config      String   @default("{}")
-  type        String   @default("polish")  // polish: 润色, continue: 续写, expand: 扩写
+  type        String   @default("base")  // base: 基础规则, sample: 文风示例
   createdAt   DateTime @default(now())
 }
 

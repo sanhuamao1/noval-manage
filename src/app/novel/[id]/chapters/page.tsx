@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Button, AddButton } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { NoBorderInput } from "@/components/ui/no-border-input";
 import {
     Trash2,
     Save,
@@ -23,6 +23,7 @@ import { ChapterEditor } from "@/components/chapters/ChapterEditor";
 import { SelectionMenu } from "@/components/polish/SelectionMenu";
 import { PolishResultPopover } from "@/components/polish/PolishResultPopover";
 import { PolishPanel } from "@/components/polish/PolishPanel";
+import { SimpleTabs } from "@/components/tabs";
 
 interface Chapter {
     id: string;
@@ -209,32 +210,16 @@ export default function ChaptersPage() {
                         <AddButton onClick={createChapter} />
                     </div>
 
-                    <div className="flex gap-1 mb-3 bg-muted rounded-lg p-1">
-                        {filterTabs.map((tab) => (
-                            <button
-                                key={tab.key}
-                                onClick={() => setFilter(tab.key)}
-                                className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${
-                                    filter === tab.key
-                                        ? "bg-background text-foreground font-medium shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground"
-                                }`}
-                            >
-                                {tab.label}
-                                {tab.key !== "all" && (
-                                    <span className="ml-1">
-                                        (
-                                        {
-                                            chapters.filter(
-                                                (ch) => ch.status === tab.key,
-                                            ).length
-                                        }
-                                        )
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
+                    <SimpleTabs
+                        tabs={filterTabs}
+                        value={filter}
+                        onChange={(k) => setFilter(k as FilterTab)}
+                        counts={{
+                            published: chapters.filter((ch) => ch.status === "published").length,
+                            draft: chapters.filter((ch) => ch.status === "draft").length,
+                        }}
+                        className="mb-3"
+                    />
 
                     {/* 排序栏 */}
                     <div className="flex items-center mb-2 px-1 text-xs text-muted-foreground">
@@ -326,13 +311,13 @@ export default function ChaptersPage() {
                         <>
                             <div className="border-b p-4">
                                 <div className="flex items-center gap-4">
-                                    <Input
+                                    <NoBorderInput
                                         ref={titleInputRef}
                                         value={editTitle}
                                         onChange={(e) =>
                                             setEditTitle(e.target.value)
                                         }
-                                        className="text-lg font-semibold border-none px-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-transparent focus:outline-none"
+                                        className="text-lg"
                                         placeholder="章节标题"
                                     />
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground flex-shrink-0">

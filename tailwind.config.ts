@@ -5,6 +5,7 @@ const config: Config = {
     './src/pages/**/*.{ts,tsx}',
     './src/components/**/*.{ts,tsx}',
     './src/app/**/*.{ts,tsx}',
+    './src/lib/**/*.{ts,tsx}',
   ],
   prefix: "",
   theme: {
@@ -107,6 +108,9 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      spacing: {
+        18: "4.5rem",
       },
       radius: {
         lg: "var(--radius)",
