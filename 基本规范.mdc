@@ -1,0 +1,77 @@
+---
+description: 
+globs:
+alwaysApply: false
+---
+
+# 项目规范
+
+## API 调用
+
+统一用 `@/lib/api`，禁止裸写 `fetch`。
+
+```typescript
+import { api } from "@/lib/api";
+
+// GET
+const data = await api<T[]>({ url: "/api/xxx" });
+
+// POST / PUT / PATCH / DELETE
+await api({ url: "/api/xxx", method: "POST", data: { name: "xx" } });
+```
+
+- `data` 直接传对象
+
+## 数据存储
+
+YAML 文件体系，统一用 `@/lib/store`：
+
+```typescript
+import { get, put, remove, list, genId, nextSortOrder } from "@/lib/store";
+
+// data/novels/{novelId}/chapters/{id}.yml
+put("chapter", id, { title: "xx", content: "xx" }, novelId);
+```
+
+## UI 组件
+
+写组件前先检索 `src/components/ui/` 是否有可复用的：
+导入时直接从入口文件导入，不要写多行
+
+| 组件 | 用途 |
+|---|---|
+| `Button` / `AddButton` | 按钮 |
+| `NoBorderInput` | 无边框输入框 |
+| `SimpleCard` / `CardList` | 卡片列表 |
+| `PageLayout` | 页面布局 |
+| `SlidingDrawer` | 右侧抽屉 |
+| `Popover` | 弹窗 |
+| `SimpleTabs` | 标签切换 |
+| `TagSelect` | 标签选择器（可搜索/创建） |
+
+## 表单
+
+声明式配置体系，禁止手写表单项：
+
+```typescript
+import { renderSections } from "@/lib/configs/render-utils";
+// 配置文件在 @configs/xxx.yml @/lib/configs/*-defs.ts
+```
+
+## 页面模式
+
+列表+编辑抽屉：`PageLayout` + `SlidingDrawer`
+
+```tsx
+<PageLayout
+  title="标题"
+  handler={<AddButton onClick={startCreate} />}
+  drawer={<SlidingDrawer open={mode !== null} ... />}
+>
+  <CardList>{/* 卡片列表 */}</CardList>
+</PageLayout>
+```
+
+## 状态
+
+React 组件局部 `useState`；跨组件共享用 Zustand `@/stores/useAppStore`。
