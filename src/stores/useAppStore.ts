@@ -15,7 +15,7 @@ interface AppStore {
   setOutlines: (os: Record<string, unknown>[]) => void;
 
   // 实体变更 action（内部处理 API + store）
-  updateNovel: (novelId: string, data: Record<string, unknown>) => Promise<void>;
+  updateNovel: (novelId: string, data: Record<string, any>) => Promise<void>;
   createCharacter: (novelId: string, name: string) => Promise<{ id: string; name: string }>;
   createLocation: (novelId: string, name: string) => Promise<{ id: string; name: string }>;
   createForeshadowing: (novelId: string, name: string) => Promise<{ id: string; name: string }>;

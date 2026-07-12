@@ -3,7 +3,6 @@ node_modules/
 .pnp
 .pnp.js
 .agents
-.claude
 .codebuddy
 
 # 构建输出

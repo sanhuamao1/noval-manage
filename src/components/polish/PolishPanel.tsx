@@ -1,33 +1,11 @@
 import { useState } from "react";
 import { Sparkles, Check } from "lucide-react";
 import { SimpleCard, Button, SimpleTabs, SlidingDrawer } from "@/components/ui";
+import { ConfigBadges } from "@/components/ui/config-badges";
 import { usePolishContext } from "./PolishContext";
-import { fillConfig, ConfigEntity } from "@/lib/configs/config-registry";
-import type { PolishRule, PolishSample } from "@/types/polish";
-
-/** 生成简短的配置摘要 */
-function ConfigSummary(raw: PolishRule) {
-  // 从注册表获取字段定义和默认值，只填充合法字段
-  const cfg = fillConfig(ConfigEntity.POLISH_RULE, raw as unknown as Record<string, unknown>) as unknown as PolishRule
-  const parts: string[] = [];
-
-  if (cfg.pace) parts.push(`节奏：${cfg.pace}`);
-  const moodArr = cfg.mood ?? [];
-  if (moodArr.length > 0) parts.push(`氛围：${moodArr.join("/")}`);
-  const sensesArr = cfg.senses ?? [];
-  if (sensesArr.length > 0) parts.push(sensesArr.join("/"));
-  const charArr = cfg.character ?? [];
-  if (charArr.length > 0) parts.push(charArr.join("/"));
-  if (cfg.rhetoric) parts.push(cfg.rhetoric);
-
-  if (parts.length === 0) return null;
-
-  return (
-    <div className="mt-1 line-clamp-1 text-[10px] text-muted-foreground/70">
-      {parts.join(" | ")}
-    </div>
-  );
-}
+import { fillConfig } from "@/lib/configs/config-utils";
+import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
+import type { PolishRuleConfig } from "@/lib/configs/generated";
 
 const TABS = [{ id: "polish", label: "润色", icon: Sparkles }];
 
@@ -114,19 +92,32 @@ export function PolishPanel() {
             {rules.length === 0 ? (
               <p className="text-sm text-muted-foreground">暂无润色规则</p>
             ) : (
-              rules.map((rule) => (
-                <div key={rule.id} className={polishing ? "pointer-events-none opacity-60" : ""}>
-                  <SimpleCard
-                    title={rule.name}
-                    description={rule.description}
-                    selected={selectedRuleId === rule.id && !polishing}
-                    onClick={polishing ? undefined : () => executePolish(rule.id)}
-                  >
-                    {ConfigSummary(rule)}
-                  </SimpleCard>
-                </div>
-              ))
-            )}
+              rules.map((rule) => {
+                  const { fields, defaults } = getEntry(ConfigEntity.POLISH_RULE)
+                  const cfg = fillConfig(rule, defaults, fields)
+                  return (
+                    <div key={rule.id} className={polishing ? "pointer-events-none opacity-60" : ""}>
+                      <SimpleCard
+                        title={rule.name}
+                        description={rule.description}
+                        selected={selectedRuleId === rule.id && !polishing}
+                        onClick={polishing ? undefined : () => executePolish(rule.id)}
+                      >
+                        <ConfigBadges<PolishRuleConfig>
+                          config={cfg}
+                          items={[
+                            ["情绪/氛围", "mood"],
+                            ["叙事手法", "narrative"],
+                            ["五感", "senses"],
+                            ["人物描写", "character"],
+                            ["环境描写", "environment"],
+                          ]}
+                        />
+                      </SimpleCard>
+                    </div>
+                  )
+                }
+            ))}
           </div>
         )}
 
@@ -140,7 +131,8 @@ export function PolishPanel() {
                   选择 1-3 个样本作为风格参考{selectedSampleIds.length > 0 ? `（已选 ${selectedSampleIds.length} 个）` : ""}
                 </p>
                 {samples.map((sample) => {
-                  const cfg = fillConfig(ConfigEntity.POLISH_SAMPLE, sample as unknown as Record<string, unknown>) as unknown as PolishSample
+                  const { fields, defaults } = getEntry(ConfigEntity.POLISH_SAMPLE)
+                  const cfg = fillConfig(sample, defaults, fields)
                   const isSelected = selectedSampleIds.includes(sample.id)
                   const isNegative = !!cfg.isNegative
                   const sceneType = cfg.sceneType || ""

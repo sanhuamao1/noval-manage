@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { AddButton, SlidingDrawer, PageLayout, CardList, SimpleCard } from "@/components/ui";
-import { renderSections, ConfigBadges, buildConfigTags } from "@/lib/configs/render-utils";
-import { getEntry, fillConfig, ConfigEntity } from "@/lib/configs/config-registry";
+import { renderSections } from "@/lib/configs/render-utils";
+import { ConfigBadges } from "@/components/ui/config-badges";
+import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
+import { fillConfig } from "@/lib/configs/config-utils";
 import type { CharacterConfig } from "@/lib/configs/generated";
 import { api } from "@/lib/api";
 
@@ -20,8 +22,8 @@ export default function CharactersPage() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [mode, setMode] = useState<"create" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const { sections: charSections, defaults: charDefaults } = getEntry(ConfigEntity.CHARACTER);
-  const [editorConfig, setEditorConfig] = useState<CharacterConfig>(charDefaults);
+  const { fields, sections, defaults } = getEntry(ConfigEntity.CHARACTER);
+  const [editorConfig, setEditorConfig] = useState<CharacterConfig>(defaults);
 
   useEffect(() => {
     fetchCharacters();
@@ -35,20 +37,20 @@ export default function CharactersPage() {
   function openForEdit(char: Character) {
     setMode("edit");
     setEditingId(char.id);
-    setEditorConfig(fillConfig(ConfigEntity.CHARACTER, char as Record<string, unknown>));
+    setEditorConfig(fillConfig(char, defaults, fields));
   }
 
   function startCreate() {
     setMode("create");
     setEditingId(null);
-    setEditorConfig(charDefaults as CharacterConfig);
+    setEditorConfig(defaults as CharacterConfig);
   }
 
   async function saveCharacter() {
     const name = String(editorConfig.name ?? "").trim();
     if (!name) return;
 
-    const { id: _, novelId: __, createdAt: ___, updatedAt: ____, ...config } = editorConfig as any;
+    const { id, novelId, createdAt, updatedAt, ...config } = editorConfig as any;
 
     if (mode === "create") {
       await api({
@@ -95,14 +97,14 @@ export default function CharactersPage() {
           onUpdate={mode === "edit" ? saveCharacter : undefined}
         >
           <div className="space-y-4">
-            {renderSections(charSections, editorConfig, (c) => setEditorConfig(c))}
+            {renderSections(sections, editorConfig, (c) => setEditorConfig(c))}
           </div>
         </SlidingDrawer>
       }
     >
       <CardList emptyText="还没有人物，点击上方按钮添加">
         {characters.map((char) => {
-          const cfg = fillConfig(ConfigEntity.CHARACTER, char as Record<string, unknown>);
+          const cfg = fillConfig(char, defaults, fields);
           return (
             <SimpleCard
               key={char.id}
@@ -112,13 +114,14 @@ export default function CharactersPage() {
               onDelete={() => deleteCharacter(char.id)}
             >
               <ConfigBadges
-                tags={buildConfigTags(cfg, [
+                config={cfg}
+                items={[
                   ["性别", "gender"],
                   ["年龄", "age"],
                   ["身份", "identity"],
                   ["叙事功能", "narrativeFunction"],
                   ["内在动机", "innerMotivation"],
-                ])}
+                ]}
               />
             </SimpleCard>
           );

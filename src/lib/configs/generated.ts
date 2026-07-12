@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-12T15:12:24.273Z，勿手动编辑
+// 自动生成于 2026-07-12T17:11:53.715Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import type { ConfigSection, ConfigFieldDef, ConfigOption } from "./config-utils";

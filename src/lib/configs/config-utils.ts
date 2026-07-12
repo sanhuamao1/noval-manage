@@ -4,8 +4,9 @@ import type { ColorName } from "../colors"
 /** 配置项颜色，等价于 ColorName */
 export type OptionColor = ColorName
 
-/** 运行时配置数据，替代散布各处的 Record<string, unknown> */
-export type ConfigData = Record<string, unknown>
+/** 运行时配置数据 */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ConfigData = Record<string, any>
 
 export interface ConfigOption {
   value: string
@@ -212,18 +213,19 @@ export function serializeArrayFields(
 }
 
 /** 以 defaults 为底，只取 fields 中定义的 key 从 data 覆盖。自动解析数组字段。 */
-export function fillConfigFrom(
+export function fillConfig<T extends ConfigData>(
   data: ConfigData,
-  defaults: ConfigData,
+  defaults: T,
   fields: readonly { key: string; type: string }[],
-): ConfigData {
-  const result = { ...defaults }
+): T {
+  const result: ConfigData = { ...defaults }
   const parsed = parseArrayFields(data, fields)
   for (const field of fields) {
     if (field.key in parsed) {
       result[field.key] = parsed[field.key]
     }
   }
-  return result
+  return result as T
 }
+
 

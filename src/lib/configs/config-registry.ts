@@ -1,8 +1,8 @@
 import { CONFIGS, ConfigEntity } from "./generated";
 export { ConfigEntity } from "./generated";
 import type { EntityConfigMap } from "./generated";
-import { buildDefaultValues, fillConfigFrom, flattenFields } from "./config-utils";
-import type { ConfigFieldDef, ConfigSection, ConfigData } from "./config-utils";
+import { buildDefaultValues, flattenFields } from "./config-utils";
+import type { ConfigFieldDef, ConfigSection } from "./config-utils";
 
 // ── 注册表 ──
 
@@ -13,9 +13,9 @@ interface ConfigEntry<T> {
   defaults: T;
 }
 
-const registry = new Map<ConfigEntity, ConfigEntry<ConfigData>>();
+const registry = new Map<ConfigEntity, ConfigEntry<any>>();
 
-function buildEntry(key: ConfigEntity): ConfigEntry<ConfigData> {
+function buildEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap[K]> {
   const config = CONFIGS[key];
   if (!config) throw new Error(`Unknown config entity: "${String(key)}"`);
   return {
@@ -28,7 +28,8 @@ function buildEntry(key: ConfigEntity): ConfigEntry<ConfigData> {
 
 /** 获取实体完整配置（字段定义 + sections + 默认值） */
 export function getEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap[K]> {
-  return (registry.get(key) ?? buildEntry(key)) as ConfigEntry<EntityConfigMap[K]>
+  if (!registry.has(key)) registry.set(key, buildEntry(key));
+  return registry.get(key)!;
 }
 
 /** 获取实体默认配置值 */
@@ -46,11 +47,6 @@ export function getSections(key: ConfigEntity): ConfigSection[] {
   return getEntry(key).sections;
 }
 
-/** 将外部数据填充到默认值上，只保留合法字段 */
-export function fillConfig<K extends ConfigEntity>(key: K, data: ConfigData): EntityConfigMap[K] {
-  const { fields, defaults } = getEntry(key);
-  return fillConfigFrom(data, defaults as ConfigData, fields) as EntityConfigMap[K];
-}
 
 // ── AI 指令生成 ──
 
@@ -66,7 +62,7 @@ export function buildConfigInstructions(config: PolishRuleConfig): string {
   for (const field of flattenFields(getEntry(ConfigEntity.POLISH_RULE).sections)) {
     if (sampleKeySet.has(field.key)) continue;
 
-    const value = (config as ConfigData)[field.key];
+    const value = (config as Record<string, unknown>)[field.key];
     if (field.type === "toggle") {
       if (value) lines.push(`${field.label}：开启`);
     } else if (field.type === "single" && value) {

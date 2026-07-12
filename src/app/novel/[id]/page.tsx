@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Button, SlidingDrawer, PageLayout } from "@/components/ui";
 import { Edit3 } from "lucide-react";
-import { getEntry, fillConfig, ConfigEntity } from "@/lib/configs/config-registry";
+import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
+import { fillConfig } from "@/lib/configs/config-utils";
 import type { NovelConfig } from "@/lib/configs/generated";
 import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
@@ -16,21 +17,21 @@ export default function NovelOverview() {
   const id = params.id as string;
   const novel = useAppStore((s) => s.novel);
   const updateNovel = useAppStore((s) => s.updateNovel);
-  const { sections, defaults } = getEntry(ConfigEntity.NOVEL);
+  const { fields, sections, defaults } = getEntry(ConfigEntity.NOVEL);
   const [editorConfig, setEditorConfig] = useState<NovelConfig>(defaults);
 
   const drawer = useDrawer();
 
   useEffect(() => {
     if (novel) {
-      setEditorConfig(fillConfig(ConfigEntity.NOVEL, novel as unknown as Record<string, unknown>));
+      setEditorConfig(fillConfig(novel, defaults, fields));
     }
   }, [novel]);
 
   async function handleSave() {
     const title = String(editorConfig.title ?? "").trim();
     if (!title) return;
-    await updateNovel(id, editorConfig as Record<string, unknown>);
+    await updateNovel(id, editorConfig);
     drawer.close();
   }
 

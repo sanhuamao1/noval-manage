@@ -26,25 +26,6 @@ import * as LucideIcons from "lucide-react";
 import type { ReactNode } from "react";
 import { TagSelect } from "@/components/outline/TagSelect";
 
-/** 从配置对象中提取标签文本数组 */
-export function buildConfigTags<T>(
-    config: T,
-    items: readonly [string, string & keyof T][],
-): string[] {
-    const tags: string[] = [];
-    for (const [label, key] of items) {
-        const value = config[key];
-        if (typeof value === "boolean") {
-            if (value) tags.push(label);
-        } else if (typeof value === "string") {
-            if (value) tags.push(`${label}：${value}`);
-        } else if (Array.isArray(value)) {
-            if (value.length > 0) tags.push(`${label}：${value.filter(Boolean).join("/")}`);
-        }
-    }
-    return tags;
-}
-
 /** 将 icon 名称字符串映射到 LucideIcon */
 export function resolveIcon(name: string | undefined): LucideIcon | undefined {
     if (!name) return undefined;
@@ -59,7 +40,7 @@ function toRadioOption(opt: ConfigOption) {
 }
 
 /** 渲染单个配置字段 */
-export function renderField<T>(
+export function renderField<T extends Record<string, any>>(
     field: ConfigFieldDef,
     config: T,
     onChange: (c: T) => void,
@@ -218,7 +199,7 @@ export function renderField<T>(
 }
 
 /** 渲染配置 sections */
-export function renderSections<T>(
+export function renderSections<T extends Record<string, any>>(
     sections: ConfigSection[],
     config: T,
     onChange: (c: T) => void,
@@ -333,20 +314,4 @@ export function renderSections<T>(
     });
 }
 
-/** 将配置对象的指定字段渲染为摘要标签 */
-export function ConfigBadges({ tags }: { tags: string[] }) {
-    if (tags.length === 0) return null;
 
-    return (
-        <div className="flex flex-wrap gap-1 mt-1.5">
-            {tags.map((t) => (
-                <span
-                    key={t}
-                    className="inline-block px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground"
-                >
-                    {t}
-                </span>
-            ))}
-        </div>
-    );
-}

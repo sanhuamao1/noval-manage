@@ -1,6 +1,7 @@
 export * from "./button";
 export * from "./card";
 export * from "./card-list";
+export * from "./config-badges";
 export * from "./drawer";
 export * from "./form-item";
 export * from "./input";

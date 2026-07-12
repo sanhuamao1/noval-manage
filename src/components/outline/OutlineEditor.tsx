@@ -7,18 +7,18 @@ import { Plus, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 
 export interface OutlineEditorHandle {
-  getData: () => { config: Record<string, unknown> };
+  getData: () => { config: Record<string, any> };
 }
 
 interface OutlineEditorProps {
   novelId: string;
   outlineId?: string | null;
-  initialConfig: Record<string, unknown>;
+  initialConfig: Record<string, any>;
 }
 
 export const OutlineEditor = forwardRef<OutlineEditorHandle, OutlineEditorProps>(
   function OutlineEditor({ novelId, outlineId, initialConfig }, ref) {
-    const [config, setConfig] = useState<Record<string, unknown>>(initialConfig);
+    const [config, setConfig] = useState<Record<string, any>>(initialConfig);
     const [keyEvents, setKeyEvents] = useState<{ id: string; title: string }[]>([]);
     const [newKeTitle, setNewKeTitle] = useState("");
 

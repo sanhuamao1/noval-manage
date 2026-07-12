@@ -1,5 +1,5 @@
-import { buildConfigInstructions, fillConfig, ConfigEntity } from "@/lib/configs/config-registry"
-import type { PolishRuleConfig } from "@/lib/configs/generated"
+import { buildConfigInstructions, ConfigEntity, getEntry } from "@/lib/configs/config-registry"
+import { fillConfig } from "@/lib/configs/config-utils"
 
 export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {
   const url = process.env.AI_BASE_URL || ""
@@ -81,7 +81,8 @@ export function buildPolishPrompt(
   }
 
   // 从注册表获取字段定义和默认值，只填充合法字段
-  const config = fillConfig(ConfigEntity.POLISH_RULE, rule as Record<string, unknown>) as PolishRuleConfig
+  const { fields, defaults } = getEntry(ConfigEntity.POLISH_RULE)
+  const config = fillConfig(rule, defaults, fields)
   const section = buildConfigInstructions(config)
   if (section.trim()) {
     parts.push(`\n${section}`)

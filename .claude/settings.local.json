@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(*)",
+      "Read(configs/src/script/**)",
+      "Write(configs/src/script/**)",
+      "Edit(configs/src/script/**)",
+      "Glob(configs/src/script/**)",
+      "Grep(configs/src/script/**)",
+      "Read(tailwind.config.ts)",
+      "Write(tailwind.config.ts)",
+      "Edit(tailwind.config.ts)",
+      "Glob(tailwind.config.ts)",
+      "Grep(tailwind.config.ts)",
+      "Read(.claude/settings.local.json)",
+      "Write(.claude/settings.local.json)",
+      "Read(CLAUDE.md)",
+      "Read(.claude/rules/**)"
+    ]
+  }
+}
