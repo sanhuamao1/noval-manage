@@ -1,117 +1,130 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { AddButton } from "@/components/ui/button"
-import { Sparkles, Tag, EyeOff } from "lucide-react"
-import { SlidingDrawer } from "@/components/ui/drawer"
-import { PageLayout } from "@/components/PageLayout"
-import { PolishRuleEditor, type PolishRuleEditorHandle } from "@/components/polish/PolishRuleEditor"
-import { SampleEditor, type SampleEditorHandle } from "@/components/polish/SampleEditor"
-import { SimpleCard } from "@/components/ui/card"
-import { CardList } from "@/components/CardList"
-import { DEFAULT_POLISH_CONFIG, DEFAULT_SAMPLE_CONFIG } from "@/lib/configs/polish-defs"
-import { parseConfig } from "@/lib/configs/config-utils"
-import { ConfigBadges } from "@/lib/configs/render-utils"
-import { buildConfigTags } from "@/lib/configs/render-utils"
-
-interface PolishRule {
-  id: string
-  name: string
-  description: string | null
-  prompt: string
-  config: string | null
-  type: string
-  useCount: number
-}
+import { useState, useEffect } from "react"
+import { AddButton, SlidingDrawer, PageLayout, SimpleCard, CardList, Tag } from "@/components/ui"
+import { Sparkles, EyeOff } from "lucide-react"
+import { renderSections, ConfigBadges, buildConfigTags, resolveIcon } from "@/lib/configs/render-utils"
+import { findOptionInConfig, PolishRuleConfig } from "@/lib/configs/generated"
+import type { OptionColor } from "@/lib/configs/config-utils"
+import { getEntry, fillConfig, ConfigEntity } from "@/lib/configs/config-registry"
+import type { PolishRule, PolishSample } from "@/types/polish"
+import { api } from "@/lib/api"
 
 export default function PolishPage() {
-  const [allRules, setAllRules] = useState<PolishRule[]>([])
+  const [rules, setRules] = useState<PolishRule[]>([])
+  const [samples, setSamples] = useState<PolishSample[]>([])
   const [mode, setMode] = useState<"create" | "edit" | null>(null)
   const [editingType, setEditingType] = useState<"rule" | "sample">("rule")
   const [editingId, setEditingId] = useState<string | null>(null)
-  const ruleEditorRef = useRef<PolishRuleEditorHandle>(null)
-  const sampleEditorRef = useRef<SampleEditorHandle>(null)
+  const [editorConfig, setEditorConfig] = useState<Record<string, unknown>>({})
+
+  const { sections: ruleSections, defaults: ruleDefaults } = getEntry(ConfigEntity.POLISH_RULE)
+  const { sections: sampleSections, defaults: sampleDefaults } = getEntry(ConfigEntity.POLISH_SAMPLE)
 
   useEffect(() => {
     fetchAll()
   }, [])
 
   async function fetchAll() {
-    const res = await fetch("/api/polish/rules")
-    const data = await res.json()
-    setAllRules(data)
+    const [rulesData, samplesData] = await Promise.all([
+      api<PolishRule[]>({ url: "/api/polish/rules" }),
+      api<PolishSample[]>({ url: "/api/polish/samples" }),
+    ])
+    setRules(rulesData)
+    setSamples(samplesData)
   }
 
-  const rules = allRules.filter((r) => r.type === "base")
-  const samples = allRules.filter((r) => r.type === "sample")
-
-  function openForEdit(type: "rule" | "sample", item: PolishRule) {
+  function openForEdit(type: "rule" | "sample", item: PolishRule | PolishSample) {
     setEditingType(type)
     setMode("edit")
     setEditingId(item.id)
+    // 从注册表获取字段定义和默认值，只填充合法字段
+    setEditorConfig(
+      type === "rule"
+        ? fillConfig(ConfigEntity.POLISH_RULE, item as unknown as Record<string, unknown>) as Record<string, unknown>
+        : fillConfig(ConfigEntity.POLISH_SAMPLE, item as unknown as Record<string, unknown>) as Record<string, unknown>,
+    )
   }
 
   function startCreate(type: "rule" | "sample") {
     setEditingType(type)
     setMode("create")
     setEditingId(null)
+    setEditorConfig(
+      type === "rule"
+        ? ruleDefaults as Record<string, unknown>
+        : sampleDefaults as Record<string, unknown>,
+    )
   }
 
   async function saveRule() {
-    if (!ruleEditorRef.current) return
-    const { name, description, prompt, config } = ruleEditorRef.current.getData()
-    if (!name.trim()) return
+    const name = String(editorConfig.name ?? "").trim()
+    if (!name) return
+    const description = String(editorConfig.description ?? "").trim() || null
+    const prompt = String(editorConfig.prompt ?? "")
+    const { id: _, createdAt: __, updatedAt: ___, useCount: ____, type: _____, ...config } = editorConfig
 
-    if (mode === "create") {
-      const res = await fetch("/api/polish/rules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, prompt, config: JSON.stringify(config), type: "base" }),
-      })
-      if (!res.ok) return
-    } else if (mode === "edit" && editingId) {
-      const res = await fetch("/api/polish/rules", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, name, description, prompt, config: JSON.stringify(config) }),
-      })
-      if (!res.ok) return
-    }
-    fetchAll()
-    setMode(null)
-    setEditingId(null)
+    try {
+      if (mode === "create") {
+        await api({
+          url: "/api/polish/rules",
+          method: "POST",
+          data: { name, description, prompt, ...config },
+        })
+      } else if (mode === "edit" && editingId) {
+        await api({
+          url: "/api/polish/rules",
+          method: "PUT",
+          data: { id: editingId, name, description, prompt, ...config },
+        })
+      }
+      fetchAll()
+      setMode(null)
+      setEditingId(null)
+    } catch { /* silently ignore */ }
   }
 
   async function saveSample() {
-    if (!sampleEditorRef.current) return
-    const { name, prompt, config } = sampleEditorRef.current.getData()
-    if (!name.trim() || !config.text.trim()) return
+    const name = String(editorConfig.name ?? "").trim()
+    const prompt = String(editorConfig.prompt ?? "")
+    const text = String(editorConfig.text ?? "")
+    if (!name.trim() || !text.trim()) return
 
-    const configStr = JSON.stringify(config)
-    if (mode === "create") {
-      const res = await fetch("/api/polish/rules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, prompt, config: configStr, type: "sample" }),
-      })
-      if (!res.ok) return
-    } else if (mode === "edit" && editingId) {
-      const res = await fetch("/api/polish/rules", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, name, prompt, config: configStr }),
-      })
-      if (!res.ok) return
-    }
-    fetchAll()
-    setMode(null)
-    setEditingId(null)
+    const { id: _, createdAt: __, updatedAt: ___, useCount: ____, type: _____, ...config } = editorConfig
+    try {
+      if (mode === "create") {
+        await api({
+          url: "/api/polish/samples",
+          method: "POST",
+          data: { name, prompt, ...config },
+        })
+      } else if (mode === "edit" && editingId) {
+        await api({
+          url: "/api/polish/samples",
+          method: "PUT",
+          data: { id: editingId, name, prompt, ...config },
+        })
+      }
+      fetchAll()
+      setMode(null)
+      setEditingId(null)
+    } catch { /* silently ignore */ }
   }
 
-  async function deleteItem(ruleId: string) {
+  async function deleteRule(ruleId: string) {
     if (!confirm("确定要删除吗？")) return
-    await fetch(`/api/polish/rules?id=${ruleId}`, { method: "DELETE" })
+    await api({ url: `/api/polish/rules?id=${ruleId}`, method: "DELETE" })
     if (editingId === ruleId) {
+      setMode(null)
+      setEditingId(null)
+    }
+    fetchAll()
+  }
+
+  async function deleteSample(sampleId: string) {
+    if (!confirm("确定要删除吗？")) return
+    await api({ url: `/api/polish/samples?id=${sampleId}`, method: "DELETE" })
+    if (editingId === sampleId) {
       setMode(null)
       setEditingId(null)
     }
@@ -146,26 +159,14 @@ export default function PolishPage() {
           onUpdate={mode === "edit" ? (editingType === "rule" ? saveRule : saveSample) : undefined}
         >
           {editingType === "rule" && (
-            <PolishRuleEditor
-              key={"rule-" + (editingId ?? "create")}
-              ref={ruleEditorRef}
-              initialName={editingRule?.name ?? ""}
-              initialDescription={editingRule?.description ?? ""}
-              initialPrompt={editingRule?.prompt ?? ""}
-              initialConfig={editingRule ? parseConfig(editingRule.config, DEFAULT_POLISH_CONFIG) : DEFAULT_POLISH_CONFIG}
-            />
+            <div className="space-y-4">
+              {renderSections(ruleSections, editorConfig, setEditorConfig)}
+            </div>
           )}
           {editingType === "sample" && (
-            <SampleEditor
-              key={"sample-" + (editingId ?? "create")}
-              ref={sampleEditorRef}
-              initialName={editingSample?.name ?? ""}
-              initialPrompt={editingSample?.prompt ?? ""}
-              initialConfig={editingSample
-                ? parseConfig(editingSample.config, DEFAULT_SAMPLE_CONFIG as any) as any
-                : { scene_type: "", text: "", is_negative: false }
-              }
-            />
+            <div className="space-y-4">
+              {renderSections(sampleSections, editorConfig, setEditorConfig)}
+            </div>
           )}
         </SlidingDrawer>
       }
@@ -181,7 +182,7 @@ export default function PolishPage() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
         >
           {rules.map((rule) => {
-            const cfg = parseConfig(rule.config, DEFAULT_POLISH_CONFIG)
+            const cfg = fillConfig(ConfigEntity.POLISH_RULE, rule as unknown as Record<string, unknown>)
             return (
               <SimpleCard
                 key={rule.id}
@@ -189,10 +190,10 @@ export default function PolishPage() {
                 description={rule.description}
                 selected={editingId === rule.id && editingType === "rule"}
                 onClick={() => openForEdit("rule", rule)}
-                onDelete={() => deleteItem(rule.id)}
+                onDelete={() => deleteRule(rule.id)}
               >
                 <ConfigBadges
-                  tags={buildConfigTags(cfg, [
+                  tags={buildConfigTags<PolishRuleConfig>(cfg, [
                     ["情绪/氛围", "mood"],
                     ["叙事手法", "narrative"],
                     ["五感", "senses"],
@@ -222,9 +223,9 @@ export default function PolishPage() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
         >
           {samples.map((sample) => {
-            const cfg = parseConfig(sample.config, DEFAULT_SAMPLE_CONFIG as any) as any
-            const sceneType = cfg.scene_type || ""
-            const isNegative = !!cfg.is_negative
+            const cfg = fillConfig(ConfigEntity.POLISH_SAMPLE, sample as unknown as Record<string, unknown>)
+            const sceneType = cfg.sceneType || ""
+            const isNegative = !!cfg.isNegative
             return (
               <SimpleCard
                 key={sample.id}
@@ -232,15 +233,17 @@ export default function PolishPage() {
                 description={sample.prompt || null}
                 selected={editingId === sample.id && editingType === "sample"}
                 onClick={() => openForEdit("sample", sample)}
-                onDelete={() => deleteItem(sample.id)}
+                onDelete={() => deleteSample(sample.id)}
               >
                 <div className="mt-1 flex items-center gap-2">
-                  {sceneType && (
-                    <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                      <Tag className="w-2.5 h-2.5" />
-                      {sceneType}
-                    </span>
-                  )}
+                  {sceneType && (() => {
+                    const opt = findOptionInConfig(ConfigEntity.POLISH_SAMPLE, sceneType)
+                    return (
+                      <Tag icon={resolveIcon(opt?.icon)} color={(opt?.color as OptionColor) ?? "default"}>
+                        {sceneType}
+                      </Tag>
+                    )
+                  })()}
                   {isNegative && (
                     <span className="inline-flex items-center gap-0.5 text-[10px] text-destructive">
                       <EyeOff className="w-2.5 h-2.5" />

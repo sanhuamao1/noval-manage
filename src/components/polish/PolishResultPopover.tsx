@@ -1,8 +1,7 @@
 "use client"
 
 import { useRef, useEffect } from "react"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { Textarea, Button } from "@/components/ui"
 import { X, Check } from "lucide-react"
 import { usePolishContext } from "./PolishContext"
 

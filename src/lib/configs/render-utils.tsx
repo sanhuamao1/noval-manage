@@ -2,27 +2,34 @@ import {
     type ConfigFieldDef,
     type ConfigOption,
     type ConfigSection,
-    type TabGroup,
 } from "@/lib/configs/config-utils";
-import { RadioGroup } from "@/components/radio-group";
-import { Toggle } from "@/components/ui/toggle";
-import { ListField } from "@/components/form-list";
-import { FormInput } from "@/components/form-input";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
+import {
+    RadioGroup,
+    Toggle,
+    ListField,
+    Input,
+    Button,
+    Card,
+    CardHeader,
+    CardContent,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    NoBorderInput,
+    FormItem,
+    LongTextField,
+} from "@/components/ui";
 import { CheckCheck, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { NoBorderInput } from "@/components/ui/no-border-input";
-import { FormItem } from "@/components/form-item";
 import type { ReactNode } from "react";
-import { LongTextField } from "@/components/long-text-field";
+import { TagSelect } from "@/components/outline/TagSelect";
 
 /** 从配置对象中提取标签文本数组 */
-export function buildConfigTags(
-    config: Record<string, unknown>,
-    items: [string, string][],
+export function buildConfigTags<T>(
+    config: T,
+    items: readonly [string, string & keyof T][],
 ): string[] {
     const tags: string[] = [];
     for (const [label, key] of items) {
@@ -51,20 +58,12 @@ function toRadioOption(opt: ConfigOption) {
     return { ...opt, icon: Icon };
 }
 
-/** 过滤掉指定 key 的字段 */
-function filterFields(
-    fields: (ConfigFieldDef | TabGroup)[],
-    skipKeys?: string[],
-): (ConfigFieldDef | TabGroup)[] {
-    if (!skipKeys || skipKeys.length === 0) return fields;
-    return fields.filter((f) => !skipKeys.includes(f.key));
-}
-
 /** 渲染单个配置字段 */
-export function renderField<T extends Record<string, unknown>>(
+export function renderField<T>(
     field: ConfigFieldDef,
     config: T,
     onChange: (c: T) => void,
+    novelId?: string,
 ) {
     function set(key: keyof T, value: T[keyof T]) {
         onChange({ ...config, [key]: value });
@@ -72,141 +71,158 @@ export function renderField<T extends Record<string, unknown>>(
 
     const value = (config as any)[field.key];
 
-    const hideLabel = field.noLabel ?? false;
-
     const sharedProps = {
         display: field.display || "default",
         flexCols: field.cols,
         className: field.className,
-        key: field.key,
     };
 
-    if (field.type === "toggle") {
-        const control = (
-            <Toggle
-                value={value as boolean}
-                onChange={(v) => set(field.key as keyof T, v as any)}
-            />
-        );
-        if (hideLabel) return <FormItem {...sharedProps}>{control}</FormItem>;
-        return <FormItem label={field.label} {...sharedProps}>{control}</FormItem>;
+    let control: ReactNode = null;
+    let handlerEl: ReactNode = undefined;
+
+    switch (field.type) {
+        case "toggle":
+            control = (
+                <Toggle
+                    value={value as boolean}
+                    onChange={(v) => set(field.key as keyof T, v as any)}
+                />
+            );
+            break;
+
+        case "single": {
+            const radioOptions = (field.options ?? []).map(toRadioOption);
+            control = (
+                <RadioGroup
+                    options={radioOptions}
+                    value={(value as string) || ""}
+                    onChange={(v) => set(field.key as keyof T, v as any)}
+                    variant={field.variant as "box" | undefined}
+                />
+            );
+            break;
+        }
+
+        case "multi": {
+            const radioOptions = (field.options ?? []).map(toRadioOption);
+            const selected = (value as string[]) || [];
+            const isAllSelected = selected.length === radioOptions.length;
+
+            if (field.max === undefined) {
+                handlerEl = (
+                    <Button
+                        variant="radio"
+                        size="auto"
+                        isActive={isAllSelected}
+                        onClick={() =>
+                            set(
+                                field.key as keyof T,
+                                (isAllSelected
+                                    ? []
+                                    : [...radioOptions.map((o) => o.value)]) as any,
+                            )
+                        }
+                    >
+                        <CheckCheck className="w-2.5 h-2.5" />
+                    </Button>
+                );
+            }
+
+            control = (
+                <RadioGroup
+                    type="multi"
+                    options={radioOptions}
+                    value={selected}
+                    onChange={(v) => set(field.key as keyof T, v as any)}
+                    max={field.max}
+                    variant={field.variant as "box" | undefined}
+                />
+            );
+            break;
+        }
+
+        case "text": {
+            const textValue = (value as string) ?? "";
+            control = (
+                <Input
+                    value={textValue}
+                    onChange={(e) => set(field.key as keyof T, e.target.value as any)}
+                    placeholder={field.placeholder}
+                />
+            );
+            break;
+        }
+
+        case "longtext": {
+            const textValue = (value as string) ?? "";
+            const maxLength = field.maxLength ?? 1000;
+            return (
+                <LongTextField
+                    value={textValue}
+                    maxLength={maxLength}
+                    placeholder={field.placeholder}
+                    label={field.label}
+                    onChange={(v) => set(field.key as keyof T, v as any)}
+                />
+            );
+        }
+
+        case "tagselect": {
+            const selectedIds = (value as string[]) || [];
+            if (!novelId) return null;
+            control = (
+                <TagSelect
+                    label={field.label}
+                    entity={field.entity!}
+                    novelId={novelId}
+                    selectedIds={selectedIds}
+                    onChange={(ids) => set(field.key as keyof T, ids as any)}
+                    optionValue={field.optionValue}
+                    optionLabel={field.optionLabel}
+                />
+            );
+            break;
+        }
+
+        case "list": {
+            const listValues = (value as string[]) || [];
+            const isEmpty = listValues.length === 0 || listValues.every((v) => !v.trim());
+            control = isEmpty ? (
+                <div className="flex items-center justify-center py-6 text-sm text-fg-tertiary">
+                    点击右上角 <Plus className="w-3.5 h-3.5 inline mx-1" /> 添加
+                </div>
+            ) : (
+                <ListField
+                    subFields={field.subFields ?? []}
+                    values={listValues}
+                    onChange={(v) => set(field.key as keyof T, v as any)}
+                />
+            );
+            break;
+        }
+
+        default:
+            return null;
     }
 
-    if (field.type === "single") {
-        const radioOptions = (field.options ?? []).map(toRadioOption);
-        const control = (
-            <RadioGroup
-                options={radioOptions}
-                value={(value as string) || ""}
-                onChange={(v) => set(field.key as keyof T, v as any)}
-                variant={field.variant as "box" | undefined}
-            />
-        );
-        if (hideLabel) return <FormItem {...sharedProps}>{control}</FormItem>;
-        return <FormItem label={field.label} {...sharedProps}>{control}</FormItem>;
-    }
-
-    // multi
-    if (field.type === "multi") {
-        const radioOptions = (field.options ?? []).map(toRadioOption);
-        const selected = value as string[];
-        const isAllSelected = selected.length === radioOptions.length;
-
-        const sholdShowHandler = field.max === undefined;
-
-        const handlerEl = sholdShowHandler ? (
-            <Button
-                variant="radio"
-                size="auto"
-                isActive={isAllSelected}
-                onClick={() =>
-                    set(
-                        field.key as keyof T,
-                        (isAllSelected
-                            ? []
-                            : [...radioOptions.map((o) => o.value)]) as any,
-                    )
-                }
-            >
-                <CheckCheck className="w-2.5 h-2.5" />
-            </Button>
-        ) : undefined;
-
-        const control = (
-            <RadioGroup
-                type="multi"
-                options={radioOptions}
-                value={selected}
-                onChange={(v) => set(field.key as keyof T, v as any)}
-                max={field.max}
-                variant={field.variant as "box" | undefined}
-            />
-        );
-        if (hideLabel) return <FormItem {...sharedProps}>{control}</FormItem>;
-        return (
-            <FormItem label={field.label} {...sharedProps} handler={handlerEl}>
-                {control}
-            </FormItem>
-        );
-    }
-
-    // text
-    if (field.type === "text") {
-        const textValue = (value as string) ?? "";
-        const control = (
-            <FormInput
-                label={field.label}
-                value={textValue}
-                onChange={(e) => set(field.key as keyof T, e.target.value as any)}
-                placeholder={field.placeholder}
-            />
-        );
-        if (hideLabel) return <div className={sharedProps.className}>{control}</div>;
-        return <div className={sharedProps.className}>{control}</div>;
-    }
-
-    // longtext (多行文本，带字数限制)
-    if (field.type === "longtext") {
-        const textValue = (value as string) ?? "";
-        const maxLength = field.maxLength ?? 1000;
-        const control = (
-            <LongTextField
-                value={textValue}
-                maxLength={maxLength}
-                placeholder={field.placeholder}
-                label={field.label}
-                onChange={(v) => set(field.key as keyof T, v as any)}
-            />
-        );
-        return <div className={sharedProps.className}>{control}</div>;
-    }
-
-    // list
-    const listValues = (value as string[]) || [];
-    const isEmpty = listValues.length === 0 || listValues.every((v) => !v.trim());
-
-    const control = isEmpty ? (
-        <div className="flex items-center justify-center py-6 text-sm text-fg-tertiary">
-            点击右上角 <Plus className="w-3.5 h-3.5 inline mx-1" /> 添加
-        </div>
-    ) : (
-        <ListField
-            label={field.label}
-            subFields={field.subFields ?? []}
-            values={listValues}
-            onChange={(v) => set(field.key as keyof T, v as any)}
-        />
+    return (
+        <FormItem
+            key={field.key}
+            label={field.noLabel ? undefined : field.label}
+            {...sharedProps}
+            handler={handlerEl}
+        >
+            {control}
+        </FormItem>
     );
-    if (hideLabel) return <FormItem {...sharedProps}>{control}</FormItem>;
-    return <FormItem label={field.label} {...sharedProps}>{control}</FormItem>;
 }
 
 /** 渲染配置 sections */
-export function renderSections<T extends Record<string, unknown>>(
+export function renderSections<T>(
     sections: ConfigSection[],
     config: T,
     onChange: (c: T) => void,
-    skipKeys?: string[],
+    novelId?: string,
 ) {
     return sections.map((section, index) => {
         if (section.type === "card") {
@@ -244,14 +260,14 @@ export function renderSections<T extends Record<string, unknown>>(
                 <Card key={index}>
                     {headerEl}
                     <CardContent className={section.class}>
-                        {filterFields(section.children, skipKeys)
+                        {section.children
                         .filter((f): f is ConfigFieldDef => f.type !== "tab-group")
-                        .map((field) => renderField(field, config, onChange))}
+                        .map((field) => renderField(field, config, onChange, novelId))}
                     </CardContent>
                 </Card>
             );
         } else if (section.type === "tabs") {
-            const filteredChildren = filterFields(section.children, skipKeys);
+            const filteredChildren = section.children;
             const firstKey = filteredChildren[0]?.key ?? "";
             return (
                 <Tabs key={index} defaultValue={firstKey}>
@@ -272,7 +288,7 @@ export function renderSections<T extends Record<string, unknown>>(
                         if (child.type === "tab-group") {
                             return (
                                 <TabsContent key={child.key} value={child.key} className={child.class ?? section.class}>
-                                    {child.children.map((field) => renderField(field, config, onChange))}
+                                    {child.children.map((field) => renderField(field, config, onChange, novelId))}
                                 </TabsContent>
                             );
                         }
@@ -292,7 +308,7 @@ export function renderSections<T extends Record<string, unknown>>(
                                     }
                                     : undefined}
                             >
-                                {renderField({ ...child}, config, onChange)}
+                                {renderField({ ...child}, config, onChange, novelId)}
                             </TabsContent>
                         );
                     })}
@@ -306,7 +322,7 @@ export function renderSections<T extends Record<string, unknown>>(
                         const span = subSection.colspan ?? 1;
                         return (
                             <div key={subIndex} style={{ gridColumn: `span ${span}` }}>
-                                {renderSections([subSection], config, onChange, skipKeys)}
+                                {renderSections([subSection], config, onChange, novelId)}
                             </div>
                         );
                     })}

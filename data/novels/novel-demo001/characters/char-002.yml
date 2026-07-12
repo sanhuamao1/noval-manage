@@ -1,0 +1,27 @@
+id: char-002
+novelId: novel-demo001
+name: 苏婉
+gender: 女
+age: 23岁
+identity: 药师
+item: 银针
+coreConflict: 家族使命与个人情感
+emotionExpression: 压抑
+abilities:
+  - '医术;精通药理，能解百毒'
+  - '暗器;银针杀人于无形'
+growthArcs:
+  - '隐忍;压抑真实想法;学会表达'
+relationships:
+  - '林远;青梅竹马，亦敌亦友'
+notes:
+  - '破局方式;以药术辅助'
+  - '关键行为模式;冷静分析，关键时刻出手'
+narrativeFunction:
+  - 伙伴
+  - 变形者
+innerMotivation:
+  - 照顾者
+  - 爱人
+createdAt: '2026-07-01T10:10:00.000Z'
+updatedAt: '2026-07-08T12:00:00.000Z'

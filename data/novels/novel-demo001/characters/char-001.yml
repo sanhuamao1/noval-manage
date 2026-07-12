@@ -1,0 +1,27 @@
+id: char-001
+novelId: novel-demo001
+name: 林远
+gender: 男
+age: 25岁
+identity: 潜行者
+item: 破碎的怀表
+coreConflict: 复仇与救赎的抉择
+emotionExpression: 成熟克制
+abilities:
+  - '剑术;精于快剑，出招凌厉'
+  - '潜行;善用阴影隐蔽身形'
+growthArcs:
+  - '偏执;不信任他人;学会依靠伙伴'
+relationships:
+  - '苏婉;青梅竹马，亦敌亦友'
+notes:
+  - '破局方式;以智取胜，不蛮干'
+  - '关键行为模式;遇强则强，绝境爆发'
+  - '角色危险性或潜力;潜力极大，觉醒后战力质变'
+narrativeFunction:
+  - 英雄
+innerMotivation:
+  - 战士
+  - 探索者
+createdAt: '2026-07-01T10:05:00.000Z'
+updatedAt: '2026-07-10T15:00:00.000Z'

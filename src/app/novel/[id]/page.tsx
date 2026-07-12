@@ -1,65 +1,37 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { SlidingDrawer } from "@/components/ui/drawer";
+import { Button, SlidingDrawer, PageLayout } from "@/components/ui";
 import { Edit3 } from "lucide-react";
-import { PageLayout } from "@/components/PageLayout";
-import { DEFAULT_NOVEL_CONFIG } from "@/lib/configs/novel-defs";
-import { parseConfig } from "@/lib/configs/config-utils";
+import { getEntry, fillConfig, ConfigEntity } from "@/lib/configs/config-registry";
+import type { NovelConfig } from "@/lib/configs/generated";
+import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
-import {
-  NovelOverviewEditor,
-  type NovelOverviewEditorHandle,
-} from "@/components/novel/NovelOverviewEditor";
 import { NovelOverviewPreview } from "@/components/novel/NovelOverviewPreview";
-
-interface NovelData {
-  id: string;
-  title: string;
-  description: string | null;
-  config: string;
-  wordCount?: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useAppStore } from "@/stores/useAppStore";
 
 export default function NovelOverview() {
   const params = useParams();
   const id = params.id as string;
-  const [novel, setNovel] = useState<NovelData | null>(null);
-  const editorRef = useRef<NovelOverviewEditorHandle>(null);
+  const novel = useAppStore((s) => s.novel);
+  const updateNovel = useAppStore((s) => s.updateNovel);
+  const { sections, defaults } = getEntry(ConfigEntity.NOVEL);
+  const [editorConfig, setEditorConfig] = useState<NovelConfig>(defaults);
 
   const drawer = useDrawer();
 
-  const fetchNovel = useCallback(async () => {
-    const res = await fetch(`/api/novels?id=${id}`);
-    const data = await res.json();
-    setNovel(data);
-  }, [id]);
-
   useEffect(() => {
-    fetchNovel();
-  }, [fetchNovel]);
+    if (novel) {
+      setEditorConfig(fillConfig(ConfigEntity.NOVEL, novel as unknown as Record<string, unknown>));
+    }
+  }, [novel]);
 
   async function handleSave() {
-    if (!editorRef.current) return;
-    const { title, description, config } = editorRef.current.getData();
-    if (!title.trim()) return;
-    const res = await fetch(`/api/novels/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: title.trim(),
-        description: description.trim() || null,
-        config: JSON.stringify(config),
-      }),
-    });
-    if (res.ok) {
-      drawer.close();
-      fetchNovel();
-    }
+    const title = String(editorConfig.title ?? "").trim();
+    if (!title) return;
+    await updateNovel(id, editorConfig as Record<string, unknown>);
+    drawer.close();
   }
 
   if (!novel) {
@@ -69,10 +41,6 @@ export default function NovelOverview() {
       </div>
     );
   }
-
-  const config = parseConfig(novel.config, DEFAULT_NOVEL_CONFIG);
-
-  console.log(config)
 
   return (
     <PageLayout
@@ -84,21 +52,14 @@ export default function NovelOverview() {
         </Button>
       }
       drawer={
-        <SlidingDrawer
-          open={drawer.open}
-          onClose={drawer.close}
-          onUpdate={handleSave}
-        >
-          <NovelOverviewEditor
-            ref={editorRef}
-            initialTitle={novel.title}
-            initialDescription={novel.description || ""}
-            initialConfig={config}
-          />
+        <SlidingDrawer open={drawer.open} onClose={drawer.close} onUpdate={handleSave}>
+          <div className="space-y-4">
+            {renderSections(sections, editorConfig, (c) => setEditorConfig(c))}
+          </div>
         </SlidingDrawer>
       }
     >
-      <NovelOverviewPreview novel={novel} config={config} />
+      <NovelOverviewPreview novel={novel} config={editorConfig} />
     </PageLayout>
   );
 }

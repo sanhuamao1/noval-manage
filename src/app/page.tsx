@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Label } from "@/components/ui/label"
+import { Button, Input, Popover, PopoverContent, PopoverTrigger, Label } from "@/components/ui"
 import { Plus, BookOpen, Trash2 } from "lucide-react"
+import { api } from "@/lib/api"
 
 interface Novel {
   id: string
@@ -31,29 +29,22 @@ export default function HomePage() {
   }, [])
 
   async function fetchNovels() {
-    const res = await fetch("/api/novels")
-    const data = await res.json()
+    const data = await api<Novel[]>({ url: "/api/novels" })
     setNovels(data)
   }
 
   async function createNovel() {
     if (!title.trim()) return
-    const res = await fetch("/api/novels", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description }),
-    })
-    if (res.ok) {
-      setOpen(false)
-      setTitle("")
-      setDescription("")
-      fetchNovels()
-    }
+    await api({ url: "/api/novels", method: "POST", data: { title, description } })
+    setOpen(false)
+    setTitle("")
+    setDescription("")
+    fetchNovels()
   }
 
   async function deleteNovel(id: string) {
     if (!confirm("确定要删除这个作品吗？所有章节和人物数据将被永久删除。")) return
-    await fetch(`/api/novels?id=${id}`, { method: "DELETE" })
+    await api({ url: `/api/novels?id=${id}`, method: "DELETE" })
     fetchNovels()
   }
 

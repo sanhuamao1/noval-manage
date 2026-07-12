@@ -1,74 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-
-/** 计算章节内容字数 */
-function calculateWordCount(chapters: { content: string }[]): number {
-  return chapters.reduce((count, chapter) => {
-    return count + chapter.content.length
-  }, 0)
-}
+import { listNovels, getNovel, createNovel, removeNovel, getNovelWordCount, count } from '@/lib/store'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
 
   if (id) {
-    const novel = await prisma.novel.findUnique({
-      where: { id },
-      include: {
-        chapters: {
-          select: { content: true },
-        },
-        _count: {
-          select: { chapters: true, characters: true },
-        },
-      },
+    const novel = getNovel(id)
+    if (!novel) return NextResponse.json(null, { status: 404 })
+    return NextResponse.json({
+      ...novel,
+      wordCount: getNovelWordCount(id),
+      _count: { chapters: count('chapter', id), characters: count('character', id) },
     })
-    if (novel) {
-      // 添加 wordCount 字段
-      const novelWithWordCount = {
-        ...novel,
-        wordCount: calculateWordCount(novel.chapters),
-        chapters: undefined, // 移除原始 chapters 数据
-      }
-      return NextResponse.json(novelWithWordCount)
-    }
-    return NextResponse.json(novel, { status: 404 })
   }
 
-  const novels = await prisma.novel.findMany({
-    include: {
-      chapters: {
-        select: { content: true },
-      },
-      _count: {
-        select: { chapters: true, characters: true },
-      },
+  const novels = listNovels()
+  const result = novels.map(n => ({
+    ...n,
+    wordCount: getNovelWordCount((n as Record<string, string>).id),
+    _count: {
+      chapters: count('chapter', (n as Record<string, string>).id),
+      characters: count('character', (n as Record<string, string>).id),
     },
-    orderBy: { updatedAt: 'desc' },
-  })
-  // 为每个作品添加 wordCount
-  const novelsWithWordCount = novels.map(({ chapters, ...novel }) => ({
-    ...novel,
-    wordCount: calculateWordCount(chapters),
   }))
-  return NextResponse.json(novelsWithWordCount)
+  return NextResponse.json(result)
 }
 
 export async function POST(req: NextRequest) {
   const { title, description } = await req.json()
-  const novel = await prisma.novel.create({
-    data: { title, description },
-  })
+  if (!title) return NextResponse.json({ error: '缺少 title' }, { status: 400 })
+  const novel = createNovel(title, description)
   return NextResponse.json(novel)
 }
 
 export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
-  if (!id) {
-    return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
-  }
-  await prisma.novel.delete({ where: { id } })
+  if (!id) return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
+  removeNovel(id)
   return NextResponse.json({ success: true })
 }

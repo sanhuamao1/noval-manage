@@ -1,0 +1,74 @@
+entity: Outline
+
+fields:
+  title:
+    type: text
+    label: 章纲标题
+    placeholder: 章纲标题
+  contentBrief:
+    type: text
+    label: 概要
+    placeholder: 一句话概括本章（最多80字）
+    maxLength: 80
+  contentDetail:
+    type: longtext
+    label: 详细内容
+    placeholder: 详细描述本章情节发展和关键节点...
+    maxLength: 400
+  status:
+    type: single
+    label: 状态
+    options:
+      - { value: planned, label: 已规划, icon: Calendar, color: neutral }
+      - { value: in_progress, label: 进行中, icon: Pen, color: primary }
+      - { value: completed, label: 已完成, icon: CheckCircle, color: success }
+    display: flex
+  timeline:
+    type: text
+    label: 时间
+    icon: Clock
+    placeholder: "如：春·清晨 / 天元历127年三月廿·深夜"
+  tone:
+    type: single
+    label: 基调
+    options: tone
+    display: flex
+    className: grid grid-cols-2 gap-2
+  characterIds:
+    type: tagselect
+    label: 出场人物
+    entity: character
+  locationIds:
+    type: tagselect
+    label: 地点
+    entity: location
+  foreshadowingIds:
+    type: tagselect
+    label: 伏笔
+    entity: foreshadowing
+
+sections:  
+  - type: grid
+    cols: 2
+    sections:
+      - type: grid
+        colspan: 1
+        cols: 1
+        sections:
+          - type: card
+            title: 基本信息
+            icon: FileText
+            class: space-y-3
+            fields: [title, contentBrief, contentDetail, status]
+      - type: grid
+        colspan: 1
+        cols: 1
+        sections:
+          - type: card
+            title: 时空基调
+            icon: MapPin
+            fields: [timeline, tone]
+          - type: card
+            title: 关联实体
+            icon: Link
+            fields: [characterIds, locationIds, foreshadowingIds]

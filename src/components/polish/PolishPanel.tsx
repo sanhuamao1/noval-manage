@@ -1,27 +1,24 @@
 import { useState } from "react";
 import { Sparkles, Check } from "lucide-react";
-import { SimpleCard } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { SimpleTabs } from "@/components/tabs";
-import { SlidingDrawer } from "@/components/ui/drawer";
+import { SimpleCard, Button, SimpleTabs, SlidingDrawer } from "@/components/ui";
 import { usePolishContext } from "./PolishContext";
-import { DEFAULT_POLISH_CONFIG } from "@/lib/configs/polish-defs";
-import { parseConfig } from "@/lib/configs/config-utils";
+import { fillConfig, ConfigEntity } from "@/lib/configs/config-registry";
+import type { PolishRule, PolishSample } from "@/types/polish";
 
 /** 生成简短的配置摘要 */
-function ConfigSummary(raw: string | null | undefined) {
-  const cfg = parseConfig(raw, DEFAULT_POLISH_CONFIG) as typeof DEFAULT_POLISH_CONFIG &
-    Record<string, unknown>;
+function ConfigSummary(raw: PolishRule) {
+  // 从注册表获取字段定义和默认值，只填充合法字段
+  const cfg = fillConfig(ConfigEntity.POLISH_RULE, raw as unknown as Record<string, unknown>) as unknown as PolishRule
   const parts: string[] = [];
 
   if (cfg.pace) parts.push(`节奏：${cfg.pace}`);
-  const moodArr = (cfg.mood ?? []) as string[];
+  const moodArr = cfg.mood ?? [];
   if (moodArr.length > 0) parts.push(`氛围：${moodArr.join("/")}`);
-  const sensesArr = (cfg.senses ?? []) as string[];
+  const sensesArr = cfg.senses ?? [];
   if (sensesArr.length > 0) parts.push(sensesArr.join("/"));
-  const charArr = (cfg.character ?? []) as string[];
+  const charArr = cfg.character ?? [];
   if (charArr.length > 0) parts.push(charArr.join("/"));
-  if (cfg.rhetoric) parts.push(cfg.rhetoric as string);
+  if (cfg.rhetoric) parts.push(cfg.rhetoric);
 
   if (parts.length === 0) return null;
 
@@ -125,7 +122,7 @@ export function PolishPanel() {
                     selected={selectedRuleId === rule.id && !polishing}
                     onClick={polishing ? undefined : () => executePolish(rule.id)}
                   >
-                    {ConfigSummary(rule.config)}
+                    {ConfigSummary(rule)}
                   </SimpleCard>
                 </div>
               ))
@@ -143,10 +140,10 @@ export function PolishPanel() {
                   选择 1-3 个样本作为风格参考{selectedSampleIds.length > 0 ? `（已选 ${selectedSampleIds.length} 个）` : ""}
                 </p>
                 {samples.map((sample) => {
-                  const cfg = parseConfig(sample.config, { scene_type: "", text: "", is_negative: false });
+                  const cfg = fillConfig(ConfigEntity.POLISH_SAMPLE, sample as unknown as Record<string, unknown>) as unknown as PolishSample
                   const isSelected = selectedSampleIds.includes(sample.id)
-                  const isNegative = !!(cfg as any).is_negative
-                  const sceneType = (cfg as any).scene_type || ""
+                  const isNegative = !!cfg.isNegative
+                  const sceneType = cfg.sceneType || ""
                   return (
                     <div key={sample.id} className={polishing ? "pointer-events-none opacity-60" : ""}>
                       <SimpleCard

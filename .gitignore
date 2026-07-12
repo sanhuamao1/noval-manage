@@ -3,6 +3,8 @@ node_modules/
 .pnp
 .pnp.js
 .agents
+.claude
+.codebuddy
 
 # 构建输出
 .next/
@@ -15,7 +17,7 @@ out/
 .env.test.local
 .env.production.local
 
-# 数据库
+# 数据库（已弃用，保留以防残留）
 *.db
 *.db-journal
 prisma/novel.db

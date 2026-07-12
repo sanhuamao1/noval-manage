@@ -1,22 +1,12 @@
 "use client";
 
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Tag } from "@/components/ui/tag";
+import { Card, CardHeader, CardContent, Tag } from "@/components/ui";
 import { BookOpen, Calendar, Hash, Tags, Clock } from "lucide-react";
-import type { NovelConfig } from "@/lib/configs/novel-defs";
-import { findOption } from "@/lib/configs/novel-defs";
+import type { NovelConfig } from "@/lib/configs/generated";
+import { ConfigEntity, findOptionInConfig } from "@/lib/configs/generated";
 import { resolveIcon } from "@/lib/configs/render-utils";
 import { formatDateStr, formatWordCount } from "@/lib/utils";
-
-interface NovelData {
-  id: string;
-  title: string;
-  description: string | null;
-  config: string;
-  wordCount?: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { NovelData } from "@/types/novel";
 
 interface NovelOverviewPreviewProps {
   novel: NovelData;
@@ -26,9 +16,9 @@ interface NovelOverviewPreviewProps {
 export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProps) {
   const genreList: string[] = Array.isArray(config.genre) ? config.genre : [];
   const statusVal: string = (config.status as string) || "";
-  const primaryToneVal: string = (config.primary_tone as string) || "";
-  const secondaryTonesList: string[] = Array.isArray(config.secondary_tones)
-    ? config.secondary_tones
+  const primaryToneVal: string = (config.primaryTone as string) || "";
+  const secondaryTonesList: string[] = Array.isArray(config.secondaryTones)
+    ? config.secondaryTones
     : [];
 
   return (
@@ -66,7 +56,7 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
             <div className="mb-4 flex flex-wrap items-center gap-2">
               {statusVal &&
                 (() => {
-                  const statusOpt = findOption(statusVal);
+                  const statusOpt = findOptionInConfig(ConfigEntity.NOVEL, statusVal);
                   return (
                     <Tag
                       color={statusOpt?.color || "default"}
@@ -77,7 +67,7 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
                   );
                 })()}
               {genreList.map((g: string) => {
-                const opt = findOption(g);
+                const opt = findOptionInConfig(ConfigEntity.NOVEL, g);
                 return (
                   <Tag
                     key={g}
@@ -90,7 +80,7 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
               })}
               {primaryToneVal &&
                 (() => {
-                  const toneOpt = findOption(primaryToneVal);
+                  const toneOpt = findOptionInConfig(ConfigEntity.NOVEL, primaryToneVal);
                   return (
                     <Tag
                       color={toneOpt?.color || "default"}
@@ -101,7 +91,7 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
                   );
                 })()}
               {secondaryTonesList.map((t: string) => {
-                const opt = findOption(t);
+                const opt = findOptionInConfig(ConfigEntity.NOVEL, t);
                 return (
                   <Tag
                     key={t}

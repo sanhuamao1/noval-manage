@@ -1,0 +1,132 @@
+entity: Character
+
+fields:
+  name:
+    type: text
+    label: 角色名称
+    placeholder: 角色名称
+    defaultValue: ""
+  gender:
+    type: single
+    label: 性别
+    options: gender
+    display: flex
+  role:
+    type: single
+    label: 角色类型
+    options: role
+    display: flex
+  age:
+    type: text
+    label: 年龄
+    placeholder: "如：25岁"
+  identity:
+    type: text
+    label: 身份
+    placeholder: 身份/职业/组织归属
+  item:
+    type: text
+    label: 标志性物件
+    placeholder: 一件有故事的随身物品
+  coreConflict:
+    type: text
+    label: 核心矛盾
+    placeholder: 一句话概括
+  emotionExpression:
+    type: single
+    label: 情感表达方式
+    options: emotion-expression
+    display: flex
+    className: col-span-full
+  abilities:
+    type: list
+    label: 能力
+    noLabel: true
+    subFields:
+      - { placeholder: 擅长什么, width: w-1/3 }
+      - { placeholder: 具体表现, width: flex-1 }
+  growthArcs:
+    type: list
+    label: 成长弧光
+    noLabel: true
+    subFields:
+      - { placeholder: 缺陷, width: w-1/4 }
+      - { placeholder: 表现, width: w-1/3 }
+      - { placeholder: 成长方向, width: w-1/3 }
+  relationships:
+    type: list
+    label: 关系网络
+    noLabel: true
+    subFields:
+      - { placeholder: 角色姓名, width: w-1/3 }
+      - { placeholder: 与 TA 的关系, width: flex-1 }
+  notes:
+    type: list
+    label: 写作注意事项
+    noLabel: true
+    defaultValue:
+      - "破局方式;"
+      - "关键行为模式;"
+      - "角色危险性或潜力;"
+    subFields:
+      - { placeholder: 标签, width: w-1/3 }
+      - { placeholder: 内容, width: flex-1 }
+  narrativeFunction:
+    type: multi
+    label: 叙事功能原型
+    max: 3
+    options: narrative-function
+    display: grid
+    noLabel: true
+    variant: box
+  innerMotivation:
+    type: multi
+    label: 内在动机原型
+    max: 3
+    options: inner-motivation
+    display: grid
+    noLabel: true
+    variant: box
+
+sections:
+  - type: grid
+    cols: 3
+    sections:
+      - type: grid
+        colspan: 2
+        cols: 1
+        sections:
+          - type: card
+            title: 角色名称
+            icon: UserRound
+            titleKey: name
+            titleEditable: true
+            class: grid grid-cols-2 gap-3 parent
+            fields: [gender, role, age, identity, item, coreConflict, emotionExpression]
+          - type: tabs
+            title: 能力与关系
+            children:
+              - key: abilities
+                label: 能力
+                fields: [abilities]
+              - key: growthArcs
+                label: 成长弧光
+                fields: [growthArcs]
+              - key: relationships
+                label: 关系网络
+                fields: [relationships]
+              - key: notes
+                label: 写作注意事项
+                fields: [notes]
+      - type: grid
+        colspan: 1
+        cols: 1
+        sections:
+          - type: card
+            title: 叙事功能原型（沃格勒体系）
+            icon: Shield
+            fields: [narrativeFunction]
+          - type: card
+            title: 内在动机原型（皮尔逊体系）
+            icon: Heart
+            fields: [innerMotivation]

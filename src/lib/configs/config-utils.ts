@@ -1,13 +1,21 @@
 // ─── 类型定义 ───
-export type OptionColor = "primary" | "success" | "warn" | "default"
+import type { ColorName } from "../colors"
+
+/** 配置项颜色，等价于 ColorName */
+export type OptionColor = ColorName
+
+/** 运行时配置数据，替代散布各处的 Record<string, unknown> */
+export type ConfigData = Record<string, unknown>
 
 export interface ConfigOption {
   value: string
+  /** 显示标签（可选，默认显示 value） */
+  label?: string
   /** Lucide icon 名称（可选） */
   icon?: string
   /** 选项颜色（可选） */
   color?: OptionColor
-  /** 选项说明文案（可选，无 description 则直接用 value） */
+  /** 选项说明文案（可选） */
   description?: string
 }
 
@@ -18,14 +26,16 @@ export interface ListSubField {
   width?: string
 }
 
+/** 字段控件类型 */
+export type FieldType = "single" | "multi" | "toggle" | "list" | "text" | "longtext" | "tagselect"
+
 export interface ConfigFieldDef<K extends string = string> {
   key: K
   label: string
-  type: "single" | "multi" | "toggle" | "list" | "text" | "longtext"
+  type: FieldType
   options?: readonly ConfigOption[]
   max?: number
   display?: "default" | "flex" | "grid" | "between"
-  handler?: string
   /** display="grid" 时的列数，默认 3 */
   cols?: number
   /** 字段图标（lucide 组件名），在 tabs 中显示在 tab trigger 上 */
@@ -42,6 +52,14 @@ export interface ConfigFieldDef<K extends string = string> {
   noLabel?: boolean
   /** 控件变体，如 "box"（multi/single 类型适用） */
   variant?: string
+  /** type="tagselect" 时对应的实体 key，选项从 store 动态获取 */
+  entity?: string
+  /** type="tagselect" 时，选项对象中用作 value 的 key，默认 "id" */
+  optionValue?: string
+  /** type="tagselect" 时，选项对象中用作 label 的 key，默认 "name" */
+  optionLabel?: string
+  /** 字段默认值，优先级高于根据 type 自动推导的默认值 */
+  defaultValue?: unknown
 }
 
 export interface TabGroup<K extends string = string> {
@@ -115,11 +133,12 @@ interface TypeValueMap {
   list: string[]
   text: string | undefined
   longtext: string | undefined
+  tagselect: string[]
 }
 
 /** 从字段定义数组推导配置对象类型 */
 export type ConfigOf<
-  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" | "longtext" }[],
+  T extends readonly { key: string; type: FieldType }[],
 > = {
   [K in T[number] as K["key"]]: TypeValueMap[K["type"]]
 }
@@ -131,32 +150,80 @@ export type ConfigOf<
  * toggle → false, multi → [], list → [], single → undefined, text → undefined
  */
 export function buildDefaultValues<
-  T extends readonly { key: string; type: "single" | "multi" | "toggle" | "list" | "text" | "longtext" }[],
->(fields: T): ConfigOf<T> & { prompt?: string } {
-  const result: Record<string, unknown> = {}
+  T extends readonly { key: string; type: FieldType; defaultValue?: unknown }[],
+>(fields: T): ConfigOf<T> {
+  const result: ConfigData = {}
   for (const field of fields) {
-    if (field.type === "toggle") {
+    if ("defaultValue" in field && field.defaultValue !== undefined) {
+      result[field.key] = field.defaultValue
+    } else if (field.type === "toggle") {
       result[field.key] = false
-    } else if (field.type === "multi" || field.type === "list") {
+    } else if (field.type === "multi" || field.type === "list" || field.type === "tagselect") {
       result[field.key] = []
     } else {
       result[field.key] = undefined
     }
   }
-  return { ...result, prompt: "" } as ConfigOf<T> & { prompt?: string }
+  return result as ConfigOf<T>
 }
 
-/** 安全解析 JSON 配置字符串，缺失字段用默认值补齐 */
-export function parseConfig<T extends Record<string, unknown>>(
-  raw: string | null | undefined,
-  defaults: T,
-): T {
-  if (!raw) return { ...defaults }
-  try {
-    const parsed = JSON.parse(raw)
-    return { ...defaults, ...parsed }
-  } catch {
-    return { ...defaults }
+/**
+ * 将记录中的数组字段从 JSON 字符串还原为数组（读取时用）。
+ */
+export function parseArrayFields(
+  data: ConfigData,
+  fields: readonly { key: string; type: string }[],
+): ConfigData {
+  const result = { ...data }
+  for (const field of fields) {
+    if (field.type === "multi" || field.type === "list" || field.type === "tagselect") {
+      const raw = result[field.key]
+      if (typeof raw === "string") {
+        try {
+          result[field.key] = JSON.parse(raw)
+        } catch {
+          result[field.key] = []
+        }
+      } else if (raw == null) {
+        result[field.key] = []
+      }
+    }
   }
+  return result
+}
+
+/**
+ * 将数组字段序列化为 JSON 字符串（写入时用）。
+ */
+export function serializeArrayFields(
+  data: ConfigData,
+  fields: readonly { key: string; type: string }[],
+): ConfigData {
+  const result = { ...data }
+  for (const field of fields) {
+    if (field.type === "multi" || field.type === "list" || field.type === "tagselect") {
+      const val = result[field.key]
+      if (Array.isArray(val)) {
+        result[field.key] = JSON.stringify(val)
+      }
+    }
+  }
+  return result
+}
+
+/** 以 defaults 为底，只取 fields 中定义的 key 从 data 覆盖。自动解析数组字段。 */
+export function fillConfigFrom(
+  data: ConfigData,
+  defaults: ConfigData,
+  fields: readonly { key: string; type: string }[],
+): ConfigData {
+  const result = { ...defaults }
+  const parsed = parseArrayFields(data, fields)
+  for (const field of fields) {
+    if (field.key in parsed) {
+      result[field.key] = parsed[field.key]
+    }
+  }
+  return result
 }
 

@@ -1,16 +1,6 @@
-"use client"
-
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react"
-
-interface PolishRule {
-  id: string
-  name: string
-  description: string | null
-  prompt: string
-  config: string | null
-  type: string
-  useCount: number
-}
+import type { PolishRule, PolishSample } from "@/types/polish"
+import { api } from "@/lib/api"
 
 interface SelectionRange {
   start: number
@@ -31,7 +21,7 @@ interface PolishContextType {
   selectedRuleId: string
 
   // 风格样本
-  samples: PolishRule[]
+  samples: PolishSample[]
   selectedSampleIds: string[]
   toggleSampleId: (id: string) => void
 
@@ -70,7 +60,7 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
   const [panelOpen, setPanelOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [rules, setRules] = useState<PolishRule[]>([])
-  const [samples, setSamples] = useState<PolishRule[]>([])
+  const [samples, setSamples] = useState<PolishSample[]>([])
   const [selectedRuleId, setSelectedRuleId] = useState("")
   const [selectedSampleIds, setSelectedSampleIds] = useState<string[]>([])
   const [polishing, setPolishing] = useState(false)
@@ -105,10 +95,12 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
 
   async function fetchAllRules() {
     try {
-      const res = await fetch("/api/polish/rules")
-      const data = await res.json()
-      setRules(data.filter((r: any) => r.type === "base"))
-      setSamples(data.filter((r: any) => r.type === "sample"))
+      const [rulesData, samplesData] = await Promise.all([
+        api<PolishRule[]>({ url: "/api/polish/rules" }),
+        api<PolishSample[]>({ url: "/api/polish/samples" }),
+      ])
+      setRules(rulesData)
+      setSamples(samplesData)
     } catch {}
   }
 
@@ -183,16 +175,15 @@ export function PolishProvider({ children, editContent, setEditContent, editorRe
     }
 
     try {
-      const res = await fetch("/api/polish", {
+      const data = await api<{ error?: string; polishedText?: string }>({
+        url: "/api/polish",
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        data: body,
       })
-      const data = await res.json()
       if (data.error) {
         setPolishError(data.error)
       } else {
-        setPolishResult(data.polishedText)
+        setPolishResult(data.polishedText ?? "")
         setShowResultPopover(true)
         // 刷新数据
         fetchAllRules()

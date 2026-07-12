@@ -1,0 +1,123 @@
+entity: PolishRule
+
+fields:
+  name:
+    type: text
+    label: 规则名称
+    placeholder: "如：口语化→书面化"
+  description:
+    type: text
+    label: 规则描述
+    placeholder: 简单描述这个规则的作用
+  prompt:
+    type: longtext
+    label: 自定义补充说明
+    placeholder: 在此补充额外的润色要求...
+    maxLength: 1000
+    className: col-span-full
+  pace:
+    type: single
+    label: 节奏
+    options:
+      - { value: 快 }
+      - { value: 中 }
+      - { value: 慢 }
+    display: flex
+  mood:
+    type: multi
+    label: 情绪 / 氛围
+    max: 2
+    options:
+      - { value: 紧张 }
+      - { value: 压抑 }
+      - { value: 温馨 }
+      - { value: 荒诞 }
+      - { value: 沉重 }
+      - { value: 轻松 }
+      - { value: 悬疑 }
+      - { value: 悲怆 }
+    display: flex
+  narrative:
+    type: single
+    label: 叙事手法
+    options:
+      - { value: 展示 }
+      - { value: 告知 }
+      - { value: 混合 }
+    display: flex
+  senses:
+    type: multi
+    label: 五感
+    options:
+      - { value: 视觉 }
+      - { value: 听觉 }
+      - { value: 嗅觉 }
+      - { value: 味觉 }
+      - { value: 触觉 }
+    display: flex
+  character:
+    type: multi
+    label: 人物描写
+    options:
+      - { value: 神态/微表情 }
+      - { value: 动作/小动作 }
+      - { value: 心理/内心独白 }
+      - { value: 语言/语气 }
+    display: flex
+  environment:
+    type: multi
+    label: 环境描写
+    options:
+      - { value: 空间/陈设, description: 精细化描写空间布局和物品陈设，烘托场景氛围 }
+      - { value: 光影/天气, description: 强化光影变化与天气对氛围的烘托作用 }
+      - { value: 气味/声音, description: 利用环境中的气味与环境音增强场景真实感 }
+    display: flex
+  rhetoric:
+    type: single
+    label: 修辞
+    noLabel: true
+    options:
+      - { value: 可多用比喻/拟人 }
+      - { value: 偏白描/克制 }
+      - { value: 适度排比 }
+    display: flex
+  timeVariation:
+    type: toggle
+    label: 时间感与节奏变奏
+    display: between
+  contrastInsertion:
+    type: toggle
+    label: 对比/反差插入
+    display: between
+
+sections:
+  - type: card
+    title: 基本信息
+    icon: BookOpen
+    class: grid grid-cols-2 gap-4
+    fields: [name, description, prompt]
+
+  - type: grid
+    cols: 2
+    sections:
+      - type: card
+        title: 界限
+        class: space-y-4
+        fields: [pace, mood, narrative]
+      - type: card
+        title: 侧重点
+        class: space-y-4
+        fields: [senses, character, environment]
+
+  - type: tabs
+    title: 高级设置
+    children:
+      - key: rhetoric
+        label: 修辞
+        fields: [rhetoric]
+      - key: timeVariation
+        label: 时间感与节奏变奏
+        fields: [timeVariation]
+      - key: contrastInsertion
+        label: 对比/反差插入
+        fields: [contrastInsertion]

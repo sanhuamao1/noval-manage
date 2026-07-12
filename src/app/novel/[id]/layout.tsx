@@ -1,23 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { BookOpen, Users, FileText, Sparkles, ChevronLeft } from "lucide-react"
+import { BookOpen, Users, FileText, Sparkles, ScrollText, ChevronLeft } from "lucide-react"
 import Link from "next/link"
-
-interface Novel {
-  id: string
-  title: string
-  _count: {
-    chapters: number
-    characters: number
-  }
-}
+import { useAppStore } from "@/stores/useAppStore"
 
 const navItems = [
   { href: "", label: "概览", icon: BookOpen },
   { href: "/chapters", label: "章节", icon: FileText },
+  { href: "/outlines", label: "大纲", icon: ScrollText },
   { href: "/characters", label: "人物", icon: Users },
   { href: "/polish", label: "润色", icon: Sparkles },
 ]
@@ -30,15 +23,14 @@ export default function NovelLayout({
   const params = useParams()
   const pathname = usePathname()
   const router = useRouter()
-  const [novel, setNovel] = useState<Novel | null>(null)
   const id = params.id as string
+  const novel = useAppStore((s) => s.novel)
+  const init = useAppStore((s) => s.init)
 
   useEffect(() => {
-    fetch(`/api/novels?id=${id}`)
-      .then(res => res.json())
-      .then(data => setNovel(data))
-      .catch(() => {})
-  }, [id])
+    if (novel?.id === id) return;
+    init(id);
+  }, [id, novel?.id, init])
 
   const currentPath = pathname.replace(`/novel/${id}`, "") || ""
 
@@ -75,10 +67,10 @@ export default function NovelLayout({
                 <Icon className="w-4 h-4" />
                 <span className="flex-1">{item.label}</span>
                 {item.href === "/chapters" && (
-                  <span className="text-xs text-muted-foreground/60">{novel?._count.chapters ?? 0}</span>
+                  <span className="text-xs text-muted-foreground/60">{novel?._count?.chapters ?? 0}</span>
                 )}
                 {item.href === "/characters" && (
-                  <span className="text-xs text-muted-foreground/60">{novel?._count.characters ?? 0}</span>
+                  <span className="text-xs text-muted-foreground/60">{novel?._count?.characters ?? 0}</span>
                 )}
               </Link>
             )

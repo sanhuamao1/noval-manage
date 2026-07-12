@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
-import { Button, AddButton } from "@/components/ui/button";
-import { NoBorderInput } from "@/components/ui/no-border-input";
+import { Button, AddButton, NoBorderInput, SimpleTabs } from "@/components/ui";
 import {
     Trash2,
     Save,
@@ -18,12 +17,12 @@ import {
     Indent,
 } from "lucide-react";
 import { wordCount } from "@/lib/utils";
+import { api } from "@/lib/api";
 import { PolishProvider } from "@/components/polish/PolishContext";
 import { ChapterEditor } from "@/components/chapters/ChapterEditor";
 import { SelectionMenu } from "@/components/polish/SelectionMenu";
 import { PolishResultPopover } from "@/components/polish/PolishResultPopover";
 import { PolishPanel } from "@/components/polish/PolishPanel";
-import { SimpleTabs } from "@/components/tabs";
 
 interface Chapter {
     id: string;
@@ -67,34 +66,26 @@ export default function ChaptersPage() {
     }, [id]);
 
     async function fetchChapters() {
-        const res = await fetch(`/api/chapters?novelId=${id}`);
-        const data = await res.json();
+        const data = await api<Chapter[]>({ url: `/api/chapters?novelId=${id}` });
         setChapters(data);
     }
 
     async function createChapter() {
-        const res = await fetch("/api/chapters", {
+        const newChapter = await api<Chapter>({
+            url: "/api/chapters",
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                novelId: id,
-                title: "未命名章节",
-                content: "",
-            }),
+            data: { novelId: id, title: "未命名章节", content: "" },
         });
-        if (res.ok) {
-            const newChapter = await res.json();
-            setSelectedChapter(newChapter);
-            setEditTitle(newChapter.title);
-            setEditContent("");
-            setJustCreated(true);
-            fetchChapters();
-        }
+        setSelectedChapter(newChapter);
+        setEditTitle(newChapter.title);
+        setEditContent("");
+        setJustCreated(true);
+        fetchChapters();
     }
 
     async function deleteChapter(chapterId: string) {
         if (!confirm("确定要删除这个章节吗？")) return;
-        await fetch(`/api/chapters?id=${chapterId}`, { method: "DELETE" });
+        await api({ url: `/api/chapters?id=${chapterId}`, method: "DELETE" });
         if (selectedChapter?.id === chapterId) setSelectedChapter(null);
         fetchChapters();
     }
@@ -102,10 +93,10 @@ export default function ChaptersPage() {
     async function toggleStatus(chapter: Chapter) {
         const newStatus =
             chapter.status === "published" ? "draft" : "published";
-        await fetch("/api/chapters", {
+        await api({
+            url: "/api/chapters",
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: chapter.id, status: newStatus }),
+            data: { id: chapter.id, novelId: id, status: newStatus },
         });
         if (selectedChapter?.id === chapter.id) {
             setSelectedChapter({ ...selectedChapter, status: newStatus });
@@ -129,14 +120,15 @@ export default function ChaptersPage() {
     const saveChapter = useCallback(async () => {
         if (!selectedChapter) return;
         setSaving(true);
-        await fetch("/api/chapters", {
+        await api({
+            url: "/api/chapters",
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+            data: {
                 id: selectedChapter.id,
+                novelId: id,
                 title: editTitle,
                 content: editContent,
-            }),
+            },
         });
         setSaving(false);
         fetchChapters();

@@ -1,0 +1,42 @@
+entity: PolishSample
+
+fields:
+  name:
+    type: text
+    label: 样本标题
+    placeholder: "如：Boss 战节奏范本"
+  prompt:
+    type: text
+    label: 提示/注释
+    placeholder: 对样本的写作要点说明
+  sceneType:
+    type: single
+    label: 场景类型
+    options:
+      - { value: 战斗, icon: Swords, color: red }
+      - { value: 对话, icon: MessageSquare, color: sky }
+      - { value: 环境, icon: Trees, color: emerald }
+      - { value: 心理, icon: Brain, color: violet }
+      - { value: 其他, icon: Layers, color: default }
+    display: flex
+  text:
+    type: longtext
+    label: 样本正文
+    maxLength: 600
+    placeholder: 粘贴样本正文（不超过 600 字）...
+  isNegative:
+    type: toggle
+    label: 设为反例（请避免的风格）
+    display: between
+
+sections:
+  - type: card
+    title: 基本信息
+    icon: FileText
+    class: grid grid-cols-2 gap-4
+    fields: [name, prompt]
+
+  - type: card
+    title: 样本内容
+    class: space-y-3
+    fields: [sceneType, text, isNegative]

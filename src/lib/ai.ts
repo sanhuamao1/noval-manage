@@ -1,12 +1,12 @@
-import { DEFAULT_POLISH_CONFIG, buildConfigInstructions } from "@/lib/configs/polish-defs"
-import { parseConfig } from "@/lib/configs/config-utils"
+import { buildConfigInstructions, fillConfig, ConfigEntity } from "@/lib/configs/config-registry"
+import type { PolishRuleConfig } from "@/lib/configs/generated"
 
 export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {
   const url = process.env.AI_BASE_URL || ""
   const model = process.env.AI_MODEL
   const key = process.env.AI_API_KEY
 
-  console.log(url,model)
+  console.log(url, model)
 
   if (!key) {
     throw new Error('请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）')
@@ -38,18 +38,24 @@ export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) 
   return data.choices[0].message.content
 }
 
-
+/** 风格样本（用于 prompt 构建） */
+interface StyleSample {
+  title: string;
+  annotation: string | null;
+  text: string;
+  isNegative: boolean;
+}
 
 /** 构建风格样本注入 Prompt（只塞标题 + 注释 + 原文，不塞数值特征） */
 export function buildStylePrompt(
-  samples: { title: string; annotation?: string | null; text: string; is_negative: boolean }[],
+  samples: StyleSample[],
 ): string {
   if (samples.length === 0) return ""
 
   let prompt = "【风格参考】\n\n"
 
   samples.forEach((s, i) => {
-    if (s.is_negative) {
+    if (s.isNegative) {
       prompt += `【反例 ${i + 1} - 请避免】${s.title}\n`
     } else {
       prompt += `【样本 ${i + 1}】${s.title}\n`
@@ -64,7 +70,7 @@ export function buildStylePrompt(
 }
 
 export function buildPolishPrompt(
-  rule: { name: string; description?: string | null; prompt?: string; config?: string },
+  rule: { name: string; description?: string | null; prompt?: string } & Record<string, unknown>,
   text: string,
 ): string {
   const parts: string[] = []
@@ -74,15 +80,14 @@ export function buildPolishPrompt(
     parts.push(`\n规则说明：${rule.description}`)
   }
 
-  if (rule.config) {
-    const parsed = parseConfig(rule.config, DEFAULT_POLISH_CONFIG)
-    const section = buildConfigInstructions(parsed)
-    if (section.trim()) {
-      parts.push(`\n${section}`)
-    }
+  // 从注册表获取字段定义和默认值，只填充合法字段
+  const config = fillConfig(ConfigEntity.POLISH_RULE, rule as Record<string, unknown>) as PolishRuleConfig
+  const section = buildConfigInstructions(config)
+  if (section.trim()) {
+    parts.push(`\n${section}`)
   }
 
-  if (rule.prompt && !rule.config) {
+  if (rule.prompt && !section) {
     parts.push(`\n规则补充：${rule.prompt}`)
   }
 

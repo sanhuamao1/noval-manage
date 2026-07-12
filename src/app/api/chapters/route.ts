@@ -1,55 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { list, get, put, remove, genId, nextSortOrder } from '@/lib/store'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const novelId = searchParams.get('novelId')
-  if (!novelId) {
-    return NextResponse.json({ error: '缺少 novelId' }, { status: 400 })
-  }
-  const chapters = await prisma.chapter.findMany({
-    where: { novelId },
-    orderBy: { sortOrder: 'asc' },
-  })
+  if (!novelId) return NextResponse.json({ error: '缺少 novelId' }, { status: 400 })
+  const chapters = list('chapter', novelId)
   return NextResponse.json(chapters)
 }
 
 export async function POST(req: NextRequest) {
   const { novelId, title, content } = await req.json()
-  
-  // 获取当前最大排序值
-  const lastChapter = await prisma.chapter.findFirst({
-    where: { novelId },
-    orderBy: { sortOrder: 'desc' },
-  })
-  const sortOrder = (lastChapter?.sortOrder ?? -1) + 1
-
-  const chapter = await prisma.chapter.create({
-    data: { novelId, title, content, sortOrder },
-  })
+  if (!novelId) return NextResponse.json({ error: '缺少 novelId' }, { status: 400 })
+  const id = genId()
+  const sortOrder = nextSortOrder('chapter', novelId)
+  put('chapter', id, { novelId, title: title ?? '', content: content ?? '', status: 'draft', sortOrder, relatedCharacters: null }, novelId)
+  const chapter = get('chapter', id, novelId)
   return NextResponse.json(chapter)
 }
 
 export async function PUT(req: NextRequest) {
-  const { id, title, content, status, relatedCharacters } = await req.json()
-  const data: any = {}
-  if (title !== undefined) data.title = title
-  if (content !== undefined) data.content = content
-  if (status !== undefined) data.status = status
-  if (relatedCharacters !== undefined) data.relatedCharacters = relatedCharacters
-  const chapter = await prisma.chapter.update({
-    where: { id },
-    data,
-  })
+  const { id, novelId, ...data } = await req.json()
+  if (!id) return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
+  put('chapter', id, data, novelId)
+  const chapter = get('chapter', id, novelId)
   return NextResponse.json(chapter)
 }
 
 export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
-  if (!id) {
-    return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
-  }
-  await prisma.chapter.delete({ where: { id } })
+  const novelId = searchParams.get('novelId')
+  if (!id) return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
+  remove('chapter', id, novelId ?? undefined)
   return NextResponse.json({ success: true })
 }

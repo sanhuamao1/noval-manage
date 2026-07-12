@@ -16,8 +16,9 @@ model Novel {
   updatedAt   DateTime          @updatedAt
   chapters    Chapter[]
   characters  Character[]
-  outlines    Outline[]
-  brainstorms Brainstorm[]
+  outlines      Outline[]
+  locations     Location[]
+  foreshadowings Foreshadowing[]
 }
 
 model Chapter {
@@ -31,7 +32,7 @@ model Chapter {
   sortOrder         Int                @default(0)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
-  characterEmotions CharacterEmotion[]
+  outline Outline?
 }
 
 model Character {
@@ -56,31 +57,34 @@ model PolishRule {
   createdAt   DateTime @default(now())
 }
 
-// === 大纲 (用户计划的功能) ===
-// 支持层级结构（parentId 实现树形），用于故事大纲、情节设计、时间线
+// === 大纲 ===
+// 与章节 1:1 关联，包含章纲的完整信息
 model Outline {
-  id          String    @id @default(cuid())
-  novelId     String
-  novel       Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  parentId    String?   // 父节点ID，支持层级结构
-  title       String
-  content     String?   // 详细内容/描述
-  type        String    @default("chapter")  // chapter: 章, arc: 弧光, plot: 情节, scene: 场景
-  sortOrder   Int       @default(0)
-  startChapterId String? // 关联起始章节
-  endChapterId   String? // 关联结束章节
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  novelId       String
+  novel         Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapterId     String?   @unique
+  chapter       Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  title         String
+  contentBrief  String?
+  contentDetail String?
+  status        String    @default("planned")  // planned / in_progress / completed
+  sortOrder     Int       @default(0)
+  config        String    @default("{}")  // JSON: { timeline, tone, characterIds[], locationIds[], foreshadowingIds[] }
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  characterEmotions CharacterEmotion[]
+  keyEvents         KeyEvent[]
 }
 
-// === 人物情感/状态追踪 (用户计划的功能) ===
-// 记录人物在具体章节/场景中的情感状态和情绪变化
+// === 人物情感/状态追踪 ===
+// 记录人物在大纲中的情感状态（一条记录一个状态，多条表示连续变化）
 model CharacterEmotion {
   id          String    @id @default(cuid())
   characterId String
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  chapterId   String?
-  chapter     Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  outlineId   String
+  outline     Outline   @relation(fields: [outlineId], references: [id], onDelete: Cascade)
   emotion     String    // 情绪类型：喜悦/悲伤/愤怒/恐惧/惊讶/厌恶/爱/恨/焦虑/平静/...
   intensity   Int       @default(5)   // 情绪强度 1-10
   state       String?   // 人物状态/处境描述
@@ -88,16 +92,35 @@ model CharacterEmotion {
   createdAt   DateTime  @default(now())
 }
 
-// === 头脑风暴 (用户计划的功能) ===
-// 灵感卡片/写作点子/情节构思
-model Brainstorm {
-  id          String   @id @default(cuid())
-  novelId     String
-  novel       Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  title       String
-  content     String
-  tags        String?  // JSON 标签数组 ["人物","情节"]
-  type        String   @default("idea")  // idea: 灵感, twist: 反转, setting: 设定, note: 笔记
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// === 地点 ===
+// 作品中的地点/场景，与 novel 关联，大纲中通过 locationIds 引用
+model Location {
+  id        String   @id @default(cuid())
+  novelId   String
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// === 伏笔 ===
+// 作品中的伏笔，与 novel 关联，大纲中通过 foreshadowingIds 引用
+model Foreshadowing {
+  id        String   @id @default(cuid())
+  novelId   String
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// === 关键事件 ===
+// 绑定到具体大纲
+model KeyEvent {
+  id        String   @id @default(cuid())
+  outlineId String
+  outline   Outline  @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+  title     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
 }

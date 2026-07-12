@@ -1,22 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { AddButton } from "@/components/ui/button";
-import { SlidingDrawer } from "@/components/ui/drawer";
-import { PageLayout } from "@/components/PageLayout";
-import { CardList } from "@/components/CardList";
-import { SimpleCard } from "@/components/ui/card";
-import { CharacterEditor, type CharacterEditorHandle } from "@/components/character/CharacterEditor";
-import { parseConfig } from "@/lib/configs/config-utils";
-import { ConfigBadges } from "@/lib/configs/render-utils";
-import { buildConfigTags } from "@/lib/configs/render-utils";
-import { DEFAULT_CHARACTER_CONFIG } from "@/lib/configs/character-defs";
+import { AddButton, SlidingDrawer, PageLayout, CardList, SimpleCard } from "@/components/ui";
+import { renderSections, ConfigBadges, buildConfigTags } from "@/lib/configs/render-utils";
+import { getEntry, fillConfig, ConfigEntity } from "@/lib/configs/config-registry";
+import type { CharacterConfig } from "@/lib/configs/generated";
+import { api } from "@/lib/api";
 
 interface Character {
   id: string;
   name: string;
-  config: string | null;
+  [key: string]: unknown;
 }
 
 export default function CharactersPage() {
@@ -25,48 +20,49 @@ export default function CharactersPage() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [mode, setMode] = useState<"create" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const editorRef = useRef<CharacterEditorHandle>(null);
+  const { sections: charSections, defaults: charDefaults } = getEntry(ConfigEntity.CHARACTER);
+  const [editorConfig, setEditorConfig] = useState<CharacterConfig>(charDefaults);
 
   useEffect(() => {
     fetchCharacters();
   }, [id]);
 
   async function fetchCharacters() {
-    const res = await fetch(`/api/characters?novelId=${id}`);
-    const data = await res.json();
+    const data = await api<Character[]>({ url: `/api/characters?novelId=${id}` });
     setCharacters(data);
   }
 
   function openForEdit(char: Character) {
     setMode("edit");
     setEditingId(char.id);
+    setEditorConfig(fillConfig(ConfigEntity.CHARACTER, char as Record<string, unknown>));
   }
 
   function startCreate() {
     setMode("create");
     setEditingId(null);
+    setEditorConfig(charDefaults as CharacterConfig);
   }
 
   async function saveCharacter() {
-    if (!editorRef.current) return;
-    const { name, config } = editorRef.current.getData();
-    if (!name.trim()) return;
+    const name = String(editorConfig.name ?? "").trim();
+    if (!name) return;
+
+    const { id: _, novelId: __, createdAt: ___, updatedAt: ____, ...config } = editorConfig as any;
 
     if (mode === "create") {
-      const res = await fetch("/api/characters", {
+      await api({
+        url: "/api/characters",
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ novelId: id, name: name.trim(), config: JSON.stringify(config) }),
+        data: { novelId: id, name, ...config },
       });
-      if (!res.ok) return;
       fetchCharacters();
     } else if (mode === "edit" && editingId) {
-      const res = await fetch("/api/characters", {
+      await api({
+        url: "/api/characters",
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingId, name, config: JSON.stringify(config) }),
+        data: { id: editingId, novelId: id, ...config },
       });
-      if (!res.ok) return;
       fetchCharacters();
     }
     setMode(null);
@@ -75,15 +71,13 @@ export default function CharactersPage() {
 
   async function deleteCharacter(charId: string) {
     if (!confirm("确定要删除这个人物吗？")) return;
-    await fetch(`/api/characters?id=${charId}`, { method: "DELETE" });
+    await api({ url: `/api/characters?id=${charId}&novelId=${id}`, method: "DELETE" });
     if (editingId === charId) {
       setMode(null);
       setEditingId(null);
     }
     fetchCharacters();
   }
-
-  const editingChar = editingId ? characters.find((c) => c.id === editingId) ?? null : null;
 
   return (
     <PageLayout
@@ -92,23 +86,23 @@ export default function CharactersPage() {
       drawer={
         <SlidingDrawer
           open={mode !== null}
-          onClose={() => { setMode(null); setEditingId(null); }}
+          onClose={() => {
+            setMode(null);
+            setEditingId(null);
+          }}
           width={890}
           onCreate={mode === "create" ? saveCharacter : undefined}
           onUpdate={mode === "edit" ? saveCharacter : undefined}
         >
-          <CharacterEditor
-            key={editingId ?? "create"}
-            ref={editorRef}
-            initialName={editingChar?.name ?? ""}
-            initialConfig={parseConfig(editingChar?.config, DEFAULT_CHARACTER_CONFIG)}
-          />
+          <div className="space-y-4">
+            {renderSections(charSections, editorConfig, (c) => setEditorConfig(c))}
+          </div>
         </SlidingDrawer>
       }
     >
       <CardList emptyText="还没有人物，点击上方按钮添加">
         {characters.map((char) => {
-          const cfg = parseConfig(char.config, DEFAULT_CHARACTER_CONFIG);
+          const cfg = fillConfig(ConfigEntity.CHARACTER, char as Record<string, unknown>);
           return (
             <SimpleCard
               key={char.id}

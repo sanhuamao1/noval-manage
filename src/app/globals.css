@@ -53,4 +53,7 @@
   body {
     @apply bg-bg-950 text-fg-primary;
   }
+  .parent > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;  /* 或者 span 2 */
+  }
 }
