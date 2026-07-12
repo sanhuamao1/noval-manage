@@ -1,7 +1,8 @@
 "use client";
 
 import { useAppStore } from "@/stores/useAppStore";
-import { ENTITY_META } from "@/lib/entities";
+import { api } from "@/lib/api";
+import type { RefreshKey } from "@/stores/useAppStore";
 
 /** 实体条目基础类型 */
 export interface EntityItemBase {
@@ -15,15 +16,22 @@ export interface EntityItemBase {
  *
  * @example
  * ```ts
- * const { items, createFn } = useEntityItems<Character>(entity);
+ * const { items, createFn } = useEntityItems<Character>("characters");
  * ```
  */
 export function useEntityItems<T extends EntityItemBase = EntityItemBase>(entity: string) {
-  const meta = ENTITY_META[entity];
-  const items = (useAppStore((s) => (s as any)[meta.storeKey] ?? []) ?? []) as T[];
-  const createFn = useAppStore((s) => (s as any)[meta.createAction]) as (
-    novelId: string,
-    name: string,
-  ) => Promise<T>;
+  const items = (useAppStore((s) => (s as any)[entity] ?? []) ?? []) as T[];
+  const mutate = useAppStore((s) => s.mutate);
+
+  const createFn = async (novelId: string, name: string): Promise<T> => {
+    return mutate<T>(novelId, entity as RefreshKey, () =>
+      api<T>({
+        url: `/api/${entity}`,
+        method: "POST",
+        data: { novelId, name },
+      }),
+    );
+  };
+
   return { items, createFn } as const;
 }

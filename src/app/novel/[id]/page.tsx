@@ -11,12 +11,13 @@ import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
 import { NovelOverviewPreview } from "@/components/novel/NovelOverviewPreview";
 import { useAppStore } from "@/stores/useAppStore";
+import { api } from "@/lib/api";
 
 export default function NovelOverview() {
   const params = useParams();
   const id = params.id as string;
   const novel = useAppStore((s) => s.novel);
-  const updateNovel = useAppStore((s) => s.updateNovel);
+  const mutate = useAppStore((s) => s.mutate);
   const { fields, sections, defaults } = getEntry(ConfigEntity.NOVEL);
   const [editorConfig, setEditorConfig] = useState<NovelConfig>(defaults);
 
@@ -31,7 +32,9 @@ export default function NovelOverview() {
   async function handleSave() {
     const title = String(editorConfig.title ?? "").trim();
     if (!title) return;
-    await updateNovel(id, editorConfig);
+    await mutate(id, "novel", () =>
+      api({ url: `/api/novels/${id}`, method: "PATCH", data: editorConfig as Record<string, unknown> }),
+    );
     drawer.close();
   }
 

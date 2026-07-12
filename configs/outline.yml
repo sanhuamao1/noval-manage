@@ -37,15 +37,15 @@ fields:
   characterIds:
     type: tagselect
     label: 出场人物
-    entity: character
+    entity: characters
   locationIds:
     type: tagselect
     label: 地点
-    entity: location
+    entity: locations
   foreshadowingIds:
     type: tagselect
     label: 伏笔
-    entity: foreshadowing
+    entity: foreshadowings
 
 sections:  
   - type: grid

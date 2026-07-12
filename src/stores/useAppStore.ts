@@ -2,6 +2,16 @@ import { create } from "zustand";
 import type { NovelData } from "@/types/novel";
 import { api } from "@/lib/api";
 
+export type RefreshKey = "novel" | "characters" | "locations" | "foreshadowings" | "outlines";
+
+const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
+  novel:          (id) => `/api/novels?id=${id}`,
+  characters:     (id) => `/api/characters?novelId=${id}`,
+  locations:      (id) => `/api/locations?novelId=${id}`,
+  foreshadowings: (id) => `/api/foreshadowings?novelId=${id}`,
+  outlines:       (id) => `/api/outlines?novelId=${id}`,
+};
+
 interface AppStore {
   novel: NovelData | null;
 
@@ -14,11 +24,12 @@ interface AppStore {
   init: (novelId: string) => Promise<void>;
   setOutlines: (os: Record<string, unknown>[]) => void;
 
-  // 实体变更 action（内部处理 API + store）
-  updateNovel: (novelId: string, data: Record<string, any>) => Promise<void>;
-  createCharacter: (novelId: string, name: string) => Promise<{ id: string; name: string }>;
-  createLocation: (novelId: string, name: string) => Promise<{ id: string; name: string }>;
-  createForeshadowing: (novelId: string, name: string) => Promise<{ id: string; name: string }>;
+  // 通用 mutate：执行 apiCall + 自动刷新对应 key 的数据
+  mutate: <T>(
+    novelId: string,
+    refreshKey: RefreshKey,
+    apiCall: () => Promise<T>,
+  ) => Promise<T>;
 
   reset: () => void;
 }
@@ -46,38 +57,16 @@ export const useAppStore = create<AppStore>((set) => ({
 
   setOutlines: (outlines) => set({ outlines }),
 
-  updateNovel: async (novelId, data) => {
-    await api({ url: `/api/novels/${novelId}`, method: "PATCH", data });
-    const novel = await api<NovelData>({ url: `/api/novels?id=${novelId}` });
-    set({ novel });
-  },
-
-  createCharacter: async (novelId, name) => {
-    const created = await api<{ id: string; name: string }>({
-      url: "/api/characters",
-      method: "POST",
-      data: { novelId, name },
-    });
-    set((s) => ({ characters: [...s.characters, created] }));
-    return created;
-  },
-  createLocation: async (novelId, name) => {
-    const created = await api<{ id: string; name: string }>({
-      url: "/api/locations",
-      method: "POST",
-      data: { novelId, name },
-    });
-    set((s) => ({ locations: [...s.locations, created] }));
-    return created;
-  },
-  createForeshadowing: async (novelId, name) => {
-    const created = await api<{ id: string; name: string }>({
-      url: "/api/foreshadowings",
-      method: "POST",
-      data: { novelId, name },
-    });
-    set((s) => ({ foreshadowings: [...s.foreshadowings, created] }));
-    return created;
+  mutate: async <T>(
+    novelId: string,
+    refreshKey: RefreshKey,
+    apiCall: () => Promise<T>,
+  ): Promise<T> => {
+    const result = await apiCall();
+    const url = KEY_API[refreshKey](novelId);
+    const freshData = await api<unknown>({ url });
+    set({ [refreshKey]: freshData });
+    return result;
   },
 
   reset: () => set(initial),
