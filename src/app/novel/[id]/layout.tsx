@@ -39,12 +39,8 @@ export default function NovelLayout({
       {/* 侧边栏 */}
       <aside className="w-64 border-r bg-card flex flex-col">
         <div className="p-4 border-b">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/")}
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            返回
+          <Button variant="ghost" size="icon" onClick={() => router.push("/")}>
+            <ChevronLeft className="w-4 h-4" />
           </Button>
           <h2 className="font-semibold text-lg truncate">
             {novel?.title || "加载中..."}
@@ -79,7 +75,7 @@ export default function NovelLayout({
       </aside>
 
       {/* 主内容区 */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto flex">
         {children}
       </main>
     </>

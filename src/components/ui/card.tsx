@@ -79,46 +79,69 @@ interface SimpleCardProps {
   title: string
   description?: string | null
   icon?: LucideIcon
+  size?: "sm" | "md"
   selected?: boolean
   onClick?: () => void
   onDelete?: () => void
   children?: React.ReactNode
 }
 
+const sizeStyles = {
+  sm: {
+    icon: "w-4 h-4",
+    containerGap: "gap-3",
+    containerPadding: "p-4",
+    title: "text-sm",
+    description: "text-xs",
+    children: "mt-2",
+  },
+  md: {
+    icon: "w-5 h-5",
+    containerGap: "gap-4",
+    containerPadding: "p-5",
+    title: "text-base",
+    description: "text-sm",
+    children: "mt-3",
+  },
+} as const
+
 const SimpleCard = React.forwardRef<HTMLDivElement, SimpleCardProps>(
-  ({ title, description, selected, icon: Icon, onClick, onDelete, children }, ref) => (
-    <div
-      ref={ref}
-      className={`border rounded-lg p-4 bg-bg-800 group cursor-pointer transition-colors ${selected ? "border-primary shadow-sm" : "hover:border-primary/50"
-        }`}
-      onClick={onClick}
-    >
-      <div className="flex gap-3">
-        {Icon && (
-          <div className="flex items-start pt-0.5 shrink-0">
-            <Icon className="w-4 h-4 text-muted-foreground" />
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between mb-1">
-            <h3 className="font-medium text-sm truncate">{title}</h3>
-            {onDelete && (
-              <Button variant="destructive" size="auto" onClick={(e) => {
-                e.stopPropagation()
-                onDelete()
-              }}>
-                <Trash2 className="w-3 h-3 text-destructive" />
-              </Button>
-            )}
-          </div>
-          {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
+  ({ title, description, size: sizeProp = "sm", icon: Icon, selected, onClick, onDelete, children }, ref) => {
+    const s = sizeStyles[sizeProp]
+    return (
+      <div
+        ref={ref}
+        className={`border rounded-lg ${s.containerPadding} bg-bg-800 group cursor-pointer transition-colors ${selected ? "border-primary shadow-sm" : "hover:border-primary/50"
+          }`}
+        onClick={onClick}
+      >
+        <div className={`flex ${s.containerGap}`}>
+          {Icon && (
+            <div className="flex items-start pt-0.5 shrink-0">
+              <Icon className={`${s.icon} text-muted-foreground`} />
+            </div>
           )}
-          {children}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between mb-1">
+              <h3 className={`font-medium ${s.title} truncate`}>{title}</h3>
+              {onDelete && (
+                <Button variant="destructive" size="auto" onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                }}>
+                  <Trash2 className="w-3 h-3 text-destructive" />
+                </Button>
+              )}
+            </div>
+            {description && (
+              <p className={`${s.description} text-muted-foreground`}>{description}</p>
+            )}
+            {children && <div className={s.children}>{children}</div>}
+          </div>
         </div>
       </div>
-    </div>
-  ),
+    )
+  },
 )
 SimpleCard.displayName = "SimpleCard"
 

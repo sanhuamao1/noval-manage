@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-12T17:11:53.715Z，勿手动编辑
+// 自动生成于 2026-07-13T07:27:21.319Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import type { ConfigSection, ConfigFieldDef, ConfigOption } from "./config-utils";
@@ -1737,19 +1737,19 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                     "key": "characterIds",
                     "label": "出场人物",
                     "type": "tagselect",
-                    "entity": "character"
+                    "entity": "characters"
                   },
                   {
                     "key": "locationIds",
                     "label": "地点",
                     "type": "tagselect",
-                    "entity": "location"
+                    "entity": "locations"
                   },
                   {
                     "key": "foreshadowingIds",
                     "label": "伏笔",
                     "type": "tagselect",
-                    "entity": "foreshadowing"
+                    "entity": "foreshadowings"
                   }
                 ]
               }
@@ -1885,19 +1885,19 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "key": "characterIds",
         "label": "出场人物",
         "type": "tagselect",
-        "entity": "character"
+        "entity": "characters"
       },
       {
         "key": "locationIds",
         "label": "地点",
         "type": "tagselect",
-        "entity": "location"
+        "entity": "locations"
       },
       {
         "key": "foreshadowingIds",
         "label": "伏笔",
         "type": "tagselect",
-        "entity": "foreshadowing"
+        "entity": "foreshadowings"
       }
     ]
   },

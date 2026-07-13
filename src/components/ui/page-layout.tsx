@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
 interface PageLayoutProps {
   /** 页面标题 */
   title?: string;
-  /** 标题右侧操作区（如编辑按钮） */
+  /** 标题下方的描述文字 */
+  description?: string;
+  /** 标题右侧操作区（如编辑/添加按钮） */
   handler?: ReactNode;
   /** 页面主内容区 */
   children?: ReactNode;
@@ -13,23 +15,23 @@ interface PageLayoutProps {
   drawer?: ReactNode;
 }
 
-export function PageLayout({ title, handler, children, drawer }: PageLayoutProps) {
+export function PageLayout({ title, description, handler, children, drawer }: PageLayoutProps) {
   return (
-    <div className="flex h-full">
-      <div className="min-w-0 flex-1 overflow-auto p-8">
-        <div className="mx-auto max-w-6xl space-y-8">
-          {/* 顶部标题行 */}
-          {title && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold">{title}</h1>
-                {handler}
-              </div>
+    <div className="flex-1 overflow-auto flex">
+      <div className="mx-auto p-8 max-w-4xl flex-1">
+        {(title || handler) && (
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              {title && <h1 className="text-3xl font-bold">{title}</h1>}
+              {description && (
+                <p className="text-muted-foreground mt-1">{description}</p>
+              )}
             </div>
-          )}
+            {handler}
+          </div>
+        )}
 
-          {children}
-        </div>
+        {children}
       </div>
 
       {drawer}

@@ -1,20 +1,23 @@
 import type { ReactNode } from "react";
+import { BookOpen } from 'lucide-react'
 
 interface CardListProps {
   emptyText: string;
   children: ReactNode;
-  className?: string;
 }
 
-export function CardList({ emptyText, children, className }: CardListProps) {
+export function CardList({ emptyText, children }: CardListProps) {
   const isEmpty = !children || (Array.isArray(children) && children.length === 0);
 
   return (
-    <div className={className ?? "flex max-w-md flex-col gap-2"}>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-4">
       {isEmpty ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          {emptyText}
-        </p>
+        <div className="text-center py-20">
+          <BookOpen className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
+          <h2 className="text-xl font-semibold text-muted-foreground mb-2">还没有内容</h2>
+          <p className="text-muted-foreground mb-6">{emptyText}</p>
+        </div>
+
       ) : (
         children
       )}

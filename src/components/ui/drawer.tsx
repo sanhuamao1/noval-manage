@@ -23,7 +23,7 @@ function SlidingDrawer({ open, onClose, width = 620, title, onCreate, onUpdate, 
     "w-8 h-8 flex items-center justify-center rounded-l-lg shadow-md transition-opacity"
 
   return (
-    <div className="relative flex-shrink-0 h-full border-l border-border-subtle bg-bg-800/50">
+    <div className={cn("relative flex-shrink-0 h-full border-l border-border-subtle bg-bg-800/50", open && "ml-8")}>
       {/* 书签式按钮组 */}
       {open && (onClose || onCreate || onUpdate) && (
         <div className="absolute -left-4 top-8 -translate-x-1/2 z-10 flex flex-col gap-3">
