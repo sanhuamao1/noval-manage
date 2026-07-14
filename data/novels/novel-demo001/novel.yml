@@ -1,16 +1,17 @@
 id: novel-demo001
 title: 暗潮22
 description: 一个关于复仇与救赎的玄幻悬疑故事
-status: 连载中
+status: 已完结
 genre:
   - 玄幻
   - 悬疑
 enablePreset: false
-primaryTone: 悬疑紧张
+primaryTone: 唯美浪漫
 secondaryTones:
   - 沉郁黑暗
-worldType: 东方玄幻
-worldShape: 大陆
+  - 冷峻克制
+worldType: 星际科幻
+worldShape: 星球
 createdAt: '2026-07-01T10:00:00.000Z'
-updatedAt: '2026-07-13T09:49:27.275Z'
-presetStyle: 古龙体
+updatedAt: '2026-07-14T13:36:29.011Z'
+presetStyle: 网文爽文体

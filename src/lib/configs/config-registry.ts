@@ -1,8 +1,9 @@
-import { CONFIGS, ConfigEntity } from "./generated";
-export { ConfigEntity } from "./generated";
-import type { EntityConfigMap } from "./generated";
+import { CONFIGS } from "./generated";
+import { ConfigEntity } from "@/types";
+export { ConfigEntity } from "@/types";
+import type { EntityConfigMap } from "@/types";
 import { buildDefaultValues } from "./config-utils";
-import type { ConfigFieldDef, ConfigSection } from "./config-utils";
+import type { ConfigFieldDef, ConfigSection } from "@/types";
 
 // ── 注册表 ──
 

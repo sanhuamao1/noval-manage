@@ -1,6 +1,6 @@
 import { buildConfigInstructions, ConfigEntity, getEntry } from "@/lib/configs/config-registry"
 import { fillConfig } from "@/lib/configs/config-utils"
-import { PolishRuleConfig, PolishSampleConfig } from '@/lib/configs/generated'
+import type { PolishRuleConfig, PolishSampleConfig } from '@/types/entityConfig'
 import { api } from './api'
 
 export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {

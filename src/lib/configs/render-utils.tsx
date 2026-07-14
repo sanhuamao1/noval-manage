@@ -2,7 +2,7 @@ import {
     type ConfigFieldDef,
     type ConfigOption,
     type ConfigSection,
-} from "@/lib/configs/config-utils";
+} from "@/types";
 import {
     RadioGroup,
     Toggle,

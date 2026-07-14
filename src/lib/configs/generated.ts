@@ -1,104 +1,7 @@
-// 自动生成于 2026-07-14T04:06:57.905Z，勿手动编辑
+// 自动生成于 2026-07-14T14:36:20.338Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
-import type { ConfigSection, ConfigFieldDef } from "./config-utils";
-
-export interface EntityConfig {
-  entity: string;
-  sections: ConfigSection[];
-  fields: ConfigFieldDef[];
-}
-
-// ── 配置类型接口（由 YAML 字段定义自动推导）──
-
-/** Novel 配置类型 */
-export interface NovelConfig {
-  title?: string | undefined;
-  description?: string | undefined;
-  status?: string | undefined;
-  genre?: string[];
-  enablePreset?: boolean;
-  presetStyle?: string | undefined;
-  primaryTone?: string | undefined;
-  secondaryTones?: string[];
-  worldType?: string | undefined;
-  worldShape?: string | undefined;
-}
-
-/** Character 配置类型 */
-export interface CharacterConfig {
-  name?: string | undefined;
-  gender?: string | undefined;
-  role?: string | undefined;
-  age?: string | undefined;
-  identity?: string | undefined;
-  item?: string | undefined;
-  coreConflict?: string | undefined;
-  emotionExpression?: string | undefined;
-  abilities?: string[];
-  growthArcs?: string[];
-  relationships?: string[];
-  notes?: string[];
-  narrativeFunction?: string[];
-  innerMotivation?: string[];
-}
-
-/** Outline 配置类型 */
-export interface OutlineConfig {
-  title?: string | undefined;
-  contentBrief?: string | undefined;
-  contentDetail?: string | undefined;
-  status?: string | undefined;
-  timeline?: string | undefined;
-  tone?: string | undefined;
-  characterIds?: string[];
-  locationIds?: string[];
-  foreshadowingIds?: string[];
-}
-
-/** PolishRule 配置类型 */
-export interface PolishRuleConfig {
-  name?: string | undefined;
-  description?: string | undefined;
-  prompt?: string | undefined;
-  pace?: string | undefined;
-  mood?: string[];
-  narrative?: string | undefined;
-  senses?: string[];
-  character?: string[];
-  environment?: string[];
-  rhetoric?: string | undefined;
-  timeVariation?: boolean;
-  contrastInsertion?: boolean;
-}
-
-/** PolishSample 配置类型 */
-export interface PolishSampleConfig {
-  name?: string | undefined;
-  prompt?: string | undefined;
-  sceneType?: string | undefined;
-  text?: string | undefined;
-  isNegative?: boolean;
-}
-
-/** 实体 Key → 配置类型 映射表 */
-export interface EntityConfigMap {
-  [ConfigEntity.NOVEL]: NovelConfig;
-  [ConfigEntity.CHARACTER]: CharacterConfig;
-  [ConfigEntity.OUTLINE]: OutlineConfig;
-  [ConfigEntity.POLISH_RULE]: PolishRuleConfig;
-  [ConfigEntity.POLISH_SAMPLE]: PolishSampleConfig;
-}
-
-
-/** 配置实体枚举（与 YAML 实体列表同源，由构建脚本自动生成） */
-export enum ConfigEntity {
-  NOVEL = "novel",
-  CHARACTER = "character",
-  OUTLINE = "outline",
-  POLISH_RULE = "polish-rule",
-  POLISH_SAMPLE = "polish-sample",
-}
+import { ConfigEntity, EntityConfig } from "@/types/entity";
 
 export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
   "novel": {
@@ -446,7 +349,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "max": 2,
             "display": "flex",
             "noLabel": true,
-            "variant": "box",
             "className": "gap-2"
           },
           {
@@ -633,7 +535,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "max": 2,
         "display": "flex",
         "noLabel": true,
-        "variant": "box",
         "className": "gap-2"
       },
       {

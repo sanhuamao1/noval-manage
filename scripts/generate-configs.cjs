@@ -1,5 +1,5 @@
 // scripts/generate-configs.cjs
-// 构建时执行：读取 configs/*.yml → 生成 src/lib/configs/generated.ts
+// 构建时执行：读取 configs/*.yml → 生成 src/types/entity.ts, src/types/entityConfig.ts, src/lib/configs/generated.ts
 // 避免客户端 bundling 时遇到 fs/yaml 等 Node.js 模块
 
 const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("fs");
@@ -44,7 +44,7 @@ function buildField(key, def, ownOptions) {
     optionLabel: def.optionLabel,
     defaultValue: def.defaultValue,
   };
-  // 过滤掉 undefined 值，保持 generated.ts 干净
+  // 过滤掉 undefined 值，保持 generated 文件干净
   return Object.fromEntries(
     Object.entries(field).filter(([, v]) => v !== undefined),
   );
@@ -122,23 +122,7 @@ for (const name of entities) {
   configs[name] = loadEntityConfig(name);
 }
 
-// ── 生成 TS 文件 ──
-
-const outPath = resolve(ROOT, "src/lib/configs/generated.ts");
-
-const header = `// 自动生成于 ${new Date().toISOString()}，勿手动编辑
-// 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
-
-import type { ConfigSection, ConfigFieldDef } from "./config-utils";
-
-export interface EntityConfig {
-  entity: string;
-  sections: ConfigSection[];
-  fields: ConfigFieldDef[];
-}
-`;
-
-// ── 类型生成工具 ──
+// ── 辅助 ──
 
 function typeToTsType(type) {
   switch (type) {
@@ -163,43 +147,95 @@ function toScreamingSnake(kebab) {
   return kebab.replace(/-/g, "_").toUpperCase();
 }
 
-/** 从实体配置生成 TypeScript 接口 */
-function generateConfigTypes() {
-  let result = "// ── 配置类型接口（由 YAML 字段定义自动推导）──\n\n";
-  for (const [entityName, cfg] of Object.entries(configs)) {
-    const typeName = `${toPascalCase(entityName)}Config`;
-    result += `/** ${cfg.entity} 配置类型 */\n`;
-    result += `export interface ${typeName} {\n`;
-    for (const field of cfg.fields) {
-      result += `  ${field.key}?: ${typeToTsType(field.type)};\n`;
-    }
-    result += `}\n\n`;
-  }
-  // EntityKey → ConfigType 映射表，供 config-registry 做强类型分发
-  // Key 引用 ConfigEntity 枚举，避免字符串重复
-  result += `/** 实体 Key → 配置类型 映射表 */\n`;
-  result += `export interface EntityConfigMap {\n`;
+// ── 生成 src/types/entity.ts ──
+
+function generateEntityFile() {
+  const configTypeNames = entities.map(name => `${toPascalCase(name)}Config`);
+
+  let code = `// 自动生成于 ${new Date().toISOString()}，勿手动编辑
+// 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
+
+export * from "./configs";
+
+import type { ConfigSection, ConfigFieldDef } from "./configs";
+import type { ${configTypeNames.join(", ")} } from "./entityConfig";
+
+export interface EntityConfig {
+  entity: string;
+  sections: ConfigSection[];
+  fields: ConfigFieldDef[];
+}
+
+`;
+
+  // EntityConfigMap
+  code += `/** 实体 Key → 配置类型 映射表 */\n`;
+  code += `export interface EntityConfigMap {\n`;
   for (const entityName of entities) {
     const typeName = `${toPascalCase(entityName)}Config`;
-    result += `  [ConfigEntity.${toScreamingSnake(entityName)}]: ${typeName};\n`;
+    code += `  [ConfigEntity.${toScreamingSnake(entityName)}]: ${typeName};\n`;
   }
-  result += `}\n\n`;
-  return result;
+  code += `}\n\n`;
+
+  // ConfigEntity enum
+  code += `/** 配置实体枚举（与 YAML 实体列表同源，由构建脚本自动生成） */\n`;
+  code += `export enum ConfigEntity {\n`;
+  code += entities.map(name => `  ${toScreamingSnake(name)} = "${name}"`).join(",\n");
+  code += `\n}\n`;
+
+  return code;
 }
+
+// ── 生成 src/types/entityConfig.ts ──
+
+function generateEntityConfigFile() {
+  let code = `// 自动生成于 ${new Date().toISOString()}，勿手动编辑
+// 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
+
+// ── 配置类型接口（由 YAML 字段定义自动推导）──
+
+`;
+  for (const [entityName, cfg] of Object.entries(configs)) {
+    const typeName = `${toPascalCase(entityName)}Config`;
+    code += `/** ${cfg.entity} 配置类型 */\n`;
+    code += `export interface ${typeName} {\n`;
+    for (const field of cfg.fields) {
+      code += `  ${field.key}?: ${typeToTsType(field.type)};\n`;
+    }
+    code += `}\n\n`;
+  }
+  return code;
+}
+
+// ── 生成 src/lib/configs/generated.ts ──
+
+// ── 写出文件 ──
 
 const configsJson = JSON.stringify(configs, null, 2);
 
-const output = `${header}
-${generateConfigTypes()}
-/** 配置实体枚举（与 YAML 实体列表同源，由构建脚本自动生成） */
-export enum ConfigEntity {
-${entities.map(name => `  ${toScreamingSnake(name)} = "${name}"`).join(",\n")},
-}
+// 生成 entity.ts
+const entityContent = generateEntityFile();
+const entityOutPath = resolve(ROOT, "src/types/entity.ts");
+writeFileSync(entityOutPath, entityContent, "utf-8");
+console.log(`Generated ${entityOutPath}`);
+
+// 生成 entityConfig.ts
+const entityConfigContent = generateEntityConfigFile();
+const entityConfigOutPath = resolve(ROOT, "src/types/entityConfig.ts");
+writeFileSync(entityConfigOutPath, entityConfigContent, "utf-8");
+console.log(`Generated ${entityConfigOutPath}`);
+
+// 生成 generated.ts
+const generatedContent = `${"// "}自动生成于 ${new Date().toISOString()}，勿手动编辑
+// 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
+
+import { ConfigEntity, EntityConfig } from "@/types/entity";
 
 export const CONFIGS: Record<ConfigEntity, EntityConfig> = ${configsJson};
 `;
 
-const outDir = dirname(outPath);
-if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
-writeFileSync(outPath, output, "utf-8");
-console.log(`Generated ${outPath} (${Object.keys(configs).length} entities)`);
+const generatedOutPath = resolve(ROOT, "src/lib/configs/generated.ts");
+const generatedOutDir = dirname(generatedOutPath);
+if (!existsSync(generatedOutDir)) mkdirSync(generatedOutDir, { recursive: true });
+writeFileSync(generatedOutPath, generatedContent, "utf-8");
+console.log(`Generated ${generatedOutPath} (${Object.keys(configs).length} entities)`);

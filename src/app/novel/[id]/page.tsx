@@ -6,7 +6,7 @@ import { Button, SlidingDrawer, PageLayout } from "@/components/ui";
 import { Edit3 } from "lucide-react";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
-import type { NovelConfig } from "@/lib/configs/generated";
+import type { NovelConfig, NovelData } from "@/types";
 import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
 import { NovelOverviewPreview } from "@/components/novel/NovelOverviewPreview";
@@ -25,7 +25,7 @@ export default function NovelOverview() {
 
   useEffect(() => {
     if (novel) {
-      setEditorConfig(fillConfig(novel, defaults, fields));
+      setEditorConfig(fillConfig<NovelData, NovelConfig>(novel, defaults, fields));
     }
   }, [novel]);
 
@@ -33,7 +33,11 @@ export default function NovelOverview() {
     const title = String(editorConfig.title ?? "").trim();
     if (!title) return;
     await mutate(id, "novel", () =>
-      api({ url: `/api/novels/${id}`, method: "PATCH", data: editorConfig as Record<string, unknown> }),
+      api({
+        url: `/api/novels/${id}`,
+        method: "PATCH",
+        data: editorConfig as Record<string, unknown>,
+      }),
     );
     drawer.close();
   }

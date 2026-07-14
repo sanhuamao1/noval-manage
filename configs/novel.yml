@@ -24,7 +24,6 @@ fields:
     max: 2
     options: genre
     display: flex
-    variant: box
     noLabel: true
     className: gap-2
   enablePreset:

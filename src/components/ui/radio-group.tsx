@@ -3,7 +3,7 @@
 import type { ComponentType } from "react"
 import { Tooltip } from "./tooltip"
 import { RADIO_COLORS } from "@/lib/colors"
-import type { OptionColor } from "@/lib/configs/config-utils"
+import type { OptionColor } from "@/types"
 
 export interface RadioOption {
   value: string

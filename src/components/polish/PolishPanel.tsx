@@ -72,7 +72,7 @@ export function PolishPanel() {
       <SlidingDrawer open={panelOpen} width={360} title="润色规则">
         {/* 选中文本预览 */}
         {selectedText && (
-          <div className="rounded-lg border bg-muted/50 p-3 mb-3">
+          <div className="mb-3 rounded-lg border bg-muted/50 p-3">
             <p className="mb-1 text-xs text-muted-foreground">选中文本：</p>
             <p className="line-clamp-3 text-sm">{selectedText}</p>
           </div>
@@ -93,31 +93,31 @@ export function PolishPanel() {
               <p className="text-sm text-muted-foreground">暂无润色规则</p>
             ) : (
               rules.map((rule) => {
-                  const { fields, defaults } = getEntry(ConfigEntity.POLISH_RULE)
-                  const cfg = fillConfig(rule, defaults, fields)
-                  return (
-                    <div key={rule.id} className={polishing ? "pointer-events-none opacity-60" : ""}>
-                      <SimpleCard
-                        title={rule.name}
-                        description={rule.description}
-                        selected={selectedRuleId === rule.id && !polishing}
-                        onClick={polishing ? undefined : () => executePolish(rule.id)}
-                      >
-                        <ConfigBadges<PolishRuleConfig>
-                          config={cfg}
-                          items={[
-                            ["情绪/氛围", "mood"],
-                            ["叙事手法", "narrative"],
-                            ["五感", "senses"],
-                            ["人物描写", "character"],
-                            ["环境描写", "environment"],
-                          ]}
-                        />
-                      </SimpleCard>
-                    </div>
-                  )
-                }
-            ))}
+                const { fields, defaults } = getEntry(ConfigEntity.POLISH_RULE);
+                const cfg = fillConfig(rule, defaults, fields);
+                return (
+                  <div key={rule.id} className={polishing ? "pointer-events-none opacity-60" : ""}>
+                    <SimpleCard
+                      title={rule.name}
+                      description={rule.description}
+                      selected={selectedRuleId === rule.id && !polishing}
+                      onClick={polishing ? undefined : () => executePolish(rule.id)}
+                    >
+                      <ConfigBadges<PolishRuleConfig>
+                        config={cfg}
+                        items={[
+                          ["情绪/氛围", "mood"],
+                          ["叙事手法", "narrative"],
+                          ["五感", "senses"],
+                          ["人物描写", "character"],
+                          ["环境描写", "environment"],
+                        ]}
+                      />
+                    </SimpleCard>
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
 
@@ -128,57 +128,69 @@ export function PolishPanel() {
             ) : (
               <>
                 <p className="text-xs text-muted-foreground">
-                  选择 1-3 个样本作为风格参考{selectedSampleIds.length > 0 ? `（已选 ${selectedSampleIds.length} 个）` : ""}
+                  选择 1-3 个样本作为风格参考
+                  {selectedSampleIds.length > 0 ? `（已选 ${selectedSampleIds.length} 个）` : ""}
                 </p>
                 {samples.map((sample) => {
-                  const { fields, defaults } = getEntry(ConfigEntity.POLISH_SAMPLE)
-                  const cfg = fillConfig(sample, defaults, fields)
-                  const isSelected = selectedSampleIds.includes(sample.id)
-                  const isNegative = !!cfg.isNegative
-                  const sceneType = cfg.sceneType || ""
+                  const { fields, defaults } = getEntry(ConfigEntity.POLISH_SAMPLE);
+                  const cfg = fillConfig(sample, defaults, fields);
+                  const isSelected = selectedSampleIds.includes(sample.id);
+                  const isNegative = !!cfg.isNegative;
+                  const sceneType = cfg.sceneType || "";
                   return (
-                    <div key={sample.id} className={polishing ? "pointer-events-none opacity-60" : ""}>
+                    <div
+                      key={sample.id}
+                      className={polishing ? "pointer-events-none opacity-60" : ""}
+                    >
                       <SimpleCard
                         title={sample.name}
                         selected={isSelected}
                         onClick={polishing ? undefined : () => toggleSampleId(sample.id)}
                       >
-                        <div className="flex items-center justify-between mt-1">
-                          <div className="flex items-center gap-2 min-w-0">
+                        <div className="mt-1 flex items-center justify-between">
+                          <div className="flex min-w-0 items-center gap-2">
                             {isNegative && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive shrink-0">
+                              <span className="shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] text-destructive">
                                 反例
                               </span>
                             )}
                             {sceneType && (
-                              <span className="text-[10px] text-muted-foreground truncate">{sceneType}</span>
+                              <span className="truncate text-[10px] text-muted-foreground">
+                                {sceneType}
+                              </span>
                             )}
                           </div>
-                          <div className={`w-4 h-4 rounded-sm border flex items-center justify-center shrink-0 ${
-                            isSelected ? "bg-primary border-primary" : "border-muted-foreground/30"
-                          }`}>
-                            {isSelected && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                          <div
+                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
+                              isSelected
+                                ? "border-primary bg-primary"
+                                : "border-muted-foreground/30"
+                            }`}
+                          >
+                            {isSelected && (
+                              <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                            )}
                           </div>
                         </div>
                         {sample.prompt && (
-                          <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
+                          <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
                             提示：{sample.prompt}
                           </p>
                         )}
                       </SimpleCard>
                     </div>
-                  )
+                  );
                 })}
                 {selectedSampleIds.length > 0 && (
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full mt-2"
+                    className="mt-2 w-full"
                     onClick={() => executePolish("")}
                     disabled={polishing}
                   >
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    {polishing ? "润色中..." : "仅用样本润色"}
+                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                    {polishing ? "润色中..." : "用样本润色"}
                   </Button>
                 )}
               </>
@@ -187,14 +199,14 @@ export function PolishPanel() {
         )}
 
         {polishing && (
-          <div className="rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground mt-3">
+          <div className="mt-3 rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
             <Sparkles className="mr-1 inline-block h-4 w-4 animate-pulse" />
             润色中...
           </div>
         )}
 
         {polishError && (
-          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mt-3">
+          <div className="mt-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             {polishError}
           </div>
         )}

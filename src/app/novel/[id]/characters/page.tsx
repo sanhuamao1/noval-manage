@@ -1,71 +1,60 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { AddButton, SlidingDrawer, PageLayout, CardList, SimpleCard } from "@/components/ui";
 import { renderSections } from "@/lib/configs/render-utils";
 import { ConfigBadges } from "@/components/ui/config-badges";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
-import type { CharacterConfig } from "@/lib/configs/generated";
 import { api } from "@/lib/api";
-
-interface Character {
-  id: string;
-  name: string;
-  [key: string]: unknown;
-}
+import { useAppStore } from "@/stores/useAppStore";
+import { CharacterConfig, CharacterData } from "@/types";
 
 export default function CharactersPage() {
   const params = useParams();
   const id = params.id as string;
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [mode, setMode] = useState<"create" | "edit" | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const characters = useAppStore((s) => s.characters);
+  const mutate = useAppStore((s) => s.mutate);
+
   const { fields, sections, defaults } = getEntry(ConfigEntity.CHARACTER);
   const [editorConfig, setEditorConfig] = useState<CharacterConfig>(defaults);
 
-  useEffect(() => {
-    fetchCharacters();
-  }, [id]);
+  const [mode, setMode] = useState<"create" | "edit" | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  async function fetchCharacters() {
-    const data = await api<Character[]>({ url: `/api/characters?novelId=${id}` });
-    setCharacters(data);
-  }
-
-  function openForEdit(char: Character) {
+  function openForEdit(char: CharacterData) {
     setMode("edit");
     setEditingId(char.id);
-    setEditorConfig(fillConfig(char, defaults, fields));
+    setEditorConfig(fillConfig<CharacterData, CharacterConfig>(char, defaults, fields));
   }
 
   function startCreate() {
     setMode("create");
     setEditingId(null);
-    setEditorConfig(defaults as CharacterConfig);
+    setEditorConfig(defaults);
   }
 
   async function saveCharacter() {
     const name = String(editorConfig.name ?? "").trim();
     if (!name) return;
 
-    const { id, novelId, createdAt, updatedAt, ...config } = editorConfig as any;
-
     if (mode === "create") {
-      await api({
-        url: "/api/characters",
-        method: "POST",
-        data: { novelId: id, name, ...config },
+      await mutate(id, "characters", async () => {
+        await api({
+          url: "/api/characters",
+          method: "POST",
+          data: { novelId: id, name, ...editorConfig },
+        });
       });
-      fetchCharacters();
     } else if (mode === "edit" && editingId) {
-      await api({
-        url: "/api/characters",
-        method: "PUT",
-        data: { id: editingId, novelId: id, ...config },
+      await mutate(id, "characters", async () => {
+        await api({
+          url: "/api/characters",
+          method: "PUT",
+          data: { id: editingId, novelId: id, ...editorConfig },
+        });
       });
-      fetchCharacters();
     }
     setMode(null);
     setEditingId(null);
@@ -73,12 +62,13 @@ export default function CharactersPage() {
 
   async function deleteCharacter(charId: string) {
     if (!confirm("确定要删除这个人物吗？")) return;
-    await api({ url: `/api/characters?id=${charId}&novelId=${id}`, method: "DELETE" });
+    await mutate(id, "characters", async () => {
+      await api({ url: `/api/characters?id=${charId}&novelId=${id}`, method: "DELETE" });
+    });
     if (editingId === charId) {
       setMode(null);
       setEditingId(null);
     }
-    fetchCharacters();
   }
 
   return (
@@ -104,7 +94,6 @@ export default function CharactersPage() {
     >
       <CardList emptyText="还没有人物，点击上方按钮添加">
         {characters.map((char) => {
-          const cfg = fillConfig(char, defaults, fields);
           return (
             <SimpleCard
               key={char.id}
@@ -114,7 +103,7 @@ export default function CharactersPage() {
               onDelete={() => deleteCharacter(char.id)}
             >
               <ConfigBadges
-                config={cfg}
+                config={char}
                 items={[
                   ["性别", "gender"],
                   ["年龄", "age"],

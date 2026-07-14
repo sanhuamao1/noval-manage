@@ -6,7 +6,7 @@ import type {
   ConfigOption,
   ConfigSection,
   TabGroup,
-} from "@/lib/configs/config-utils";
+} from "@/types";
 
 // ── YAML 结构定义 ──
 

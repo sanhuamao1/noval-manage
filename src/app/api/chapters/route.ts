@@ -4,9 +4,20 @@ import { list, get, put, remove, genId, nextSortOrder } from '@/lib/store'
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const novelId = searchParams.get('novelId')
+  const id = searchParams.get('id')
   if (!novelId) return NextResponse.json({ error: '缺少 novelId' }, { status: 400 })
-  const chapters = list('chapter', novelId)
-  return NextResponse.json(chapters)
+
+  // 获取单个章节（含 content）
+  if (id) {
+    const chapter = get('chapter', id, novelId)
+    if (!chapter) return NextResponse.json({ error: '章节不存在' }, { status: 404 })
+    return NextResponse.json(chapter)
+  }
+
+  // 获取章节列表（不含 content）
+  const chapters = list('chapter', novelId) as Record<string, unknown>[]
+  const summaries = chapters.map(({ content, ...rest }) => rest)
+  return NextResponse.json(summaries)
 }
 
 export async function POST(req: NextRequest) {
