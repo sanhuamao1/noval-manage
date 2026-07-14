@@ -2,24 +2,21 @@
 
 import { Card, CardHeader, CardContent, Tag } from "@/components/ui";
 import { BookOpen, Calendar, Hash, Tags, Clock } from "lucide-react";
-import type { NovelConfig } from "@/lib/configs/generated";
-import { ConfigEntity, findOptionInConfig } from "@/lib/configs/generated";
-import { resolveIcon } from "@/lib/configs/render-utils";
+import { renderOptions } from "@/lib/configs/render-utils";
 import { formatDateStr, formatWordCount } from "@/lib/utils";
-import type { NovelData } from "@/types/novel";
+import { useAppStore } from "@/stores/useAppStore";
+import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 
-interface NovelOverviewPreviewProps {
-  novel: NovelData;
-  config: NovelConfig;
-}
 
-export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProps) {
-  const genreList: string[] = Array.isArray(config.genre) ? config.genre : [];
-  const statusVal: string = (config.status as string) || "";
-  const primaryToneVal: string = (config.primaryTone as string) || "";
-  const secondaryTonesList: string[] = Array.isArray(config.secondaryTones)
-    ? config.secondaryTones
-    : [];
+
+export function NovelOverviewPreview() {
+  const { novel } = useAppStore()
+  const { fieldsMap } = getEntry(ConfigEntity.NOVEL)
+
+  if (novel === null) {
+    return <NovelOverviewSkeleton />
+  }
+
 
   return (
     <>
@@ -35,7 +32,7 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
           <div className="flex-1 p-6">
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h2 className="mb-2 text-3xl font-bold">{novel.title}</h2>
+                <h2 className="mb-2 text-3xl font-bold">{novel?.title}</h2>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Hash className="h-3.5 w-3.5" />
@@ -54,56 +51,11 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              {statusVal &&
-                (() => {
-                  const statusOpt = findOptionInConfig(ConfigEntity.NOVEL, statusVal);
-                  return (
-                    <Tag
-                      color={statusOpt?.color || "default"}
-                      icon={statusOpt?.icon ? resolveIcon(statusOpt.icon) : undefined}
-                    >
-                      {statusVal}
-                    </Tag>
-                  );
-                })()}
-              {genreList.map((g: string) => {
-                const opt = findOptionInConfig(ConfigEntity.NOVEL, g);
-                return (
-                  <Tag
-                    key={g}
-                    color={opt?.color || "default"}
-                    icon={opt?.icon ? resolveIcon(opt.icon) : undefined}
-                  >
-                    {g}
-                  </Tag>
-                );
-              })}
-              {primaryToneVal &&
-                (() => {
-                  const toneOpt = findOptionInConfig(ConfigEntity.NOVEL, primaryToneVal);
-                  return (
-                    <Tag
-                      color={toneOpt?.color || "default"}
-                      icon={toneOpt?.icon ? resolveIcon(toneOpt.icon) : undefined}
-                    >
-                      {primaryToneVal}
-                    </Tag>
-                  );
-                })()}
-              {secondaryTonesList.map((t: string) => {
-                const opt = findOptionInConfig(ConfigEntity.NOVEL, t);
-                return (
-                  <Tag
-                    key={t}
-                    color={opt?.color || "default"}
-                    icon={opt?.icon ? resolveIcon(opt.icon) : undefined}
-                  >
-                    {t}
-                  </Tag>
-                );
-              })}
+              {renderOptions(fieldsMap['status']?.options, novel.status)}
+              {renderOptions(fieldsMap['genre']?.options, novel.genre)}
+              {renderOptions(fieldsMap['primaryTone']?.options, novel.primaryTone)}
+              {renderOptions(fieldsMap['secondaryTone']?.options, novel.secondaryTones)}
             </div>
-
             {novel.description && (
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {novel.description}
@@ -143,6 +95,64 @@ export function NovelOverviewPreview({ novel, config }: NovelOverviewPreviewProp
             <div className="text-sm text-muted-foreground">
               <span>08-01</span> 创建了项目
             </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  );
+}
+
+function NovelOverviewSkeleton() {
+  return (
+    <>
+      <Card className="overflow-hidden">
+        <div className="flex">
+          <div className="flex w-40 flex-shrink-0 items-center justify-center bg-muted/50">
+            <div className="rounded-lg bg-muted/60 h-24 w-20 animate-pulse" />
+          </div>
+
+          <div className="flex-1 p-6">
+            <div className="mb-4">
+              <div className="mb-2 h-8 w-64 rounded-md bg-muted/60 animate-pulse" />
+              <div className="flex items-center gap-4">
+                <div className="h-4 w-28 rounded bg-muted/60 animate-pulse" />
+                <div className="h-4 w-32 rounded bg-muted/60 animate-pulse" />
+                <div className="h-4 w-32 rounded bg-muted/60 animate-pulse" />
+              </div>
+            </div>
+
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <div className="h-6 w-16 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-20 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-24 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-20 rounded-full bg-muted/60 animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 w-full rounded bg-muted/60 animate-pulse" />
+              <div className="h-4 w-3/4 rounded bg-muted/60 animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader icon={Tags} title="核心标签" />
+          <CardContent>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="h-6 w-16 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-20 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-14 rounded-full bg-muted/60 animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader icon={Calendar} title="创作日志" />
+          <CardContent className="space-y-3">
+            <div className="h-4 w-full rounded bg-muted/60 animate-pulse" />
+            <div className="h-4 w-5/6 rounded bg-muted/60 animate-pulse" />
+            <div className="h-4 w-2/3 rounded bg-muted/60 animate-pulse" />
           </CardContent>
         </Card>
       </div>

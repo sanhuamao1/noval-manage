@@ -19,6 +19,7 @@ import {
     NoBorderInput,
     FormItem,
     LongTextField,
+    Tag
 } from "@/components/ui";
 import { CheckCheck, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,6 +32,32 @@ export function resolveIcon(name: string | undefined): LucideIcon | undefined {
     if (!name) return undefined;
     const icon = LucideIcons[name as keyof typeof LucideIcons];
     return (icon as LucideIcon) ?? undefined;
+}
+
+
+export const renderOptions = (options: ConfigOption[] | undefined, values: string | string[] | undefined) => {
+    if (options === undefined) return
+    if (values === undefined) return
+    if (Array.isArray(values)) {
+        return options.map(op => {
+            if (values.includes(op.value)) {
+                return <Tag
+                    color={op.color || "default"}
+                    icon={op.icon ? resolveIcon(op.icon) : undefined}
+                >
+                    {op.value}
+                </Tag>
+            }
+        })
+    } else {
+        const op = options.find(e => e.value === values)
+        return op ? <Tag
+            color={op.color || "default"}
+            icon={op.icon ? resolveIcon(op.icon) : undefined}
+        >
+            {op.value}
+        </Tag> : null
+    }
 }
 
 /** 将 ConfigOption 转换为 RadioOption（含 icon 解析） */
@@ -242,8 +269,8 @@ export function renderSections<T extends Record<string, any>>(
                     {headerEl}
                     <CardContent className={section.class}>
                         {section.children
-                        .filter((f): f is ConfigFieldDef => f.type !== "tab-group")
-                        .map((field) => renderField(field, config, onChange, novelId))}
+                            .filter((f): f is ConfigFieldDef => f.type !== "tab-group")
+                            .map((field) => renderField(field, config, onChange, novelId))}
                     </CardContent>
                 </Card>
             );
@@ -289,7 +316,7 @@ export function renderSections<T extends Record<string, any>>(
                                     }
                                     : undefined}
                             >
-                                {renderField({ ...child}, config, onChange, novelId)}
+                                {renderField({ ...child }, config, onChange, novelId)}
                             </TabsContent>
                         );
                     })}

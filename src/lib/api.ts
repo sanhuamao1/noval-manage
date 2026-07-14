@@ -2,10 +2,11 @@ type ApiOptions = {
   url: string;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   data?: Record<string, unknown>;
+  headers?: Record<string, string>;
 };
 
-export async function api<T = unknown>({ url, method = "GET", data }: ApiOptions): Promise<T> {
-  const options: RequestInit = { method };
+export async function api<T = unknown>({ url, method = "GET", data, headers }: ApiOptions): Promise<T> {
+  const options: RequestInit = { method, headers: { "Content-Type": "application/json", ...headers } };
 
   if (data && method !== "GET") {
     options.headers = { "Content-Type": "application/json" };

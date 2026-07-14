@@ -122,13 +122,6 @@ for (const name of entities) {
   configs[name] = loadEntityConfig(name);
 }
 
-// ── 收集所有选项用于 findOption －
-
-function collectAllOptions(entityName) {
-  const cfg = configs[entityName];
-  return cfg.fields.flatMap((f) => (f.options ?? []));
-}
-
 // ── 生成 TS 文件 ──
 
 const outPath = resolve(ROOT, "src/lib/configs/generated.ts");
@@ -136,7 +129,7 @@ const outPath = resolve(ROOT, "src/lib/configs/generated.ts");
 const header = `// 自动生成于 ${new Date().toISOString()}，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
-import type { ConfigSection, ConfigFieldDef, ConfigOption } from "./config-utils";
+import type { ConfigSection, ConfigFieldDef } from "./config-utils";
 
 export interface EntityConfig {
   entity: string;
@@ -194,14 +187,7 @@ function generateConfigTypes() {
   return result;
 }
 
-// ── 输出 ──
-
 const configsJson = JSON.stringify(configs, null, 2);
-
-const allOptionsJson = entities.reduce((acc, name) => {
-  acc[name] = collectAllOptions(name);
-  return acc;
-}, {});
 
 const output = `${header}
 ${generateConfigTypes()}
@@ -211,15 +197,6 @@ ${entities.map(name => `  ${toScreamingSnake(name)} = "${name}"`).join(",\n")},
 }
 
 export const CONFIGS: Record<ConfigEntity, EntityConfig> = ${configsJson};
-
-export const ALL_OPTIONS: Record<ConfigEntity, ConfigOption[]> = ${JSON.stringify(allOptionsJson, null, 2)};
-
-/** 根据 value 在指定实体中查找 ConfigOption */
-export function findOptionInConfig(entity: ConfigEntity, value: string): ConfigOption | undefined {
-  const options = ALL_OPTIONS[entity];
-  if (!options) return undefined;
-  return options.find((o) => o.value === value);
-}
 `;
 
 const outDir = dirname(outPath);

@@ -1,7 +1,7 @@
 import { CONFIGS, ConfigEntity } from "./generated";
 export { ConfigEntity } from "./generated";
 import type { EntityConfigMap } from "./generated";
-import { buildDefaultValues, flattenFields } from "./config-utils";
+import { buildDefaultValues } from "./config-utils";
 import type { ConfigFieldDef, ConfigSection } from "./config-utils";
 
 // ── 注册表 ──
@@ -9,6 +9,7 @@ import type { ConfigFieldDef, ConfigSection } from "./config-utils";
 /** 实体配置缓存项 */
 interface ConfigEntry<T> {
   fields: ConfigFieldDef[];
+  fieldsMap: Record<string, ConfigFieldDef>;
   sections: ConfigSection[];
   defaults: T;
 }
@@ -20,11 +21,14 @@ function buildEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap
   if (!config) throw new Error(`Unknown config entity: "${String(key)}"`);
   return {
     fields: config.fields,
+    fieldsMap: config.fields.reduce((acc: Record<string, ConfigFieldDef>, field) => {
+      acc[field.key] = field;
+      return acc;
+    }, {}),
     sections: config.sections,
     defaults: buildDefaultValues(config.fields),
   };
 }
-
 
 /** 获取实体完整配置（字段定义 + sections + 默认值） */
 export function getEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap[K]> {
@@ -32,37 +36,17 @@ export function getEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConf
   return registry.get(key)!;
 }
 
-/** 获取实体默认配置值 */
-export function getDefaults<K extends ConfigEntity>(key: K): EntityConfigMap[K] {
-  return getEntry(key).defaults;
-}
-
-/** 获取实体字段定义 */
-export function getFields(key: ConfigEntity): ConfigFieldDef[] {
-  return getEntry(key).fields;
-}
-
-/** 获取实体 sections */
-export function getSections(key: ConfigEntity): ConfigSection[] {
-  return getEntry(key).sections;
-}
-
-
 // ── AI 指令生成 ──
 
-import type { PolishRuleConfig } from "./generated";
-
 /** 根据润色规则配置构建 AI 可读的指令文本 */
-export function buildConfigInstructions(config: PolishRuleConfig): string {
+export function buildConfigInstructions(
+  config: Record<string, unknown>,
+  fields: ConfigFieldDef[],
+): string {
   const lines: string[] = [];
 
-  const sampleFields = getEntry(ConfigEntity.POLISH_SAMPLE).fields;
-  const sampleKeySet = new Set(sampleFields.map((f) => f.key));
-
-  for (const field of flattenFields(getEntry(ConfigEntity.POLISH_RULE).sections)) {
-    if (sampleKeySet.has(field.key)) continue;
-
-    const value = (config as Record<string, unknown>)[field.key];
+  for (const field of fields) {
+    const value = config[field.key];
     if (field.type === "toggle") {
       if (value) lines.push(`${field.label}：开启`);
     } else if (field.type === "single" && value) {
@@ -82,6 +66,5 @@ export function buildConfigInstructions(config: PolishRuleConfig): string {
     }
   }
 
-  if (config.prompt) lines.push(`自定义说明：${config.prompt}`);
   return lines.join("\n");
 }

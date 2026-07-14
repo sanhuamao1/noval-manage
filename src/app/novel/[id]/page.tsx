@@ -63,7 +63,7 @@ export default function NovelOverview() {
         </SlidingDrawer>
       }
     >
-      <NovelOverviewPreview novel={novel} config={editorConfig} />
+      <NovelOverviewPreview />
     </PageLayout>
   );
 }

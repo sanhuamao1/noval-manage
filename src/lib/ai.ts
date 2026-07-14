@@ -1,24 +1,22 @@
 import { buildConfigInstructions, ConfigEntity, getEntry } from "@/lib/configs/config-registry"
 import { fillConfig } from "@/lib/configs/config-utils"
+import { PolishRuleConfig, PolishSampleConfig } from '@/lib/configs/generated'
+import { api } from './api'
 
 export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {
-  const url = process.env.AI_BASE_URL || ""
+  const url = (process.env.AI_BASE_URL || "") + "/chat/completions"
   const model = process.env.AI_MODEL
-  const key = process.env.AI_API_KEY
-
-  console.log(url, model)
+  const key = apiKey ?? process.env.AI_API_KEY
 
   if (!key) {
     throw new Error('请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）')
   }
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`,
-    },
-    body: JSON.stringify({
+  const res = await api<{ choices: Array<{ message: { content: string } }> }>({
+    url,
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}` },
+    data: {
       model,
       messages: [
         { role: 'system', content: '你是一个专业的小说创作助手。请根据用户的要求进行文本润色。' },
@@ -26,29 +24,17 @@ export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) 
       ],
       temperature: 0.7,
       max_tokens: 4096,
-    }),
+    },
   })
 
-  if (!res.ok) {
-    const error = await res.text()
-    throw new Error(`AI API 调用失败: ${error}`)
-  }
-
-  const data = await res.json()
-  return data.choices[0].message.content
+  return res.choices[0].message.content
 }
 
-/** 风格样本（用于 prompt 构建） */
-interface StyleSample {
-  title: string;
-  annotation: string | null;
-  text: string;
-  isNegative: boolean;
-}
+
 
 /** 构建风格样本注入 Prompt（只塞标题 + 注释 + 原文，不塞数值特征） */
 export function buildStylePrompt(
-  samples: StyleSample[],
+  samples: PolishSampleConfig[],
 ): string {
   if (samples.length === 0) return ""
 
@@ -56,12 +42,12 @@ export function buildStylePrompt(
 
   samples.forEach((s, i) => {
     if (s.isNegative) {
-      prompt += `【反例 ${i + 1} - 请避免】${s.title}\n`
+      prompt += `【反例 ${i + 1} - 请避免】${s.name}\n`
     } else {
-      prompt += `【样本 ${i + 1}】${s.title}\n`
+      prompt += `【样本 ${i + 1}】${s.name}\n`
     }
-    if (s.annotation) {
-      prompt += `提示：${s.annotation}\n`
+    if (s.prompt) {
+      prompt += `提示：${s.prompt}\n`
     }
     prompt += `${s.text}\n\n`
   })
@@ -69,8 +55,9 @@ export function buildStylePrompt(
   return prompt
 }
 
+/** 润色规则构建 */
 export function buildPolishPrompt(
-  rule: { name: string; description?: string | null; prompt?: string } & Record<string, unknown>,
+  rule: PolishRuleConfig,
   text: string,
 ): string {
   const parts: string[] = []
@@ -82,8 +69,8 @@ export function buildPolishPrompt(
 
   // 从注册表获取字段定义和默认值，只填充合法字段
   const { fields, defaults } = getEntry(ConfigEntity.POLISH_RULE)
-  const config = fillConfig(rule, defaults, fields)
-  const section = buildConfigInstructions(config)
+  const config = fillConfig(rule, defaults, fields) as Record<string, unknown>
+  const section = buildConfigInstructions(config, fields)
   if (section.trim()) {
     parts.push(`\n${section}`)
   }

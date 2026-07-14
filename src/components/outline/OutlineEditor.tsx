@@ -2,7 +2,7 @@
 
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { renderSections } from "@/lib/configs/render-utils";
-import { getSections, ConfigEntity } from "@/lib/configs/config-registry";
+import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 import { Plus, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -18,6 +18,7 @@ interface OutlineEditorProps {
 
 export const OutlineEditor = forwardRef<OutlineEditorHandle, OutlineEditorProps>(
   function OutlineEditor({ novelId, outlineId, initialConfig }, ref) {
+    const { sections } = getEntry(ConfigEntity.OUTLINE)
     const [config, setConfig] = useState<Record<string, any>>(initialConfig);
     const [keyEvents, setKeyEvents] = useState<{ id: string; title: string }[]>([]);
     const [newKeTitle, setNewKeTitle] = useState("");
@@ -39,7 +40,7 @@ export const OutlineEditor = forwardRef<OutlineEditorHandle, OutlineEditorProps>
 
     return (
       <div className="space-y-6">
-        {renderSections(getSections(ConfigEntity.OUTLINE), config, setConfig, novelId)}
+        {renderSections(sections, config, setConfig, novelId)}
 
         {/* ── 关键事件管理 ── */}
         <div className="rounded-lg border border-border-subtle p-4">

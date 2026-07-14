@@ -1,148 +1,127 @@
 // ─── 类型定义 ───
-import type { ColorName } from "../colors"
+import type { ColorName } from "../colors";
 
 /** 配置项颜色，等价于 ColorName */
-export type OptionColor = ColorName
+export type OptionColor = ColorName;
 
 /** 运行时配置数据 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ConfigData = Record<string, any>
+export type ConfigData = Record<string, any>;
 
 export interface ConfigOption {
-  value: string
+  value: string;
   /** 显示标签（可选，默认显示 value） */
-  label?: string
+  label?: string;
   /** Lucide icon 名称（可选） */
-  icon?: string
+  icon?: string;
   /** 选项颜色（可选） */
-  color?: OptionColor
+  color?: OptionColor;
   /** 选项说明文案（可选） */
-  description?: string
+  description?: string;
 }
 
 export interface ListSubField {
   /** 输入框占位文本 */
-  placeholder: string
+  placeholder: string;
   /** Tailwind 宽度类，如 "w-1/3"、"flex-1"（可选，默认 "flex-1"） */
-  width?: string
+  width?: string;
 }
 
 /** 字段控件类型 */
-export type FieldType = "single" | "multi" | "toggle" | "list" | "text" | "longtext" | "tagselect"
+export type FieldType = "single" | "multi" | "toggle" | "list" | "text" | "longtext" | "tagselect";
 
 export interface ConfigFieldDef<K extends string = string> {
-  key: K
-  label: string
-  type: FieldType
-  options?: readonly ConfigOption[]
-  max?: number
-  display?: "default" | "flex" | "grid" | "between"
+  key: K;
+  label: string;
+  type: FieldType;
+  options?: ConfigOption[];
+  max?: number;
+  display?: "default" | "flex" | "grid" | "between";
   /** display="grid" 时的列数，默认 3 */
-  cols?: number
+  cols?: number;
   /** 字段图标（lucide 组件名），在 tabs 中显示在 tab trigger 上 */
-  icon?: string
+  icon?: string;
   /** type="text"/"longtext" 时输入框的占位文本 */
-  placeholder?: string
+  placeholder?: string;
   /** type="longtext" 时的文本最大长度 */
-  maxLength?: number
+  maxLength?: number;
   /** type="list" 时的子字段定义 */
-  subFields?: ListSubField[]
+  subFields?: ListSubField[];
   /** 自定义 Tailwind 类名，会附加到 FormItem 的外层 div 上 */
-  className?: string
+  className?: string;
   /** 不显示 label，优先级高于 renderField 的 noLabel 参数 */
-  noLabel?: boolean
+  noLabel?: boolean;
   /** 控件变体，如 "box"（multi/single 类型适用） */
-  variant?: string
+  variant?: string;
   /** type="tagselect" 时对应的实体 key，选项从 store 动态获取 */
-  entity?: string
+  entity?: string;
   /** type="tagselect" 时，选项对象中用作 value 的 key，默认 "id" */
-  optionValue?: string
+  optionValue?: string;
   /** type="tagselect" 时，选项对象中用作 label 的 key，默认 "name" */
-  optionLabel?: string
+  optionLabel?: string;
   /** 字段默认值，优先级高于根据 type 自动推导的默认值 */
-  defaultValue?: unknown
+  defaultValue?: unknown;
 }
 
 export interface TabGroup<K extends string = string> {
-  key: K
-  label: string
-  icon?: string
-  type: "tab-group"
-  children: ConfigFieldDef[]
+  key: K;
+  label: string;
+  icon?: string;
+  type: "tab-group";
+  children: ConfigFieldDef[];
   /** 该 tab 内容区域的自定义 Tailwind 类名 */
-  class?: string
+  class?: string;
 }
 
 export interface SectionBase {
-  title: string
-  icon?: string
-  class?: string
-  children: (ConfigFieldDef | TabGroup)[]
+  title: string;
+  icon?: string;
+  class?: string;
+  children: (ConfigFieldDef | TabGroup)[];
   /** 在 grid 布局中跨越的列数，默认 1 */
-  colspan?: number
+  colspan?: number;
   /** 从 config 中取值的 key，用于动态标题（如使用角色姓名作为卡片标题） */
-  titleKey?: string
+  titleKey?: string;
   /** 标题是否可编辑（需配合 titleKey 使用） */
-  titleEditable?: boolean
+  titleEditable?: boolean;
 }
 
 export interface CardSection extends SectionBase {
-  type: "card"
+  type: "card";
 }
 
 export interface TabsSection extends SectionBase {
-  type: "tabs"
+  type: "tabs";
 }
 
 export interface GridSection {
-  type: "grid"
-  cols: number
-  class?: string
-  sections: ConfigSection[]
+  type: "grid";
+  cols: number;
+  class?: string;
+  sections: ConfigSection[];
   /** 在 grid 布局中跨越的列数，默认 1 */
-  colspan?: number
+  colspan?: number;
 }
 
-export type ConfigSection = CardSection | TabsSection | GridSection
-
-/** 递归展开 sections 中的所有字段定义 */
-export function flattenFields(sections: ConfigSection[]): ConfigFieldDef[] {
-  const result: ConfigFieldDef[] = []
-  for (const section of sections) {
-    if (section.type === "grid") {
-      result.push(...flattenFields(section.sections))
-    } else {
-      for (const child of section.children) {
-        if (child.type === "tab-group") {
-          result.push(...child.children)
-        } else {
-          result.push(child)
-        }
-      }
-    }
-  }
-  return result
-}
+export type ConfigSection = CardSection | TabsSection | GridSection;
 
 // ─── 类型推导 ───
 
 /** 字段类型 → 值类型 映射表 */
 interface TypeValueMap {
-  toggle: boolean
-  multi: string[]
-  single: string | undefined
-  list: string[]
-  text: string | undefined
-  longtext: string | undefined
-  tagselect: string[]
+  toggle: boolean;
+  multi: string[];
+  single: string | undefined;
+  list: string[];
+  text: string | undefined;
+  longtext: string | undefined;
+  tagselect: string[];
 }
 
 /** 从字段定义数组推导配置对象类型 */
-export type ConfigOf<
-  T extends readonly { key: string; type: FieldType }[],
-> = {
-  [K in T[number] as K["key"]]: TypeValueMap[K["type"]]
-}
+export type ConfigOf<T extends readonly { key: string; type: FieldType }[]> = {
+  [K in T[number] as K["key"]]: TypeValueMap[K["type"]];
+};
 
 // ─── 运行时函数 ───
 
@@ -153,63 +132,19 @@ export type ConfigOf<
 export function buildDefaultValues<
   T extends readonly { key: string; type: FieldType; defaultValue?: unknown }[],
 >(fields: T): ConfigOf<T> {
-  const result: ConfigData = {}
+  const result: ConfigData = {};
   for (const field of fields) {
     if ("defaultValue" in field && field.defaultValue !== undefined) {
-      result[field.key] = field.defaultValue
+      result[field.key] = field.defaultValue;
     } else if (field.type === "toggle") {
-      result[field.key] = false
+      result[field.key] = false;
     } else if (field.type === "multi" || field.type === "list" || field.type === "tagselect") {
-      result[field.key] = []
+      result[field.key] = [];
     } else {
-      result[field.key] = undefined
+      result[field.key] = undefined;
     }
   }
-  return result as ConfigOf<T>
-}
-
-/**
- * 将记录中的数组字段从 JSON 字符串还原为数组（读取时用）。
- */
-export function parseArrayFields(
-  data: ConfigData,
-  fields: readonly { key: string; type: string }[],
-): ConfigData {
-  const result = { ...data }
-  for (const field of fields) {
-    if (field.type === "multi" || field.type === "list" || field.type === "tagselect") {
-      const raw = result[field.key]
-      if (typeof raw === "string") {
-        try {
-          result[field.key] = JSON.parse(raw)
-        } catch {
-          result[field.key] = []
-        }
-      } else if (raw == null) {
-        result[field.key] = []
-      }
-    }
-  }
-  return result
-}
-
-/**
- * 将数组字段序列化为 JSON 字符串（写入时用）。
- */
-export function serializeArrayFields(
-  data: ConfigData,
-  fields: readonly { key: string; type: string }[],
-): ConfigData {
-  const result = { ...data }
-  for (const field of fields) {
-    if (field.type === "multi" || field.type === "list" || field.type === "tagselect") {
-      const val = result[field.key]
-      if (Array.isArray(val)) {
-        result[field.key] = JSON.stringify(val)
-      }
-    }
-  }
-  return result
+  return result as ConfigOf<T>;
 }
 
 /** 以 defaults 为底，只取 fields 中定义的 key 从 data 覆盖。自动解析数组字段。 */
@@ -218,14 +153,11 @@ export function fillConfig<T extends ConfigData>(
   defaults: T,
   fields: readonly { key: string; type: string }[],
 ): T {
-  const result: ConfigData = { ...defaults }
-  const parsed = parseArrayFields(data, fields)
+  const result: ConfigData = { ...defaults };
   for (const field of fields) {
-    if (field.key in parsed) {
-      result[field.key] = parsed[field.key]
+    if (field.key in data) {
+      result[field.key] = data[field.key];
     }
   }
-  return result as T
+  return result as T;
 }
-
-

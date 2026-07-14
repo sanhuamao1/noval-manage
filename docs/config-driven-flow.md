@@ -97,13 +97,12 @@ src/lib/configs/generated.ts
    }
    ```
 
-2. **CONFIGS 常量** — 完整的 sections + fields + fieldsMap 对象树：
+2. **CONFIGS 常量** — 完整的 sections + fields 对象树：
    ```ts
    export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
      "novel": {
        "entity": "Novel",
        "sections": [...],
-       "fieldsMap": {...}, // `key → ConfigFieldDef` 的快速查找表
        "fields": [...]
      }
    }
@@ -111,6 +110,7 @@ src/lib/configs/generated.ts
 
 3. **ConfigEntity 枚举** — `NOVEL = "novel"`
 
+4. **FIELD_MAP** — `key → ConfigFieldDef` 的快速查找表
 
 ---
 
