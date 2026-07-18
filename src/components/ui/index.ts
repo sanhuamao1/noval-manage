@@ -18,4 +18,7 @@ export * from "./tag";
 export * from "./textarea";
 export * from "./toggle";
 export * from "./tooltip";
-export * from "./list"
+export * from "./list";
+export * from "./tags";
+export * from "./editor-form";
+export * from "./tag-select";

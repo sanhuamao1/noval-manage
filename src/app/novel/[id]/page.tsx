@@ -9,7 +9,7 @@ import { fillConfig } from "@/lib/configs/config-utils";
 import type { NovelConfig, NovelData } from "@/types";
 import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
-import { NovelOverviewPreview } from "@/components/novel/NovelOverviewPreview";
+import { NovelOverviewPreview } from "./NovelOverviewPreview";
 import { useAppStore } from "@/stores/useAppStore";
 import { api } from "@/lib/api";
 
@@ -32,6 +32,7 @@ export default function NovelOverview() {
   async function handleSave() {
     const title = String(editorConfig.title ?? "").trim();
     if (!title) return;
+
     await mutate(id, "novel", () =>
       api({
         url: `/api/novels/${id}`,

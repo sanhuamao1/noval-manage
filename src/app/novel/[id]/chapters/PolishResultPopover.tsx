@@ -3,19 +3,24 @@
 import { useRef, useEffect } from "react"
 import { Textarea, Button } from "@/components/ui"
 import { X, Check } from "lucide-react"
-import { usePolishContext } from "./PolishContext"
+import { usePolishStore } from "@/stores/usePolishStore"
+import { useMenuStore } from "@/stores/useMenuStore"
+import { useAppStore } from "@/stores/useAppStore"
 
-export function PolishResultPopover() {
-  const {
-    showResultPopover,
-    polishResult,
-    setPolishResult,
-    selectedRuleId,
-    rules,
-    selectedText,
-    cancelPolish,
-    confirmPolish,
-  } = usePolishContext()
+interface PolishResultPopoverProps {
+  editContent: string;
+  setEditContent: (val: string) => void;
+}
+
+export function PolishResultPopover({ editContent, setEditContent }: PolishResultPopoverProps) {
+  const showResultPopover = usePolishStore((s) => s.showResultPopover);
+  const polishResult = usePolishStore((s) => s.polishResult);
+  const setPolishResult = usePolishStore((s) => s.setPolishResult);
+  const selectedRuleId = usePolishStore((s) => s.selectedRuleId);
+  const cancelPolish = usePolishStore((s) => s.cancelPolish);
+  const confirmPolish = useMenuStore((s) => s.confirmPolish);
+  const selectedText = useMenuStore((s) => s.selectedText);
+  const rules = useAppStore((s) => s.polishRules);
 
   const ruleName = selectedRuleId && rules.find((r) => r.id === selectedRuleId)?.name
   const resultRef = useRef<HTMLTextAreaElement>(null)
@@ -103,7 +108,7 @@ export function PolishResultPopover() {
         <Button variant="outline" size="sm" onClick={cancelPolish}>
           取消
         </Button>
-        <Button size="sm" onClick={confirmPolish} className="gap-1">
+        <Button size="sm" onClick={() => confirmPolish(editContent, setEditContent)} className="gap-1">
           <Check className="w-4 h-4" />
           确认
         </Button>

@@ -19,13 +19,15 @@ import {
     NoBorderInput,
     FormItem,
     LongTextField,
-    Tag
+    Tag,
+    Tags,
+    TagSelect
 } from "@/components/ui";
 import { CheckCheck, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import type { ReactNode } from "react";
-import { TagSelect } from "@/components/outline/TagSelect";
+import { useAppStore } from "@/stores/useAppStore";
 
 /** 将 icon 名称字符串映射到 LucideIcon */
 export function resolveIcon(name: string | undefined): LucideIcon | undefined {
@@ -42,6 +44,7 @@ export const renderOptions = (options: ConfigOption[] | undefined, values: strin
         return options.map(op => {
             if (values.includes(op.value)) {
                 return <Tag
+                    key={op.value}
                     color={op.color || "default"}
                     icon={op.icon ? resolveIcon(op.icon) : undefined}
                 >
@@ -52,6 +55,7 @@ export const renderOptions = (options: ConfigOption[] | undefined, values: strin
     } else {
         const op = options.find(e => e.value === values)
         return op ? <Tag
+            key={op.value}
             color={op.color || "default"}
             icon={op.icon ? resolveIcon(op.icon) : undefined}
         >
@@ -83,7 +87,9 @@ export function renderField<T extends Record<string, any>>(
         display: field.display || "default",
         flexCols: field.cols,
         className: field.className,
+        rootClassName: field.rootClassName,
     };
+
 
     let control: ReactNode = null;
     let handlerEl: ReactNode = undefined;
@@ -164,15 +170,17 @@ export function renderField<T extends Record<string, any>>(
         case "longtext": {
             const textValue = (value as string) ?? "";
             const maxLength = field.maxLength ?? 1000;
-            return (
+            control = (
                 <LongTextField
+                    key={field.key}
                     value={textValue}
                     maxLength={maxLength}
                     placeholder={field.placeholder}
-                    label={field.label}
                     onChange={(v) => set(field.key as keyof T, v as any)}
+                    rootClassName={field.rootClassName}
                 />
             );
+            break;
         }
 
         case "tagselect": {
@@ -192,9 +200,47 @@ export function renderField<T extends Record<string, any>>(
             break;
         }
 
+        case "tags": {
+            control = (
+                <Tags
+                    value={(value as string[]) || []}
+                    onChange={(values) => set(field.key as keyof T, values as any)}
+                />
+            );
+            break;
+        }
+
         case "list": {
             const listValues = (value as string[]) || [];
-            const isEmpty = listValues.length === 0 || listValues.every((v) => !v.trim());
+            const isEmpty = listValues.length === 0;
+
+            // 解析 subFields 中的 optionsFrom / entity，生成选项
+            const resolvedOpts: Record<number, string[]> = {};
+            if (field.subFields) {
+                field.subFields.forEach((sf, fi) => {
+                    if (sf.type === "select") {
+                        if (sf.optionsFrom) {
+                            const sourceList = (config as any)[sf.optionsFrom] as string[] | undefined;
+                            if (sourceList && Array.isArray(sourceList)) {
+                                // 提取引用字段每个 item 的第一个子值（用 ; 分隔）
+                                resolvedOpts[fi] = sourceList
+                                    .map((item) => item.split(";")[0]?.trim())
+                                    .filter(Boolean);
+                            }
+                        } else if (sf.entity) {
+                            // 从全局 store 获取对应 entity 的 name 列表
+                            const storeState = useAppStore.getState();
+                            const entities = (storeState as any)[sf.entity];
+                            if (Array.isArray(entities)) {
+                                resolvedOpts[fi] = entities
+                                    .map((item: any) => item.name as string)
+                                    .filter(Boolean);
+                            }
+                        }
+                    }
+                });
+            }
+
             control = isEmpty ? (
                 <div className="flex items-center justify-center py-6 text-sm text-fg-tertiary">
                     点击右上角 <Plus className="w-3.5 h-3.5 inline mx-1" /> 添加
@@ -204,6 +250,7 @@ export function renderField<T extends Record<string, any>>(
                     subFields={field.subFields ?? []}
                     values={listValues}
                     onChange={(v) => set(field.key as keyof T, v as any)}
+                    resolvedOptions={resolvedOpts}
                 />
             );
             break;
@@ -258,16 +305,36 @@ export function renderSections<T extends Record<string, any>>(
                 titleValue
             );
 
+            // 子字段中有 list 类型时，在 CardHeader 右侧显示添加按钮
+            const listItem = section.children.length === 1 && section.children.find(f => f.type === "list") as any;
+            const rightHandlerNode = listItem ? (
+                    <Button
+                            key={listItem.key}
+                            variant="ghost"
+                            size="auto"
+                            onClick={() => {
+                                const currentValue = ((config as any)[listItem.key] as string[]) || [];
+                                const emptyRow = ";".repeat((listItem.subFields?.length ?? 1) - 1);
+                                onChange({
+                                    ...config,
+                                    [listItem.key]: [...currentValue, emptyRow],
+                                } as T);
+                            }}
+                        >
+                            <Plus className="w-4 h-4" />
+                        </Button>
+            ) : undefined;
+
             const headerEl = SectionIcon ? (
-                <CardHeader icon={SectionIcon} title={titleNode} />
+                <CardHeader icon={SectionIcon} title={titleNode} rightHandler={rightHandlerNode} />
             ) : (
-                <CardHeader title={titleNode} />
+                <CardHeader title={titleNode} rightHandler={rightHandlerNode} />
             );
 
             return (
                 <Card key={index}>
                     {headerEl}
-                    <CardContent className={section.class}>
+                    <CardContent className={section.class?section.class:'space-y-1.5'}>
                         {section.children
                             .filter((f): f is ConfigFieldDef => f.type !== "tab-group")
                             .map((field) => renderField(field, config, onChange, novelId))}

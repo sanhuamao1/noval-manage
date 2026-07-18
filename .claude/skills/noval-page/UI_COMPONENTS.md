@@ -34,6 +34,7 @@
 | `Stepper` | 滑块步进器 | `min?`, `max?`, `step?`, `value?`, `onChange?` |
 | `ListField` | 动态列表编辑器（子字段用 `;` 拼接） | `subFields: ListSubField[]`, `values: string[]`, `onChange` |
 | `TagSelect` | 从关联实体选择标签（引入自 `@/components/outline/TagSelect`） | `label`, `entity`, `novelId`, `selectedIds`, `onChange` |
+| `Tags` | 自定义标签输入 | `value`, `onChange` |
 
 ## 展示组件
 
@@ -53,6 +54,12 @@
 | `AddButton` | 预设为 `+` 图标的圆形按钮 | 同 Button props（自动设为 `size="icon"`） |
 | `SlidingDrawer` | 滑动侧边抽屉 | `open`, `onClose?`, `width?`, `title?`, `onCreate?`, `onUpdate?`, `rightHandler?` |
 
+## 编辑器组件
+
+| 组件 | 用途 | 关键 Props | Ref 方法 |
+|------|------|-----------|----------|
+| `EditorForm` | 配置驱动表单，内部自管状态，父组件通过 ref 读写 | `sections`, `defaults`, `key`(必传,用于切换实体时重挂载) | `getData()`, `setData(data)`, `reset()` |
+
 ## 何时询问用户
 
 - **组件表不足以支撑当前交互**（如需要特殊手势、拖拽、富文本编辑），描述可选方案（自行封装 / 引入第三方库 / 调整设计），让用户决策
@@ -63,9 +70,12 @@
 ```
 PageLayout
 ├── title + handler（标题行）
+│   └── AddButton onClick={createItem}
 ├── children（主内容区）
 │   ├── CardList > SimpleCard > ConfigBadges  （列表展示）
 │   └── Card > CardHeader + CardContent        （卡片分组）
 └── drawer（滑动抽屉）
-    └── SlidingDrawer > renderSections(sections, config, onChange)
+    └── SlidingDrawer
+        └── EditorForm ref={editorRef} key={currentEntity} sections={sections} defaults={defaults}
+            └── renderSections(sections, config, onChange)  // 内部调用
 ```

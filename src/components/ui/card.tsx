@@ -39,7 +39,7 @@ const CardHeader = React.forwardRef<
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {Icon && (
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-bg-800 border border-amber-500/30 shrink-0">
+          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-bg-800 border border-amber-500/30 shrink-0">
             <Icon className="w-5 h-5 text-amber-400" />
           </div>
         )}
@@ -134,7 +134,9 @@ const SimpleCard = React.forwardRef<HTMLDivElement, SimpleCardProps>(
               )}
             </div>
             {description && (
-              <p className={`${s.description} text-muted-foreground`}>{description}</p>
+              <p className={`${s.description} text-muted-foreground`}>
+                {description.length > 100 ? `${description.slice(0, 100)}...` : description}
+              </p>
             )}
             {children && <div className={s.children}>{children}</div>}
           </div>

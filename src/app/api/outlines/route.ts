@@ -23,11 +23,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { novelId, title } = await req.json()
-  if (!novelId || !title) return NextResponse.json({ error: '缺少必需字段' }, { status: 400 })
+  const { novelId, name } = await req.json()
+  if (!novelId || !name) return NextResponse.json({ error: '缺少必需字段' }, { status: 400 })
   const id = genId()
   const sortOrder = nextSortOrder('outline', novelId)
-  put('outline', id, { novelId, title, sortOrder, status: 'planned' }, novelId)
+  put('outline', id, { novelId, name, sortOrder, status: 'planned' }, novelId)
   const outline = get('outline', id, novelId)
   return NextResponse.json(outline)
 }

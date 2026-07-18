@@ -18,11 +18,10 @@ import {
 } from "lucide-react";
 import { wordCount } from "@/lib/utils";
 import { api } from "@/lib/api";
-import { PolishProvider } from "@/components/polish/PolishContext";
-import { ChapterEditor } from "@/components/chapters/ChapterEditor";
-import { SelectionMenu } from "@/components/polish/SelectionMenu";
-import { PolishResultPopover } from "@/components/polish/PolishResultPopover";
-import { PolishPanel } from "@/components/polish/PolishPanel";
+import { ChapterEditor } from "@/app/novel/[id]/chapters/ChapterEditor";
+import { SelectionMenu } from "@/components/SelectionMenu";
+import { PolishResultPopover } from "@/app/novel/[id]/chapters/PolishResultPopover";
+import { PolishPanel } from "@/app/novel/[id]/chapters/PolishPanel";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Chapter, ChapterSummary } from "@/types";
 
@@ -139,6 +138,7 @@ export default function ChaptersPage() {
     }
   }, [justCreated]);
 
+
   async function selectChapter(chapter: ChapterSummary) {
     const full = await api<Chapter>({ url: `/api/chapters?id=${chapter.id}&novelId=${id}` });
     setSelectedChapter(full);
@@ -170,7 +170,7 @@ export default function ChaptersPage() {
   });
 
   return (
-    <PolishProvider editContent={editContent} setEditContent={setEditContent} editorRef={editorRef}>
+    <>
       <div className="flex h-full flex-1">
         {/* 章节列表 */}
         <div className="w-72 flex-shrink-0 overflow-auto border-r p-4">
@@ -324,7 +324,7 @@ export default function ChaptersPage() {
                   editorRef={editorRef}
                 />
                 <SelectionMenu />
-                <PolishResultPopover />
+                <PolishResultPopover editContent={editContent} setEditContent={setEditContent} />
               </div>
             </>
           ) : (
@@ -343,6 +343,6 @@ export default function ChaptersPage() {
         </div>
         <PolishPanel />
       </div>
-    </PolishProvider>
+    </>
   );
 }

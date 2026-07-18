@@ -4,6 +4,8 @@ import type {
   OutlineConfig,
   PolishRuleConfig,
   PolishSampleConfig,
+  OrganizationConfig,
+  LocationConfig,
 } from "@/types/entityConfig";
 
 /** API 返回的小说数据 = 可编辑配置 + 系统字段 */
@@ -29,10 +31,10 @@ export interface CharacterData extends Omit<CharacterConfig, "name"> {
 }
 
 /** API 返回的提纲数据 = 可编辑配置 + 系统字段 */
-export interface OutlineData extends Omit<OutlineConfig, "title"> {
+export interface OutlineData extends Omit<OutlineConfig, "name"> {
   id: string;
-  /** API 保证 title 必返 */
-  title: string;
+  /** API 保证 name 必返 */
+  name: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -54,6 +56,24 @@ export interface PolishSampleData extends Omit<PolishSampleConfig, "prompt"> {
   name: string;
   prompt: string;
   useCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** API 返回的组织数据 = 可编辑配置 + 系统字段 */
+export interface OrganizationData extends Omit<OrganizationConfig, "name"> {
+  id: string;
+  /** API 保证 name 必返 */
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** API 返回的地点数据 = 可编辑配置 + 系统字段 */
+export interface LocationData extends Omit<LocationConfig, "name"> {
+  id: string;
+  /** API 保证 name 必返 */
+  name: string;
   createdAt?: string;
   updatedAt?: string;
 }

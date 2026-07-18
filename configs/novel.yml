@@ -5,12 +5,18 @@ fields:
     type: text
     label: 作品名称
     placeholder: 作品名称
+  oneLineSummary:
+    type: longtext
+    label: 一句话梗概
+    placeholder: 用一句话概括你的作品...
+    maxLength: 100
+    rootClassName: col-span-full
   description:
     type: longtext
-    label: 简介 / 梗概
+    label: 简介
     placeholder: 用一段话描述你的作品...
-    maxLength: 2000
-    className: col-span-full
+    maxLength: 800
+    rootClassName: col-span-full
   status:
     type: single
     label: 状态
@@ -26,15 +32,10 @@ fields:
     display: flex
     noLabel: true
     className: gap-2
-  enablePreset:
-    type: toggle
-    label: 启用预设文风
-    display: between
   presetStyle:
     type: single
-    label: 预设文风
+    label: 文风
     options: preset-style
-    icon: BookMarked
     display: flex
     noLabel: true
     className: grid grid-cols-3 gap-2
@@ -43,7 +44,6 @@ fields:
     label: 主基调
     options: tone
     display: flex
-    icon: Palette
     noLabel: true
     className: grid grid-cols-4 gap-2
   secondaryTones:
@@ -53,49 +53,36 @@ fields:
     options: tone
     display: flex
     noLabel: true
-    icon: Layers
     className: grid grid-cols-4 gap-2
-  worldType:
-    type: single
-    label: 世界类型
-    options: world-type
-    className: grid grid-cols-2 gap-2
   worldShape:
     type: single
     label: 世界形态
     options: world-shape
-    className: grid grid-cols-2 gap-2
+    noLabel: true
+    className: grid grid-cols-4 gap-2
 
 sections:
   - type: card
     title: 基本信息
     icon: BookOpen
     class: grid grid-cols-2 gap-4
-    fields: [title, status, description]
+    fields: [title, status, oneLineSummary, description]
 
   - type: tabs
     title: 作品设定
     children:
-      - key: enablePreset
-        label: 预设文风
-        type: tab-group
-        class: space-y-2
-        fields: [enablePreset, presetStyle]
+      - key: presetStyle
+        label: 文风
+        fields: [presetStyle]
+      - key: genre
+        label: 题材
+        fields: [genre]
+      - key: world
+        label: 世界形态
+        fields: [worldShape]
       - key: primaryTone
         label: 主基调
         fields: [primaryTone]
       - key: secondaryTones
         label: 副基调
         fields: [secondaryTones]
-
-  - type: tabs
-    title: 世界观
-    children:
-      - key: genre
-        label: 题材
-        fields: [genre]
-      - key: world
-        label: 世界
-        type: tab-group
-        class: grid grid-cols-2 gap-2
-        fields: [worldType, worldShape]

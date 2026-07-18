@@ -1,0 +1,29 @@
+entity: Location
+
+fields:
+  name:
+    type: text
+    label: 地点名称
+    placeholder: 地点名称
+  description:
+    type: longtext
+    label: 描述
+    noLabel: true
+    placeholder: 地点的简要描述
+    maxLength: 200
+  locationType:
+    type: single
+    label: 地点类型
+    noLabel: true
+    options: location-type
+    display: flex
+    rootClassName: col-span-full
+
+sections:
+  - type: card
+    title: 地点名称
+    icon: MapPin
+    titleKey: name
+    titleEditable: true
+    fields: [locationType, description]
+

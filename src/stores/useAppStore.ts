@@ -1,12 +1,13 @@
 import { create } from "zustand";
-import type { NovelData, CharacterData, OutlineData, ChapterSummary, PolishRuleData, PolishSampleData } from "@/types/data";
+import type { NovelData, CharacterData, OutlineData, ChapterSummary, PolishRuleData, PolishSampleData, OrganizationData, LocationData } from "@/types/data";
 import { api } from "@/lib/api";
 
-export type RefreshKey = "novel" | "characters" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples";
+export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples";
 
 const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   novel: (id) => `/api/novels?id=${id}`,
   characters: (id) => `/api/characters?novelId=${id}`,
+  organizations: (id) => `/api/organizations?novelId=${id}`,
   locations: (id) => `/api/locations?novelId=${id}`,
   outlines: (id) => `/api/outlines?novelId=${id}`,
   foreshadowings: (id) => `/api/foreshadowings?novelId=${id}`,
@@ -19,7 +20,8 @@ interface AppStore {
   novel: NovelData | null;
 
   characters: CharacterData[];
-  locations: { id: string; name: string }[];
+  organizations: OrganizationData[];
+  locations: LocationData[];
   foreshadowings: { id: string; name: string }[];
   outlines: OutlineData[];
   chapters: ChapterSummary[];
@@ -39,7 +41,8 @@ interface AppStore {
 const initial = {
   novel: null as NovelData | null,
   characters: [] as CharacterData[],
-  locations: [] as { id: string; name: string }[],
+  organizations: [] as OrganizationData[],
+  locations: [] as LocationData[],
   foreshadowings: [] as { id: string; name: string }[],
   outlines: [] as OutlineData[],
   chapters: [] as ChapterSummary[],
@@ -51,13 +54,18 @@ export const useAppStore = create<AppStore>((set) => ({
   ...initial,
 
   init: async (novelId) => {
-    const [novel, characters, locations, foreshadowings] = await Promise.all([
+    const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples] = await Promise.all([
       api<NovelData>({ url: `/api/novels?id=${novelId}` }),
       api<{ id: string; name: string }[]>({ url: `/api/characters?novelId=${novelId}` }),
-      api<{ id: string; name: string }[]>({ url: `/api/locations?novelId=${novelId}` }),
+      api<OrganizationData[]>({ url: `/api/organizations?novelId=${novelId}` }),
+      api<LocationData[]>({ url: `/api/locations?novelId=${novelId}` }),
       api<{ id: string; name: string }[]>({ url: `/api/foreshadowings?novelId=${novelId}` }),
+      api<OutlineData[]>({ url: `/api/outlines?novelId=${novelId}` }),
+      api<ChapterSummary[]>({ url: `/api/chapters?novelId=${novelId}` }),
+      api<PolishRuleData[]>({ url: "/api/polish/rules" }),
+      api<PolishSampleData[]>({ url: "/api/polish/samples" }),
     ]);
-    set({ novel, characters, locations, foreshadowings });
+    set({ novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples });
   },
 
   setOutlines: (outlines) => set({ outlines }),

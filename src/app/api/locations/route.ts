@@ -10,19 +10,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { novelId, name } = await req.json()
+  const { novelId, name, description, locationType, ...rest } = await req.json()
   if (!novelId || !name) return NextResponse.json({ error: '缺少必需字段' }, { status: 400 })
   const id = genId()
   const sortOrder = nextSortOrder('location', novelId)
-  put('location', id, { novelId, name, sortOrder }, novelId)
+  put('location', id, { novelId, name, description, locationType, sortOrder, ...rest }, novelId)
   const location = get('location', id, novelId)
   return NextResponse.json(location)
 }
 
 export async function PUT(req: NextRequest) {
-  const { id, novelId, name } = await req.json()
+  const { id, novelId, name, description, locationType, ...rest } = await req.json()
   if (!id) return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
-  put('location', id, { name }, novelId)
+  put('location', id, { name, description, locationType, ...rest }, novelId)
   const location = get('location', id, novelId)
   return NextResponse.json(location)
 }

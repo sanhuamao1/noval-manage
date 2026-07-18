@@ -1,33 +1,88 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Sparkles, Check } from "lucide-react";
 import { SimpleCard, Button, SimpleTabs, SlidingDrawer } from "@/components/ui";
 import { ConfigBadges } from "@/components/ui/config-badges";
-import { usePolishContext } from "./PolishContext";
+import { usePolishStore } from "@/stores/usePolishStore";
+import { usePanelStore } from "@/stores/usePanelStore";
+import { useMenuStore } from "@/stores/useMenuStore";
+import { useAppStore } from "@/stores/useAppStore";
 import { fillConfig } from "@/lib/configs/config-utils";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
-import type { PolishRuleConfig } from "@/lib/configs/generated";
+import { api } from "@/lib/api";
+import type { PolishRuleConfig } from "@/types";
 
 const TABS = [{ id: "polish", label: "润色", icon: Sparkles }];
 
 export function PolishPanel() {
-  const {
-    panelOpen,
-    setPanelOpen,
-    activeTab,
-    setActiveTab,
-    selectedText,
-    rules,
-    samples,
-    selectedRuleId,
-    selectedSampleIds,
-    toggleSampleId,
-    polishing,
-    polishError,
-    executePolish,
-    reset,
-  } = usePolishContext();
+  const panelOpen = usePanelStore((s) => s.panelOpen);
+  const setPanelOpen = usePanelStore((s) => s.setPanelOpen);
+  const selectedRuleId = usePolishStore((s) => s.selectedRuleId);
+  const setSelectedRuleId = usePolishStore((s) => s.setSelectedRuleId);
+  const selectedSampleIds = usePolishStore((s) => s.selectedSampleIds);
+  const toggleSampleId = usePolishStore((s) => s.toggleSampleId);
+  const refreshPolishData = usePolishStore((s) => s.refreshPolishData);
+  const selectedText = useMenuStore((s) => s.selectedText);
+  const rules = useAppStore((s) => s.polishRules);
+  const samples = useAppStore((s) => s.polishSamples);
 
+  const [activeTab, setActiveTab] = useState<string | null>(null);
   const [itemTab, setItemTab] = useState<"rules" | "samples">("rules");
+  const [polishing, setPolishing] = useState(false);
+  const [polishError, setPolishError] = useState("");
+
+  const executePolish = useCallback(
+    async (ruleId: string) => {
+      if (!selectedText.trim()) return;
+
+      usePolishStore.setState({ selectedRuleId: ruleId });
+      setPolishing(true);
+      setPolishError("");
+
+      const body: Record<string, unknown> = { text: selectedText };
+
+      if (ruleId) {
+        body.type = "rule";
+        body.ruleId = ruleId;
+      } else if (selectedSampleIds.length > 0) {
+        body.type = "sample";
+        body.sampleIds = selectedSampleIds;
+      }
+
+      try {
+        const data = await api<{ error?: string; polishedText?: string }>({
+          url: "/api/polish",
+          method: "POST",
+          data: body,
+        });
+        if (data.error) {
+          setPolishError(data.error);
+        } else {
+          usePolishStore.setState({
+            polishResult: data.polishedText ?? "",
+            showResultPopover: true,
+          });
+          refreshPolishData();
+        }
+      } catch (err: any) {
+        setPolishError(err.message || "润色失败");
+      } finally {
+        setPolishing(false);
+      }
+    },
+    [selectedText, selectedSampleIds, refreshPolishData],
+  );
+
+  const reset = useCallback(() => {
+    useMenuStore.getState().resetMenu();
+    usePolishStore.setState({
+      selectedRuleId: "",
+      selectedSampleIds: [],
+      polishResult: "",
+      showResultPopover: false,
+    });
+    setPolishing(false);
+    setPolishError("");
+  }, []);
 
   const ITEM_TABS = [
     { key: "rules", label: "规则" },
@@ -69,7 +124,7 @@ export function PolishPanel() {
           );
         })}
       </div>
-      <SlidingDrawer open={panelOpen} width={360} title="润色规则">
+      <SlidingDrawer open={panelOpen} width={360} className="ml-0">
         {/* 选中文本预览 */}
         {selectedText && (
           <div className="mb-3 rounded-lg border bg-muted/50 p-3">
@@ -101,7 +156,7 @@ export function PolishPanel() {
                       title={rule.name}
                       description={rule.description}
                       selected={selectedRuleId === rule.id && !polishing}
-                      onClick={polishing ? undefined : () => executePolish(rule.id)}
+                      onClick={polishing ? undefined : () => setSelectedRuleId(rule.id)}
                     >
                       <ConfigBadges<PolishRuleConfig>
                         config={cfg}
@@ -117,6 +172,16 @@ export function PolishPanel() {
                   </div>
                 );
               })
+            )}
+            {!polishing && selectedRuleId && (
+              <Button
+                variant="outline"
+                className="mt-2 w-full"
+                onClick={() => executePolish(selectedRuleId)}
+              >
+                <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                用规则润色
+              </Button>
             )}
           </div>
         )}
@@ -181,16 +246,14 @@ export function PolishPanel() {
                     </div>
                   );
                 })}
-                {selectedSampleIds.length > 0 && (
+                {!polishing && selectedSampleIds.length > 0 && (
                   <Button
                     variant="outline"
-                    size="sm"
                     className="mt-2 w-full"
                     onClick={() => executePolish("")}
-                    disabled={polishing}
                   >
                     <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                    {polishing ? "润色中..." : "用样本润色"}
+                    用样本润色
                   </Button>
                 )}
               </>
@@ -199,7 +262,7 @@ export function PolishPanel() {
         )}
 
         {polishing && (
-          <div className="mt-3 rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
+          <div className="mt-3 text-center text-sm text-muted-foreground">
             <Sparkles className="mr-1 inline-block h-4 w-4 animate-pulse" />
             润色中...
           </div>

@@ -2,10 +2,14 @@
 
 import { Button } from "@/components/ui/button"
 import { Sparkles } from "lucide-react"
-import { usePolishContext } from "./PolishContext"
+import { useMenuStore } from "@/stores/useMenuStore"
+import { usePolishStore } from "@/stores/usePolishStore"
 
 export function SelectionMenu() {
-  const { showSelectionMenu, selectionMenuPos, selectedText, handlePolishClick } = usePolishContext()
+  const showSelectionMenu = useMenuStore((s) => s.showSelectionMenu);
+  const selectionMenuPos = useMenuStore((s) => s.selectionMenuPos);
+  const selectedText = useMenuStore((s) => s.selectedText);
+  const handlePolishClick = usePolishStore((s) => s.handlePolishClick);
 
   if (!showSelectionMenu || !selectedText) return null
 

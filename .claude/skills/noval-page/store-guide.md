@@ -24,10 +24,11 @@ Zustand 全局 store，位于 `@/stores/useAppStore`。
 | key | 类型 | 说明 |
 |---|---|---|
 | `novel` | `NovelData \| null` | 当前小说 |
-| `characters` | `{ id, name }[]` | 人物列表 |
-| `locations` | `{ id, name }[]` | 地点列表 |
+| `characters` | `CharacterData[]` | 人物列表 |
+| `organizations` | `OrganizationData[]` | 组织列表 |
+| `locations` | `LocationData[]` | 地点列表 |
 | `foreshadowings` | `{ id, name }[]` | 伏笔列表 |
-| `outlines` | `Record<string, unknown>[]` | 大纲列表（手动管理，见下文） |
+| `outlines` | `OutlineData[]` | 大纲列表（手动管理，见下文） |
 
 ### Actions
 
@@ -43,7 +44,7 @@ Zustand 全局 store，位于 `@/stores/useAppStore`。
 ## RefreshKey
 
 ```ts
-type RefreshKey = "novel" | "characters" | "locations" | "foreshadowings" | "outlines";
+type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "polishRules" | "polishSamples";
 ```
 
 每个 `RefreshKey` 对应 store 中的一个 state key，`mutate` 执行后会自动重新请求该 key 对应的数据。
@@ -127,6 +128,7 @@ const { items, createFn } = useEntityItems("characters");
 ## 原则
 
 - **不需要每个实体都往 store 加 action**，一个 `mutate` 就够了
+- **CRUD 页面推荐用 `useEntityCrud`**，它封装了 store 读写和 mutate 调用，页面无需直接操作 store
 - **store 负责数据缓存和共享**，不负责业务逻辑
 - **页面负责业务逻辑**（拼装 CRUD 参数），通过 `mutate` 触发 store 刷新
 - **单页面专用数据**用 `useState` + `api()`，不放进 store
@@ -134,6 +136,6 @@ const { items, createFn } = useEntityItems("characters");
 ## 参考文件
 
 - 当前 store：[src/stores/useAppStore.ts](../../../src/stores/useAppStore.ts)
+- useEntityCrud hook：[src/hooks/useEntityCrud.ts](../../../src/hooks/useEntityCrud.ts)
 - useEntityItems hook：[src/hooks/useEntityItems.ts](../../../src/hooks/useEntityItems.ts)
-- 页面中使用 store：[page-single.md](page-single.md)
-- 页面中使用 api：[page-list.md](page-list.md)
+- entity CRUD 配置表：[src/lib/configs/crud-config.ts](../../../src/lib/configs/crud-config.ts)

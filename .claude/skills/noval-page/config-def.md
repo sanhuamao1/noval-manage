@@ -45,6 +45,7 @@ sections:                  # 布局定义，引用 fields 中的 key
 | `toggle` | `boolean` | `false` | 开关 |
 | `list` | `string[]` | `[]` | 动态列表，子字段用 `;` 拼接 |
 | `tagselect` | `string[]` | `[]` | 从关联实体选择（需 `entity` 字段） |
+| `tags` | `string[]` | `[]` | 自定义标签输入 |
 
 ## 字段属性
 
@@ -57,12 +58,14 @@ sections:                  # 布局定义，引用 fields 中的 key
 | `icon` | 全部 | Lucide 图标名，在 tabs trigger 等处显示 |
 | `noLabel` | 全部 | 不显示 label |
 | `display` | single/multi | 排列方式：`default` / `flex` / `grid` / `between` |
-| `className` | 全部 | 控件外层 Tailwind 类名 |
+| `className` | 全部 | 控件内容 Tailwind 类名 |
+| `rootClassName` | 全部 | 控件外层 Tailwind 类名 |
 | `options` | single/multi | 选项列表（内联数组）或引用名（字符串） |
 | `max` | multi | 最大可选数 |
 | `variant` | single/multi | 控件变体，如 `"box"` |
-| `subFields` | list | 子字段定义：`[{ placeholder, width }]` |
+| `subFields` | list | 子字段定义：`[{ placeholder, width, type?, optionsFrom?, entity? }]` |
 | `entity` | tagselect | **必填**。关联实体名，选项从 store 动态获取 |
+| `entity` | list subField (type="select") | 关联实体名，选项从全局 store 对应实体中取 `name` 字段（如 `"characters"`、`"organizations"`），与 `optionsFrom` 互斥 |
 
 ### defaultValue 使用场景
 
@@ -81,6 +84,45 @@ notes:
     - "破局方式;"
     - "关键行为模式;"
 ```
+
+### list 子字段扩展
+
+每个 `subFields` 条目除 `placeholder`、`width` 外，还支持以下可选属性：
+
+| 属性 | 说明 |
+|------|------|
+| `type` | 控件类型，默认 `"text"`（Input）。设为 `"select"` 渲染下拉框 |
+| `optionsFrom` | 当 `type: select` 时，引用同实体中另一个 `list` 字段的 key，自动提取其第一列子值作为下拉选项 |
+| `entity` | 当 `type: select` 时，引用全局实体名（如 `"characters"`），从 store 中取 `name` 字段作为下拉选项。与 `optionsFrom` 互斥 |
+
+**跨字段依赖示例** — members 的等级选项来自 structure 定义：
+
+```yaml
+fields:
+  structure:
+    type: list
+    subFields:
+      - { placeholder: 等级 }
+      - { placeholder: 职能 }
+  members:
+    type: list
+    subFields:
+      - { placeholder: 代号, width: w-1/3 }
+      - { placeholder: 等级, width: w-1/3, type: select, optionsFrom: structure }
+      - { placeholder: 备注, width: flex-1 }
+```
+
+**实体关联示例** — relationships 中角色姓名选项来自已有角色列表：
+
+```yaml
+fields:
+  relationships:
+    type: list
+    subFields:
+      - { placeholder: 角色姓名, width: w-1/3, type: select, entity: characters }
+      - { placeholder: 与 TA 的关系, width: flex-1 }
+```
+
 
 ## 选项系统
 
@@ -154,7 +196,11 @@ genre:
 node scripts/generate-configs.cjs
 ```
 
-生成物：`ConfigEntity` 枚举、TypeScript 类型接口（如 `CharacterConfig`）、`EntityConfigMap`、`CONFIGS` 运行时对象、`ALL_OPTIONS` 选项集合。
+读取 `configs/*.yml`，生成三个文件：
+- `src/types/entity.ts`（实体枚举与类型）、
+- `src/types/entityConfig.ts`（字段配置接口）
+- `src/lib/configs/generated.ts`（运行时配置数据）
+
 
 ## 何时询问用户
 

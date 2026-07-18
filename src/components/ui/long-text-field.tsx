@@ -1,51 +1,56 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { Textarea } from "./textarea";
-import { Label } from "./label";
 import { FileText } from "lucide-react";
 
 /** 多行文本输入字段（带字数统计） */
 export function LongTextField({
-    value,
-    maxLength,
-    placeholder,
-    label,
-    onChange,
+  value,
+  maxLength,
+  placeholder,
+  onChange,
+  rootClassName = "",
 }: {
-    value: string;
-    maxLength: number;
-    placeholder?: string;
-    label: string;
-    onChange: (v: string) => void;
+  value: string;
+  maxLength: number;
+  placeholder?: string;
+  onChange: (v: string) => void;
+  rootClassName?: string;
 }) {
-    const len = value?.length ?? 0;
-    return (
-        <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5">
-                <FileText className="w-3 h-3 text-muted-foreground" />
-                <Label>{label}</Label>
-            </div>
-            <Textarea
-                value={value ?? ""}
-                onChange={(e) => {
-                    if (e.target.value.length <= maxLength) {
-                        onChange(e.target.value);
-                    }
-                }}
-                placeholder={placeholder}
-                rows={6}
-            />
-            <div
-                className={`flex items-center justify-end text-xs ${
-                    len > maxLength * 0.9
-                        ? "text-amber-500"
-                        : "text-muted-foreground"
-                }`}
-            >
-                <span>
-                    {len}/{maxLength}
-                </span>
-            </div>
-        </div>
-    );
+  const len = value?.length ?? 0;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <div className="relative">
+      <Textarea
+        ref={textareaRef}
+        value={value ?? ""}
+        onChange={(e) => {
+          if (e.target.value.length <= maxLength) {
+            onChange(e.target.value);
+          }
+        }}
+        placeholder={placeholder}
+        rows={1}
+        className="min-h-[60px] resize-none overflow-hidden"
+      />
+      <div
+        className={`absolute bottom-1.5 right-2 flex items-center rounded bg-background/80 px-1 py-0.5 text-xs ${
+          len > maxLength * 0.9 ? "text-amber-500" : "text-muted-foreground"
+        }`}
+      >
+        <span>
+          {len}/{maxLength}
+        </span>
+      </div>
+    </div>
+  );
 }

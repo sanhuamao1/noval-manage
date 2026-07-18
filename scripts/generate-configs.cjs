@@ -37,6 +37,7 @@ function buildField(key, def, ownOptions) {
     noLabel: def.noLabel,
     variant: def.variant,
     className: def.className,
+    rootClassName: def.rootClassName,
     cols: def.cols,
     subFields: def.subFields,
     entity: def.entity,
@@ -116,7 +117,7 @@ function loadEntityConfig(name) {
 
 // ── 加载所有实体 ──
 
-const entities = ["novel", "character", "outline", "polish-rule", "polish-sample"];
+const entities = ["novel", "character", "outline", "polish-rule", "polish-sample", "organization", "location"];
 const configs = {};
 for (const name of entities) {
   configs[name] = loadEntityConfig(name);
@@ -129,7 +130,8 @@ function typeToTsType(type) {
     case "toggle": return "boolean";
     case "multi":
     case "list":
-    case "tagselect": return "string[]";
+    case "tagselect":
+    case "tags": return "string[]";
     case "single":
     case "text":
     case "longtext": return "string | undefined";

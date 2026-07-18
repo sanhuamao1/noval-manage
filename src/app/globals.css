@@ -49,11 +49,14 @@
   * {
     @apply border-border;
     box-sizing: border-box;
+    /* 全局隐藏滚动条 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
   }
   body {
     @apply bg-bg-950 text-fg-primary;
-  }
-  .parent > :last-child:nth-child(odd) {
-    grid-column: 1 / -1;  /* 或者 span 2 */
   }
 }

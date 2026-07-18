@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-14T14:36:20.338Z，勿手动编辑
+// 自动生成于 2026-07-18T16:45:07.146Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -45,12 +45,20 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "className": "grid grid-cols-3 gap-1"
           },
           {
+            "key": "oneLineSummary",
+            "label": "一句话梗概",
+            "type": "longtext",
+            "placeholder": "用一句话概括你的作品...",
+            "maxLength": 100,
+            "rootClassName": "col-span-full"
+          },
+          {
             "key": "description",
-            "label": "简介 / 梗概",
+            "label": "简介",
             "type": "longtext",
             "placeholder": "用一段话描述你的作品...",
-            "maxLength": 2000,
-            "className": "col-span-full"
+            "maxLength": 800,
+            "rootClassName": "col-span-full"
           }
         ]
       },
@@ -59,89 +67,162 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "title": "作品设定",
         "children": [
           {
-            "key": "enablePreset",
-            "label": "预设文风",
-            "type": "tab-group",
-            "class": "space-y-2",
-            "children": [
+            "key": "presetStyle",
+            "label": "文风",
+            "type": "single",
+            "options": [
               {
-                "key": "enablePreset",
-                "label": "启用预设文风",
-                "type": "toggle",
-                "display": "between"
+                "value": "古龙体",
+                "icon": "Sword",
+                "description": "短句为主，多用对仗与排比，留白极多。善用极简动作描写刻画人物，气氛冷峻肃杀。对话干脆利落，常用一句一段制造节奏感。环境描写点到为止，重视意境胜过细节铺陈。"
               },
               {
-                "key": "presetStyle",
-                "label": "预设文风",
-                "type": "single",
-                "options": [
-                  {
-                    "value": "古龙体",
-                    "icon": "Sword",
-                    "description": "短句为主，多用对仗与排比，留白极多。善用极简动作描写刻画人物，气氛冷峻肃杀。对话干脆利落，常用一句一段制造节奏感。环境描写点到为止，重视意境胜过细节铺陈。"
-                  },
-                  {
-                    "value": "金庸体",
-                    "icon": "ScrollText",
-                    "description": "文笔典雅厚重，融入古典诗词与历史典故。武功描写细腻生动，招式名目考究。叙事稳健，重情节跌宕与人物群像。对话贴合身份，方言与文言点缀其间。"
-                  },
-                  {
-                    "value": "网文爽文体",
-                    "icon": "Moon",
-                    "description": "节奏明快，多用短段落与断句制造阅读爽感。重冲突推进与情绪爆发，常以悬念钩子收尾。心理活动直白，金手指与系统提示穿插其中。环境描写服务于氛围渲染，不冗长。"
-                  },
-                  {
-                    "value": "传统文学体",
-                    "icon": "BookOpen",
-                    "description": "语言凝练考究，长句与短句交替。重心理刻画与环境烘托，叙事节奏舒缓。多用隐喻与象征，留有阐释空间。对话含蓄，潜台词丰富。"
-                  },
-                  {
-                    "value": "王朔体",
-                    "icon": "Theater",
-                    "description": "京味口语化，调侃与反讽贯穿始终。叙述者带着戏谑距离感，正经话用痞气说。对话密集，机锋暗藏，常以插科打诨解构严肃。"
-                  },
-                  {
-                    "value": "余华体",
-                    "icon": "Wind",
-                    "description": "冷峻克制，近乎零度叙事。情感不外露，靠白描动作与事件传递力量。语言朴素洗练，重复句式制造节奏。苦难叙事中带荒诞感。"
-                  },
-                  {
-                    "value": "意识流体",
-                    "icon": "Waves",
-                    "description": "长句流动，心理活动与外部事件交织。时间非线性跳跃，记忆与当下叠印。感官细节浓密，主观感受压倒客观描写。"
-                  },
-                  {
-                    "value": "极简白描体",
-                    "icon": "Zap",
-                    "description": "动词驱动，形容词极省。场景靠动作与对话搭建，不写情绪只写行为。句子短，信息密度高，留白由读者填充。"
-                  },
-                  {
-                    "value": "影视画面体",
-                    "icon": "Palette",
-                    "description": "强烈的镜头感，场景切换明确。重视觉细节与运动描写，对话简短承担叙事。氛围渲染浓墨重彩，节奏快慢有度。"
-                  },
-                  {
-                    "value": "散文诗体",
-                    "icon": "Feather",
-                    "description": "文笔优美抒情，节奏舒缓如歌。意象密集，修辞丰富，重视氛围与情绪渲染。叙事弱化，意境至上。"
-                  },
-                  {
-                    "value": "克苏鲁翻译体",
-                    "icon": "Snowflake",
-                    "description": "欧化长句，形容词堆叠密集。常以'不可名状''亵渎''癫狂'等词渲染未知恐惧。叙述者神经质，反复强调恐惧与无力感。"
-                  },
-                  {
-                    "value": "番剧轻小说体",
-                    "icon": "MessageSquare",
-                    "description": "对话密集，吐槽与内心戏穿插。短段落为主，常用括号补足心理活动。角色声口鲜明，节奏轻快，二次元梗自然嵌入。"
-                  }
-                ],
-                "display": "flex",
-                "icon": "BookMarked",
-                "noLabel": true,
-                "className": "grid grid-cols-3 gap-2"
+                "value": "金庸体",
+                "icon": "ScrollText",
+                "description": "文笔典雅厚重，融入古典诗词与历史典故。武功描写细腻生动，招式名目考究。叙事稳健，重情节跌宕与人物群像。对话贴合身份，方言与文言点缀其间。"
+              },
+              {
+                "value": "网文爽文体",
+                "icon": "Moon",
+                "description": "节奏明快，多用短段落与断句制造阅读爽感。重冲突推进与情绪爆发，常以悬念钩子收尾。心理活动直白，金手指与系统提示穿插其中。环境描写服务于氛围渲染，不冗长。"
+              },
+              {
+                "value": "传统文学体",
+                "icon": "BookOpen",
+                "description": "语言凝练考究，长句与短句交替。重心理刻画与环境烘托，叙事节奏舒缓。多用隐喻与象征，留有阐释空间。对话含蓄，潜台词丰富。"
+              },
+              {
+                "value": "王朔体",
+                "icon": "Theater",
+                "description": "京味口语化，调侃与反讽贯穿始终。叙述者带着戏谑距离感，正经话用痞气说。对话密集，机锋暗藏，常以插科打诨解构严肃。"
+              },
+              {
+                "value": "余华体",
+                "icon": "Wind",
+                "description": "冷峻克制，近乎零度叙事。情感不外露，靠白描动作与事件传递力量。语言朴素洗练，重复句式制造节奏。苦难叙事中带荒诞感。"
+              },
+              {
+                "value": "意识流体",
+                "icon": "Waves",
+                "description": "长句流动，心理活动与外部事件交织。时间非线性跳跃，记忆与当下叠印。感官细节浓密，主观感受压倒客观描写。"
+              },
+              {
+                "value": "极简白描体",
+                "icon": "Zap",
+                "description": "动词驱动，形容词极省。场景靠动作与对话搭建，不写情绪只写行为。句子短，信息密度高，留白由读者填充。"
+              },
+              {
+                "value": "影视画面体",
+                "icon": "Palette",
+                "description": "强烈的镜头感，场景切换明确。重视觉细节与运动描写，对话简短承担叙事。氛围渲染浓墨重彩，节奏快慢有度。"
+              },
+              {
+                "value": "散文诗体",
+                "icon": "Feather",
+                "description": "文笔优美抒情，节奏舒缓如歌。意象密集，修辞丰富，重视氛围与情绪渲染。叙事弱化，意境至上。"
+              },
+              {
+                "value": "克苏鲁翻译体",
+                "icon": "Snowflake",
+                "description": "欧化长句，形容词堆叠密集。常以'不可名状''亵渎''癫狂'等词渲染未知恐惧。叙述者神经质，反复强调恐惧与无力感。"
+              },
+              {
+                "value": "番剧轻小说体",
+                "icon": "MessageSquare",
+                "description": "对话密集，吐槽与内心戏穿插。短段落为主，常用括号补足心理活动。角色声口鲜明，节奏轻快，二次元梗自然嵌入。"
               }
-            ]
+            ],
+            "display": "flex",
+            "noLabel": true,
+            "className": "grid grid-cols-3 gap-2"
+          },
+          {
+            "key": "genre",
+            "label": "题材",
+            "type": "multi",
+            "options": [
+              {
+                "value": "玄幻",
+                "icon": "Sparkles"
+              },
+              {
+                "value": "仙侠",
+                "icon": "BookMarked"
+              },
+              {
+                "value": "科幻",
+                "icon": "Rocket"
+              },
+              {
+                "value": "都市",
+                "icon": "Building2"
+              },
+              {
+                "value": "言情",
+                "icon": "Heart"
+              },
+              {
+                "value": "历史",
+                "icon": "Book"
+              },
+              {
+                "value": "悬疑",
+                "icon": "Search"
+              },
+              {
+                "value": "奇幻",
+                "icon": "Wand2"
+              },
+              {
+                "value": "武侠",
+                "icon": "Sword"
+              },
+              {
+                "value": "军事",
+                "icon": "Shield"
+              },
+              {
+                "value": "游戏",
+                "icon": "Gamepad2"
+              },
+              {
+                "value": "现实",
+                "icon": "Globe"
+              }
+            ],
+            "max": 2,
+            "display": "flex",
+            "noLabel": true,
+            "className": "gap-2"
+          },
+          {
+            "key": "worldShape",
+            "label": "世界形态",
+            "type": "single",
+            "options": [
+              {
+                "value": "大陆",
+                "icon": "Map"
+              },
+              {
+                "value": "群岛",
+                "icon": "Waves"
+              },
+              {
+                "value": "星球",
+                "icon": "Globe"
+              },
+              {
+                "value": "星系",
+                "icon": "Orbit"
+              },
+              {
+                "value": "多重位面",
+                "icon": "Layers"
+              }
+            ],
+            "noLabel": true,
+            "className": "grid grid-cols-4 gap-2"
           },
           {
             "key": "primaryTone",
@@ -210,7 +291,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
               }
             ],
             "display": "flex",
-            "icon": "Palette",
             "noLabel": true,
             "className": "grid grid-cols-4 gap-2"
           },
@@ -282,158 +362,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             ],
             "max": 2,
             "display": "flex",
-            "icon": "Layers",
             "noLabel": true,
             "className": "grid grid-cols-4 gap-2"
-          }
-        ]
-      },
-      {
-        "type": "tabs",
-        "title": "世界观",
-        "children": [
-          {
-            "key": "genre",
-            "label": "题材",
-            "type": "multi",
-            "options": [
-              {
-                "value": "玄幻",
-                "icon": "Sparkles"
-              },
-              {
-                "value": "仙侠",
-                "icon": "BookMarked"
-              },
-              {
-                "value": "科幻",
-                "icon": "Rocket"
-              },
-              {
-                "value": "都市",
-                "icon": "Building2"
-              },
-              {
-                "value": "言情",
-                "icon": "Heart"
-              },
-              {
-                "value": "历史",
-                "icon": "Book"
-              },
-              {
-                "value": "悬疑",
-                "icon": "Search"
-              },
-              {
-                "value": "奇幻",
-                "icon": "Wand2"
-              },
-              {
-                "value": "武侠",
-                "icon": "Sword"
-              },
-              {
-                "value": "军事",
-                "icon": "Shield"
-              },
-              {
-                "value": "游戏",
-                "icon": "Gamepad2"
-              },
-              {
-                "value": "现实",
-                "icon": "Globe"
-              }
-            ],
-            "max": 2,
-            "display": "flex",
-            "noLabel": true,
-            "className": "gap-2"
-          },
-          {
-            "key": "world",
-            "label": "世界",
-            "type": "tab-group",
-            "class": "grid grid-cols-2 gap-2",
-            "children": [
-              {
-                "key": "worldType",
-                "label": "世界类型",
-                "type": "single",
-                "options": [
-                  {
-                    "value": "架空修仙",
-                    "icon": "Sparkles",
-                    "description": "灵气/功法/境界/宗门"
-                  },
-                  {
-                    "value": "都市现实",
-                    "icon": "Building2",
-                    "description": "现代都市背景"
-                  },
-                  {
-                    "value": "星际科幻",
-                    "icon": "Rocket",
-                    "description": "太空/星际/科技"
-                  },
-                  {
-                    "value": "西幻魔法",
-                    "icon": "Wand2",
-                    "description": "魔法/种族/神祇"
-                  },
-                  {
-                    "value": "末日废土",
-                    "icon": "Skull",
-                    "description": "灾难后/生存"
-                  },
-                  {
-                    "value": "历史架空",
-                    "icon": "Book",
-                    "description": "真实历史+虚构"
-                  },
-                  {
-                    "value": "赛博朋克",
-                    "icon": "Cpu",
-                    "description": "高科技低生活"
-                  },
-                  {
-                    "value": "东方玄幻",
-                    "icon": "Dragon",
-                    "description": "洪荒/神话/山海经"
-                  }
-                ],
-                "className": "grid grid-cols-2 gap-2"
-              },
-              {
-                "key": "worldShape",
-                "label": "世界形态",
-                "type": "single",
-                "options": [
-                  {
-                    "value": "大陆",
-                    "icon": "Map"
-                  },
-                  {
-                    "value": "群岛",
-                    "icon": "Waves"
-                  },
-                  {
-                    "value": "星球",
-                    "icon": "Globe"
-                  },
-                  {
-                    "value": "星系",
-                    "icon": "Orbit"
-                  },
-                  {
-                    "value": "多重位面",
-                    "icon": "Layers"
-                  }
-                ],
-                "className": "grid grid-cols-2 gap-2"
-              }
-            ]
           }
         ]
       }
@@ -446,12 +376,20 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "placeholder": "作品名称"
       },
       {
+        "key": "oneLineSummary",
+        "label": "一句话梗概",
+        "type": "longtext",
+        "placeholder": "用一句话概括你的作品...",
+        "maxLength": 100,
+        "rootClassName": "col-span-full"
+      },
+      {
         "key": "description",
-        "label": "简介 / 梗概",
+        "label": "简介",
         "type": "longtext",
         "placeholder": "用一段话描述你的作品...",
-        "maxLength": 2000,
-        "className": "col-span-full"
+        "maxLength": 800,
+        "rootClassName": "col-span-full"
       },
       {
         "key": "status",
@@ -538,14 +476,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "className": "gap-2"
       },
       {
-        "key": "enablePreset",
-        "label": "启用预设文风",
-        "type": "toggle",
-        "display": "between"
-      },
-      {
         "key": "presetStyle",
-        "label": "预设文风",
+        "label": "文风",
         "type": "single",
         "options": [
           {
@@ -610,7 +542,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "display": "flex",
-        "icon": "BookMarked",
         "noLabel": true,
         "className": "grid grid-cols-3 gap-2"
       },
@@ -681,7 +612,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "display": "flex",
-        "icon": "Palette",
         "noLabel": true,
         "className": "grid grid-cols-4 gap-2"
       },
@@ -753,57 +683,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         ],
         "max": 2,
         "display": "flex",
-        "icon": "Layers",
         "noLabel": true,
         "className": "grid grid-cols-4 gap-2"
-      },
-      {
-        "key": "worldType",
-        "label": "世界类型",
-        "type": "single",
-        "options": [
-          {
-            "value": "架空修仙",
-            "icon": "Sparkles",
-            "description": "灵气/功法/境界/宗门"
-          },
-          {
-            "value": "都市现实",
-            "icon": "Building2",
-            "description": "现代都市背景"
-          },
-          {
-            "value": "星际科幻",
-            "icon": "Rocket",
-            "description": "太空/星际/科技"
-          },
-          {
-            "value": "西幻魔法",
-            "icon": "Wand2",
-            "description": "魔法/种族/神祇"
-          },
-          {
-            "value": "末日废土",
-            "icon": "Skull",
-            "description": "灾难后/生存"
-          },
-          {
-            "value": "历史架空",
-            "icon": "Book",
-            "description": "真实历史+虚构"
-          },
-          {
-            "value": "赛博朋克",
-            "icon": "Cpu",
-            "description": "高科技低生活"
-          },
-          {
-            "value": "东方玄幻",
-            "icon": "Dragon",
-            "description": "洪荒/神话/山海经"
-          }
-        ],
-        "className": "grid grid-cols-2 gap-2"
       },
       {
         "key": "worldShape",
@@ -831,7 +712,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "Layers"
           }
         ],
-        "className": "grid grid-cols-2 gap-2"
+        "noLabel": true,
+        "className": "grid grid-cols-4 gap-2"
       }
     ]
   },
@@ -839,337 +721,340 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
     "entity": "Character",
     "sections": [
       {
-        "type": "grid",
-        "cols": 3,
-        "sections": [
+        "type": "card",
+        "title": "角色名称",
+        "icon": "UserRound",
+        "class": "grid grid-cols-2 gap-4",
+        "titleKey": "name",
+        "titleEditable": true,
+        "children": [
           {
-            "type": "grid",
-            "cols": 1,
-            "colspan": 2,
-            "sections": [
+            "key": "role",
+            "label": "角色类型",
+            "type": "single",
+            "options": [
               {
-                "type": "card",
-                "title": "角色名称",
-                "icon": "UserRound",
-                "class": "grid grid-cols-2 gap-3 parent",
-                "titleKey": "name",
-                "titleEditable": true,
-                "children": [
-                  {
-                    "key": "gender",
-                    "label": "性别",
-                    "type": "single",
-                    "options": [
-                      {
-                        "value": "男",
-                        "icon": "Mars"
-                      },
-                      {
-                        "value": "女",
-                        "icon": "Venus"
-                      }
-                    ],
-                    "display": "flex"
-                  },
-                  {
-                    "key": "role",
-                    "label": "角色类型",
-                    "type": "single",
-                    "options": [
-                      {
-                        "value": "主角",
-                        "icon": "Star",
-                        "color": "primary"
-                      },
-                      {
-                        "value": "配角",
-                        "icon": "Users",
-                        "color": "neutral"
-                      },
-                      {
-                        "value": "反派",
-                        "icon": "Skull",
-                        "color": "danger"
-                      }
-                    ],
-                    "display": "flex"
-                  },
-                  {
-                    "key": "age",
-                    "label": "年龄",
-                    "type": "text",
-                    "placeholder": "如：25岁"
-                  },
-                  {
-                    "key": "identity",
-                    "label": "身份",
-                    "type": "text",
-                    "placeholder": "身份/职业/组织归属"
-                  },
-                  {
-                    "key": "item",
-                    "label": "标志性物件",
-                    "type": "text",
-                    "placeholder": "一件有故事的随身物品"
-                  },
-                  {
-                    "key": "coreConflict",
-                    "label": "核心矛盾",
-                    "type": "text",
-                    "placeholder": "一句话概括"
-                  },
-                  {
-                    "key": "emotionExpression",
-                    "label": "情感表达方式",
-                    "type": "single",
-                    "options": [
-                      {
-                        "value": "成熟克制",
-                        "icon": "ShieldCheck"
-                      },
-                      {
-                        "value": "笨拙",
-                        "icon": "TriangleAlert"
-                      },
-                      {
-                        "value": "热烈",
-                        "icon": "Flame"
-                      },
-                      {
-                        "value": "压抑",
-                        "icon": "CloudRain"
-                      },
-                      {
-                        "value": "回避",
-                        "icon": "ArrowBigLeftDash"
-                      }
-                    ],
-                    "display": "flex",
-                    "className": "col-span-full"
-                  }
-                ]
+                "value": "主角",
+                "icon": "Star",
+                "color": "primary"
               },
               {
-                "type": "tabs",
-                "title": "能力与关系",
-                "children": [
+                "value": "配角",
+                "icon": "Users",
+                "color": "neutral"
+              },
+              {
+                "value": "反派",
+                "icon": "Skull",
+                "color": "danger"
+              }
+            ],
+            "display": "flex",
+            "noLabel": true,
+            "rootClassName": "col-span-full"
+          },
+          {
+            "key": "coreConflict",
+            "label": "核心矛盾",
+            "type": "text",
+            "placeholder": "一句话概括",
+            "rootClassName": "col-span-full"
+          },
+          {
+            "key": "surfaceGoal",
+            "label": "表层目标",
+            "type": "text",
+            "placeholder": "角色表面追求的目标..."
+          },
+          {
+            "key": "deepNeed",
+            "label": "深层需求",
+            "type": "text",
+            "placeholder": "角色内心真正渴望的..."
+          },
+          {
+            "key": "emotionExpression",
+            "label": "情感表达方式",
+            "type": "single",
+            "options": [
+              {
+                "value": "成熟克制",
+                "icon": "ShieldCheck"
+              },
+              {
+                "value": "笨拙",
+                "icon": "TriangleAlert"
+              },
+              {
+                "value": "热烈",
+                "icon": "Flame"
+              },
+              {
+                "value": "压抑",
+                "icon": "CloudRain"
+              },
+              {
+                "value": "回避",
+                "icon": "ArrowBigLeftDash"
+              }
+            ],
+            "display": "flex",
+            "rootClassName": "col-span-full"
+          }
+        ]
+      },
+      {
+        "type": "grid",
+        "cols": 2,
+        "sections": [
+          {
+            "type": "card",
+            "title": "基础信息",
+            "icon": "Info",
+            "children": [
+              {
+                "key": "gender",
+                "label": "性别",
+                "type": "single",
+                "options": [
                   {
-                    "key": "abilities",
-                    "label": "能力",
-                    "type": "list",
-                    "noLabel": true,
-                    "subFields": [
-                      {
-                        "placeholder": "擅长什么",
-                        "width": "w-1/3"
-                      },
-                      {
-                        "placeholder": "具体表现",
-                        "width": "flex-1"
-                      }
-                    ]
+                    "value": "男",
+                    "icon": "Mars"
                   },
                   {
-                    "key": "growthArcs",
-                    "label": "成长弧光",
-                    "type": "list",
-                    "noLabel": true,
-                    "subFields": [
-                      {
-                        "placeholder": "缺陷",
-                        "width": "w-1/4"
-                      },
-                      {
-                        "placeholder": "表现",
-                        "width": "w-1/3"
-                      },
-                      {
-                        "placeholder": "成长方向",
-                        "width": "w-1/3"
-                      }
-                    ]
-                  },
-                  {
-                    "key": "relationships",
-                    "label": "关系网络",
-                    "type": "list",
-                    "noLabel": true,
-                    "subFields": [
-                      {
-                        "placeholder": "角色姓名",
-                        "width": "w-1/3"
-                      },
-                      {
-                        "placeholder": "与 TA 的关系",
-                        "width": "flex-1"
-                      }
-                    ]
-                  },
-                  {
-                    "key": "notes",
-                    "label": "写作注意事项",
-                    "type": "list",
-                    "noLabel": true,
-                    "subFields": [
-                      {
-                        "placeholder": "标签",
-                        "width": "w-1/3"
-                      },
-                      {
-                        "placeholder": "内容",
-                        "width": "flex-1"
-                      }
-                    ],
-                    "defaultValue": [
-                      "破局方式;",
-                      "关键行为模式;",
-                      "角色危险性或潜力;"
-                    ]
+                    "value": "女",
+                    "icon": "Venus"
                   }
-                ]
+                ],
+                "display": "flex"
+              },
+              {
+                "key": "age",
+                "label": "年龄",
+                "type": "text",
+                "placeholder": "如：25岁"
+              },
+              {
+                "key": "identity",
+                "label": "身份",
+                "type": "text",
+                "placeholder": "身份/职业/组织归属"
+              },
+              {
+                "key": "item",
+                "label": "标志性物件",
+                "type": "text",
+                "placeholder": "一件有故事的随身物品"
               }
             ]
           },
           {
-            "type": "grid",
-            "cols": 1,
-            "colspan": 1,
-            "sections": [
+            "type": "tabs",
+            "title": "角色原型",
+            "children": [
               {
-                "type": "card",
-                "title": "叙事功能原型（沃格勒体系）",
-                "icon": "Shield",
-                "children": [
+                "key": "narrativeFunction",
+                "label": "叙事功能原型",
+                "type": "multi",
+                "options": [
                   {
-                    "key": "narrativeFunction",
-                    "label": "叙事功能原型",
-                    "type": "multi",
-                    "options": [
-                      {
-                        "value": "英雄",
-                        "icon": "Shield",
-                        "description": "故事核心推动者，为达成目标直面终极挑战，并愿意为集体利益做出关键牺牲。"
-                      },
-                      {
-                        "value": "导师",
-                        "icon": "GraduationCap",
-                        "description": "向英雄提供智慧、装备、训练或精神指引的引导者，通常在前期登场，后期退场或升华。"
-                      },
-                      {
-                        "value": "信使",
-                        "icon": "Mail",
-                        "description": "带来外部消息、发布冒险召唤、打破主角平静日常的角色。"
-                      },
-                      {
-                        "value": "变形者",
-                        "icon": "Sparkles",
-                        "description": "立场、忠诚度或真实身份模糊不定的角色，制造悬念、怀疑与戏剧翻转。"
-                      },
-                      {
-                        "value": "阴影",
-                        "icon": "Skull",
-                        "description": "与英雄核心价值观或目标直接对立的终极反派。"
-                      },
-                      {
-                        "value": "伙伴",
-                        "icon": "Users",
-                        "description": "英雄的同行者，提供情感支持、战力互补或功能辅助。"
-                      },
-                      {
-                        "value": "骗徒",
-                        "icon": "Theater",
-                        "description": "以狡黠、幽默或非正当手段搅动局势的角色，常打破常规逻辑。"
-                      },
-                      {
-                        "value": "边界守卫",
-                        "icon": "DoorOpen",
-                        "description": "把守每一道关卡的测试者，负责筛选英雄资格。"
-                      }
-                    ],
-                    "max": 3,
-                    "display": "grid",
-                    "noLabel": true,
-                    "variant": "box"
+                    "value": "英雄",
+                    "icon": "Shield",
+                    "description": "故事核心推动者，为达成目标直面终极挑战，并愿意为集体利益做出关键牺牲。"
+                  },
+                  {
+                    "value": "导师",
+                    "icon": "GraduationCap",
+                    "description": "向英雄提供智慧、装备、训练或精神指引的引导者，通常在前期登场，后期退场或升华。"
+                  },
+                  {
+                    "value": "信使",
+                    "icon": "Mail",
+                    "description": "带来外部消息、发布冒险召唤、打破主角平静日常的角色。"
+                  },
+                  {
+                    "value": "变形者",
+                    "icon": "Sparkles",
+                    "description": "立场、忠诚度或真实身份模糊不定的角色，制造悬念、怀疑与戏剧翻转。"
+                  },
+                  {
+                    "value": "阴影",
+                    "icon": "Skull",
+                    "description": "与英雄核心价值观或目标直接对立的终极反派。"
+                  },
+                  {
+                    "value": "伙伴",
+                    "icon": "Users",
+                    "description": "英雄的同行者，提供情感支持、战力互补或功能辅助。"
+                  },
+                  {
+                    "value": "骗徒",
+                    "icon": "Theater",
+                    "description": "以狡黠、幽默或非正当手段搅动局势的角色，常打破常规逻辑。"
+                  },
+                  {
+                    "value": "边界守卫",
+                    "icon": "DoorOpen",
+                    "description": "把守每一道关卡的测试者，负责筛选英雄资格。"
                   }
-                ]
+                ],
+                "max": 3,
+                "display": "grid",
+                "noLabel": true,
+                "variant": "box"
               },
               {
-                "type": "card",
-                "title": "内在动机原型（皮尔逊体系）",
-                "icon": "Heart",
-                "children": [
+                "key": "innerMotivation",
+                "label": "内在动机原型",
+                "type": "multi",
+                "options": [
                   {
-                    "key": "innerMotivation",
-                    "label": "内在动机原型",
-                    "type": "multi",
-                    "options": [
-                      {
-                        "value": "天真者",
-                        "icon": "Heart",
-                        "description": "追求安全与简单，赤子之心，相信世界本善。"
-                      },
-                      {
-                        "value": "孤儿",
-                        "icon": "Home",
-                        "description": "追求归属与连接，学会在残酷现实中依靠同伴。"
-                      },
-                      {
-                        "value": "战士",
-                        "icon": "Sword",
-                        "description": "追求胜利与征服，勇猛与纪律，以钢铁意志击溃障碍。"
-                      },
-                      {
-                        "value": "照顾者",
-                        "icon": "Hand",
-                        "description": "追求奉献与保护，利他母性，以滋养他人为最高价值。"
-                      },
-                      {
-                        "value": "探索者",
-                        "icon": "Compass",
-                        "description": "追求自由与真理，不安于现状，抗拒被困。"
-                      },
-                      {
-                        "value": "爱人",
-                        "icon": "Heart",
-                        "description": "追求亲密与激情，强烈的感官与情感连接。"
-                      },
-                      {
-                        "value": "叛逆者",
-                        "icon": "Flag",
-                        "description": "追求颠覆与变革，对旧秩序的愤怒，以打破枷锁为使命。"
-                      },
-                      {
-                        "value": "创造者",
-                        "icon": "Palette",
-                        "description": "追求创新与自我表达，将内心幻景具象化。"
-                      },
-                      {
-                        "value": "愚者",
-                        "icon": "PartyPopper",
-                        "description": "追求快乐与趣味，用幽默解构严肃，活在当下。"
-                      },
-                      {
-                        "value": "统治者",
-                        "icon": "Crown",
-                        "description": "追求秩序与控制，责任与力量，渴望建立稳固的体系。"
-                      },
-                      {
-                        "value": "魔术师",
-                        "icon": "Wand2",
-                        "description": "追求转化与洞察，掌握深层规律，将愿景转化为现实。"
-                      },
-                      {
-                        "value": "贤者",
-                        "icon": "BookOpen",
-                        "description": "追求真理与智慧，无尽的好奇心，以认知世界为乐。"
-                      }
-                    ],
-                    "max": 3,
-                    "display": "grid",
-                    "noLabel": true,
-                    "variant": "box"
+                    "value": "天真者",
+                    "icon": "Heart",
+                    "description": "追求安全与简单，赤子之心，相信世界本善。"
+                  },
+                  {
+                    "value": "孤儿",
+                    "icon": "Home",
+                    "description": "追求归属与连接，学会在残酷现实中依靠同伴。"
+                  },
+                  {
+                    "value": "战士",
+                    "icon": "Sword",
+                    "description": "追求胜利与征服，勇猛与纪律，以钢铁意志击溃障碍。"
+                  },
+                  {
+                    "value": "照顾者",
+                    "icon": "Hand",
+                    "description": "追求奉献与保护，利他母性，以滋养他人为最高价值。"
+                  },
+                  {
+                    "value": "探索者",
+                    "icon": "Compass",
+                    "description": "追求自由与真理，不安于现状，抗拒被困。"
+                  },
+                  {
+                    "value": "爱人",
+                    "icon": "Heart",
+                    "description": "追求亲密与激情，强烈的感官与情感连接。"
+                  },
+                  {
+                    "value": "叛逆者",
+                    "icon": "Flag",
+                    "description": "追求颠覆与变革，对旧秩序的愤怒，以打破枷锁为使命。"
+                  },
+                  {
+                    "value": "创造者",
+                    "icon": "Palette",
+                    "description": "追求创新与自我表达，将内心幻景具象化。"
+                  },
+                  {
+                    "value": "愚者",
+                    "icon": "PartyPopper",
+                    "description": "追求快乐与趣味，用幽默解构严肃，活在当下。"
+                  },
+                  {
+                    "value": "统治者",
+                    "icon": "Crown",
+                    "description": "追求秩序与控制，责任与力量，渴望建立稳固的体系。"
+                  },
+                  {
+                    "value": "魔术师",
+                    "icon": "Wand2",
+                    "description": "追求转化与洞察，掌握深层规律，将愿景转化为现实。"
+                  },
+                  {
+                    "value": "贤者",
+                    "icon": "BookOpen",
+                    "description": "追求真理与智慧，无尽的好奇心，以认知世界为乐。"
                   }
-                ]
+                ],
+                "max": 3,
+                "display": "grid",
+                "noLabel": true,
+                "variant": "box"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "tabs",
+        "title": "能力与关系",
+        "children": [
+          {
+            "key": "abilities",
+            "label": "能力",
+            "type": "tags",
+            "noLabel": true
+          },
+          {
+            "key": "growthArcs",
+            "label": "成长弧光",
+            "type": "list",
+            "noLabel": true,
+            "subFields": [
+              {
+                "placeholder": "缺陷",
+                "width": "w-1/4"
+              },
+              {
+                "placeholder": "表现",
+                "width": "w-1/3"
+              },
+              {
+                "placeholder": "成长方向",
+                "width": "w-1/3"
+              }
+            ]
+          },
+          {
+            "key": "relationships",
+            "label": "关系网络",
+            "type": "list",
+            "noLabel": true,
+            "subFields": [
+              {
+                "placeholder": "角色姓名",
+                "width": "w-1/3",
+                "type": "select",
+                "entity": "characters"
+              },
+              {
+                "placeholder": "与 TA 的关系",
+                "width": "flex-1"
+              }
+            ]
+          },
+          {
+            "key": "notes",
+            "label": "写作注意事项",
+            "type": "list",
+            "noLabel": true,
+            "subFields": [
+              {
+                "placeholder": "标签",
+                "width": "w-1/3"
+              },
+              {
+                "placeholder": "内容",
+                "width": "flex-1"
+              }
+            ],
+            "defaultValue": [
+              "破局方式;",
+              "关键行为模式;",
+              "角色危险性或潜力;"
+            ]
+          },
+          {
+            "key": "experience",
+            "label": "人物经历",
+            "type": "list",
+            "noLabel": true,
+            "subFields": [
+              {
+                "placeholder": "经历描述"
               }
             ]
           }
@@ -1221,7 +1106,9 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "color": "danger"
           }
         ],
-        "display": "flex"
+        "display": "flex",
+        "noLabel": true,
+        "rootClassName": "col-span-full"
       },
       {
         "key": "age",
@@ -1245,7 +1132,20 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "key": "coreConflict",
         "label": "核心矛盾",
         "type": "text",
-        "placeholder": "一句话概括"
+        "placeholder": "一句话概括",
+        "rootClassName": "col-span-full"
+      },
+      {
+        "key": "surfaceGoal",
+        "label": "表层目标",
+        "type": "text",
+        "placeholder": "角色表面追求的目标..."
+      },
+      {
+        "key": "deepNeed",
+        "label": "深层需求",
+        "type": "text",
+        "placeholder": "角色内心真正渴望的..."
       },
       {
         "key": "emotionExpression",
@@ -1274,23 +1174,13 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "display": "flex",
-        "className": "col-span-full"
+        "rootClassName": "col-span-full"
       },
       {
         "key": "abilities",
         "label": "能力",
-        "type": "list",
-        "noLabel": true,
-        "subFields": [
-          {
-            "placeholder": "擅长什么",
-            "width": "w-1/3"
-          },
-          {
-            "placeholder": "具体表现",
-            "width": "flex-1"
-          }
-        ]
+        "type": "tags",
+        "noLabel": true
       },
       {
         "key": "growthArcs",
@@ -1320,7 +1210,9 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "subFields": [
           {
             "placeholder": "角色姓名",
-            "width": "w-1/3"
+            "width": "w-1/3",
+            "type": "select",
+            "entity": "characters"
           },
           {
             "placeholder": "与 TA 的关系",
@@ -1347,6 +1239,17 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           "破局方式;",
           "关键行为模式;",
           "角色危险性或潜力;"
+        ]
+      },
+      {
+        "key": "experience",
+        "label": "人物经历",
+        "type": "list",
+        "noLabel": true,
+        "subFields": [
+          {
+            "placeholder": "经历描述"
+          }
         ]
       },
       {
@@ -1492,7 +1395,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "class": "space-y-3",
                 "children": [
                   {
-                    "key": "title",
+                    "key": "name",
                     "label": "章纲标题",
                     "type": "text",
                     "placeholder": "章纲标题"
@@ -1638,18 +1541,21 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                     "key": "characterIds",
                     "label": "出场人物",
                     "type": "tagselect",
+                    "rootClassName": "flex items-center gap-1",
                     "entity": "characters"
                   },
                   {
                     "key": "locationIds",
                     "label": "地点",
                     "type": "tagselect",
+                    "rootClassName": "flex items-center gap-1",
                     "entity": "locations"
                   },
                   {
                     "key": "foreshadowingIds",
                     "label": "伏笔",
                     "type": "tagselect",
+                    "rootClassName": "flex items-center gap-1",
                     "entity": "foreshadowings"
                   }
                 ]
@@ -1661,7 +1567,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
     ],
     "fields": [
       {
-        "key": "title",
+        "key": "name",
         "label": "章纲标题",
         "type": "text",
         "placeholder": "章纲标题"
@@ -1786,18 +1692,21 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "key": "characterIds",
         "label": "出场人物",
         "type": "tagselect",
+        "rootClassName": "flex items-center gap-1",
         "entity": "characters"
       },
       {
         "key": "locationIds",
         "label": "地点",
         "type": "tagselect",
+        "rootClassName": "flex items-center gap-1",
         "entity": "locations"
       },
       {
         "key": "foreshadowingIds",
         "label": "伏笔",
         "type": "tagselect",
+        "rootClassName": "flex items-center gap-1",
         "entity": "foreshadowings"
       }
     ]
@@ -2338,6 +2247,547 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "label": "设为反例（请避免的风格）",
         "type": "toggle",
         "display": "between"
+      }
+    ]
+  },
+  "organization": {
+    "entity": "Organization",
+    "sections": [
+      {
+        "type": "grid",
+        "cols": 3,
+        "sections": [
+          {
+            "type": "grid",
+            "cols": 1,
+            "colspan": 2,
+            "sections": [
+              {
+                "type": "card",
+                "title": "基本信息",
+                "icon": "Building2",
+                "class": "grid grid-cols-2 gap-3",
+                "titleKey": "name",
+                "titleEditable": true,
+                "children": [
+                  {
+                    "key": "founder",
+                    "label": "创始人",
+                    "type": "text",
+                    "placeholder": "创始人姓名"
+                  },
+                  {
+                    "key": "currentLeader",
+                    "label": "当前负责人",
+                    "type": "text",
+                    "placeholder": "当前负责人姓名"
+                  },
+                  {
+                    "key": "status",
+                    "label": "状态",
+                    "type": "single",
+                    "options": [
+                      {
+                        "value": "活跃",
+                        "icon": "Zap",
+                        "color": "success"
+                      },
+                      {
+                        "value": "蛰伏",
+                        "icon": "Clock",
+                        "color": "warn"
+                      },
+                      {
+                        "value": "已解散",
+                        "icon": "CircleOff",
+                        "color": "danger"
+                      }
+                    ],
+                    "display": "flex",
+                    "noLabel": true,
+                    "rootClassName": "col-span-full"
+                  }
+                ]
+              },
+              {
+                "type": "tabs",
+                "title": "组织详情",
+                "children": [
+                  {
+                    "key": "description",
+                    "label": "描述",
+                    "type": "longtext",
+                    "placeholder": "组织的简要描述",
+                    "maxLength": 100,
+                    "noLabel": true
+                  },
+                  {
+                    "key": "foundingBackground",
+                    "label": "成立背景",
+                    "type": "longtext",
+                    "placeholder": "组织成立的背景与契机",
+                    "maxLength": 200,
+                    "noLabel": true
+                  },
+                  {
+                    "key": "operationLogic",
+                    "label": "运行逻辑",
+                    "type": "longtext",
+                    "placeholder": "组织的运作方式和逻辑",
+                    "maxLength": 100,
+                    "noLabel": true
+                  },
+                  {
+                    "key": "structure",
+                    "label": "结构",
+                    "type": "list",
+                    "noLabel": true,
+                    "subFields": [
+                      {
+                        "placeholder": "等级",
+                        "width": "w-1/4"
+                      },
+                      {
+                        "placeholder": "作用/职责",
+                        "width": "flex-1"
+                      }
+                    ]
+                  },
+                  {
+                    "key": "members",
+                    "label": "成员",
+                    "type": "list",
+                    "noLabel": true,
+                    "subFields": [
+                      {
+                        "placeholder": "代号",
+                        "width": "w-1/4"
+                      },
+                      {
+                        "placeholder": "等级",
+                        "width": "w-1/4",
+                        "type": "select",
+                        "optionsFrom": "structure"
+                      },
+                      {
+                        "placeholder": "备注",
+                        "width": "flex-1"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "grid",
+            "cols": 1,
+            "colspan": 1,
+            "sections": [
+              {
+                "type": "card",
+                "title": "组织类型",
+                "icon": "Tag",
+                "children": [
+                  {
+                    "key": "type",
+                    "label": "组织类型",
+                    "type": "multi",
+                    "options": [
+                      {
+                        "value": "情报组织",
+                        "icon": "Eye"
+                      },
+                      {
+                        "value": "研究机构",
+                        "icon": "FlaskConical"
+                      },
+                      {
+                        "value": "犯罪集团",
+                        "icon": "Skull"
+                      },
+                      {
+                        "value": "宗教组织",
+                        "icon": "Church"
+                      },
+                      {
+                        "value": "政府机构",
+                        "icon": "Landmark"
+                      },
+                      {
+                        "value": "商业集团",
+                        "icon": "Building2"
+                      },
+                      {
+                        "value": "佣兵团",
+                        "icon": "Sword"
+                      },
+                      {
+                        "value": "学院门派",
+                        "icon": "GraduationCap"
+                      },
+                      {
+                        "value": "秘密结社",
+                        "icon": "Lock"
+                      },
+                      {
+                        "value": "反抗军",
+                        "icon": "Flag"
+                      }
+                    ],
+                    "max": 2,
+                    "display": "flex",
+                    "noLabel": true,
+                    "rootClassName": "col-span-full"
+                  }
+                ]
+              },
+              {
+                "type": "card",
+                "title": "据点",
+                "icon": "MapPin",
+                "children": [
+                  {
+                    "key": "headquarters",
+                    "label": "总部/据点",
+                    "type": "tags",
+                    "noLabel": true
+                  }
+                ]
+              },
+              {
+                "type": "card",
+                "title": "外部关系",
+                "icon": "Users",
+                "class": "space-y-2",
+                "children": [
+                  {
+                    "key": "opponents",
+                    "label": "对手",
+                    "type": "tags",
+                    "rootClassName": "flex items-center gap-1"
+                  },
+                  {
+                    "key": "mortalEnemies",
+                    "label": "死敌",
+                    "type": "tags",
+                    "rootClassName": "flex items-center gap-1"
+                  },
+                  {
+                    "key": "allies",
+                    "label": "盟友",
+                    "type": "tags",
+                    "rootClassName": "flex items-center gap-1"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "key": "name",
+        "label": "组织名称",
+        "type": "text",
+        "placeholder": "组织名称"
+      },
+      {
+        "key": "description",
+        "label": "描述",
+        "type": "longtext",
+        "placeholder": "组织的简要描述",
+        "maxLength": 100,
+        "noLabel": true
+      },
+      {
+        "key": "type",
+        "label": "组织类型",
+        "type": "multi",
+        "options": [
+          {
+            "value": "情报组织",
+            "icon": "Eye"
+          },
+          {
+            "value": "研究机构",
+            "icon": "FlaskConical"
+          },
+          {
+            "value": "犯罪集团",
+            "icon": "Skull"
+          },
+          {
+            "value": "宗教组织",
+            "icon": "Church"
+          },
+          {
+            "value": "政府机构",
+            "icon": "Landmark"
+          },
+          {
+            "value": "商业集团",
+            "icon": "Building2"
+          },
+          {
+            "value": "佣兵团",
+            "icon": "Sword"
+          },
+          {
+            "value": "学院门派",
+            "icon": "GraduationCap"
+          },
+          {
+            "value": "秘密结社",
+            "icon": "Lock"
+          },
+          {
+            "value": "反抗军",
+            "icon": "Flag"
+          }
+        ],
+        "max": 2,
+        "display": "flex",
+        "noLabel": true,
+        "rootClassName": "col-span-full"
+      },
+      {
+        "key": "status",
+        "label": "状态",
+        "type": "single",
+        "options": [
+          {
+            "value": "活跃",
+            "icon": "Zap",
+            "color": "success"
+          },
+          {
+            "value": "蛰伏",
+            "icon": "Clock",
+            "color": "warn"
+          },
+          {
+            "value": "已解散",
+            "icon": "CircleOff",
+            "color": "danger"
+          }
+        ],
+        "display": "flex",
+        "noLabel": true,
+        "rootClassName": "col-span-full"
+      },
+      {
+        "key": "foundingBackground",
+        "label": "成立背景",
+        "type": "longtext",
+        "placeholder": "组织成立的背景与契机",
+        "maxLength": 200,
+        "noLabel": true
+      },
+      {
+        "key": "founder",
+        "label": "创始人",
+        "type": "text",
+        "placeholder": "创始人姓名"
+      },
+      {
+        "key": "currentLeader",
+        "label": "当前负责人",
+        "type": "text",
+        "placeholder": "当前负责人姓名"
+      },
+      {
+        "key": "operationLogic",
+        "label": "运行逻辑",
+        "type": "longtext",
+        "placeholder": "组织的运作方式和逻辑",
+        "maxLength": 100,
+        "noLabel": true
+      },
+      {
+        "key": "structure",
+        "label": "结构",
+        "type": "list",
+        "noLabel": true,
+        "subFields": [
+          {
+            "placeholder": "等级",
+            "width": "w-1/4"
+          },
+          {
+            "placeholder": "作用/职责",
+            "width": "flex-1"
+          }
+        ]
+      },
+      {
+        "key": "headquarters",
+        "label": "总部/据点",
+        "type": "tags",
+        "noLabel": true
+      },
+      {
+        "key": "members",
+        "label": "成员",
+        "type": "list",
+        "noLabel": true,
+        "subFields": [
+          {
+            "placeholder": "代号",
+            "width": "w-1/4"
+          },
+          {
+            "placeholder": "等级",
+            "width": "w-1/4",
+            "type": "select",
+            "optionsFrom": "structure"
+          },
+          {
+            "placeholder": "备注",
+            "width": "flex-1"
+          }
+        ]
+      },
+      {
+        "key": "opponents",
+        "label": "对手",
+        "type": "tags",
+        "rootClassName": "flex items-center gap-1"
+      },
+      {
+        "key": "mortalEnemies",
+        "label": "死敌",
+        "type": "tags",
+        "rootClassName": "flex items-center gap-1"
+      },
+      {
+        "key": "allies",
+        "label": "盟友",
+        "type": "tags",
+        "rootClassName": "flex items-center gap-1"
+      }
+    ]
+  },
+  "location": {
+    "entity": "Location",
+    "sections": [
+      {
+        "type": "card",
+        "title": "地点名称",
+        "icon": "MapPin",
+        "titleKey": "name",
+        "titleEditable": true,
+        "children": [
+          {
+            "key": "locationType",
+            "label": "地点类型",
+            "type": "single",
+            "options": [
+              {
+                "value": "城市",
+                "icon": "Building2"
+              },
+              {
+                "value": "建筑",
+                "icon": "Building"
+              },
+              {
+                "value": "自然景观",
+                "icon": "Mountain"
+              },
+              {
+                "value": "秘境",
+                "icon": "Eye"
+              },
+              {
+                "value": "地下城",
+                "icon": "DoorOpen"
+              },
+              {
+                "value": "战场/遗迹",
+                "icon": "Sword"
+              },
+              {
+                "value": "虚空/位面",
+                "icon": "Orbit"
+              },
+              {
+                "value": "其他",
+                "icon": "MapPin"
+              }
+            ],
+            "display": "flex",
+            "noLabel": true,
+            "rootClassName": "col-span-full"
+          },
+          {
+            "key": "description",
+            "label": "描述",
+            "type": "longtext",
+            "placeholder": "地点的简要描述",
+            "maxLength": 200,
+            "noLabel": true
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "key": "name",
+        "label": "地点名称",
+        "type": "text",
+        "placeholder": "地点名称"
+      },
+      {
+        "key": "description",
+        "label": "描述",
+        "type": "longtext",
+        "placeholder": "地点的简要描述",
+        "maxLength": 200,
+        "noLabel": true
+      },
+      {
+        "key": "locationType",
+        "label": "地点类型",
+        "type": "single",
+        "options": [
+          {
+            "value": "城市",
+            "icon": "Building2"
+          },
+          {
+            "value": "建筑",
+            "icon": "Building"
+          },
+          {
+            "value": "自然景观",
+            "icon": "Mountain"
+          },
+          {
+            "value": "秘境",
+            "icon": "Eye"
+          },
+          {
+            "value": "地下城",
+            "icon": "DoorOpen"
+          },
+          {
+            "value": "战场/遗迹",
+            "icon": "Sword"
+          },
+          {
+            "value": "虚空/位面",
+            "icon": "Orbit"
+          },
+          {
+            "value": "其他",
+            "icon": "MapPin"
+          }
+        ],
+        "display": "flex",
+        "noLabel": true,
+        "rootClassName": "col-span-full"
       }
     ]
   }

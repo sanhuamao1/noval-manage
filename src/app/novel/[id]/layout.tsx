@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { BookOpen, Users, FileText, Sparkles, ScrollText, ChevronLeft } from "lucide-react"
+import { BookOpen, FileText, Sparkles, ScrollText, ChevronLeft, Package, Wand2 } from "lucide-react"
 import Link from "next/link"
 import { useAppStore } from "@/stores/useAppStore"
 
@@ -11,8 +11,9 @@ const navItems = [
   { href: "", label: "概览", icon: BookOpen },
   { href: "/chapters", label: "章节", icon: FileText },
   { href: "/outlines", label: "大纲", icon: ScrollText },
-  { href: "/characters", label: "人物", icon: Users },
+  { href: "/resources", label: "资源库", icon: Package },
   { href: "/polish", label: "润色", icon: Sparkles },
+  { href: "/factory", label: "梦工厂", icon: Wand2 },
 ]
 
 export default function NovelLayout({
@@ -25,6 +26,7 @@ export default function NovelLayout({
   const router = useRouter()
   const id = params.id as string
   const novel = useAppStore((s) => s.novel)
+  const chapters = useAppStore((s) => s.chapters)
   const init = useAppStore((s) => s.init)
 
   useEffect(() => {
@@ -63,10 +65,7 @@ export default function NovelLayout({
                 <Icon className="w-4 h-4" />
                 <span className="flex-1">{item.label}</span>
                 {item.href === "/chapters" && (
-                  <span className="text-xs text-muted-foreground/60">{novel?._count?.chapters ?? 0}</span>
-                )}
-                {item.href === "/characters" && (
-                  <span className="text-xs text-muted-foreground/60">{novel?._count?.characters ?? 0}</span>
+                  <span className="text-xs text-muted-foreground/60">{chapters.length}</span>
                 )}
               </Link>
             )

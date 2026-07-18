@@ -17,10 +17,10 @@ interface PageLayoutProps {
 
 export function PageLayout({ title, description, handler, children, drawer }: PageLayoutProps) {
   return (
-    <div className="flex-1 overflow-auto flex">
-      <div className="mx-auto p-8 max-w-4xl flex-1">
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="mx-auto p-8 max-w-4xl w-full flex flex-col flex-1 min-h-0">
         {(title || handler) && (
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 shrink-0">
             <div>
               {title && <h1 className="text-3xl font-bold">{title}</h1>}
               {description && (
@@ -31,7 +31,9 @@ export function PageLayout({ title, description, handler, children, drawer }: Pa
           </div>
         )}
 
-        {children}
+        <div className="flex-1 overflow-auto">
+          {children}
+        </div>
       </div>
 
       {drawer}

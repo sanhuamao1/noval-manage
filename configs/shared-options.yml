@@ -109,7 +109,46 @@ narrative-function:
   - { value: 骗徒, icon: Theater, description: 以狡黠、幽默或非正当手段搅动局势的角色，常打破常规逻辑。 }
   - { value: 边界守卫, icon: DoorOpen, description: 把守每一道关卡的测试者，负责筛选英雄资格。 }
 
-# ─── 内在动机原型（character 用）──
+# ─── 组织类型（organization 用）──
+org-type:
+  - { value: 情报组织, icon: Eye }
+  - { value: 研究机构, icon: FlaskConical }
+  - { value: 犯罪集团, icon: Skull }
+  - { value: 宗教组织, icon: Church }
+  - { value: 政府机构, icon: Landmark }
+  - { value: 商业集团, icon: Building2 }
+  - { value: 佣兵团, icon: Sword }
+  - { value: 学院门派, icon: GraduationCap }
+  - { value: 秘密结社, icon: Lock }
+  - { value: 反抗军, icon: Flag }
+
+# ─── 组织状态（organization 用）──
+org-status:
+  - { value: 活跃, icon: Zap, color: success }
+  - { value: 蛰伏, icon: Clock, color: warn }
+  - { value: 已解散, icon: CircleOff, color: danger }
+
+# ─── 地点类型（location 用）──
+location-type:
+  - { value: 城市, icon: Building2 }
+  - { value: 建筑, icon: Building }
+  - { value: 自然景观, icon: Mountain }
+  - { value: 秘境, icon: Eye }
+  - { value: 地下城, icon: DoorOpen }
+  - { value: 战场/遗迹, icon: Sword }
+  - { value: 虚空/位面, icon: Orbit }
+  - { value: 其他, icon: MapPin }
+
+# ─── 大纲架构框架（outline 用 · 由 scripts/generate-framework-options.cjs 从 configs/frameworks/*.md 生成）──
+outline-framework:
+  - value: 三幕剧结构
+    icon: FileText
+  - value: 斯奈德节拍表
+    icon: FileText
+  - value: 英雄之旅
+    icon: FileText
+  - value: 起承转合
+    icon: FileText
 inner-motivation:
   - { value: 天真者, icon: Heart, description: 追求安全与简单，赤子之心，相信世界本善。 }
   - { value: 孤儿, icon: Home, description: 追求归属与连接，学会在残酷现实中依靠同伴。 }

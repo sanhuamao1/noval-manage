@@ -5,12 +5,10 @@ status: 已完结
 genre:
   - 玄幻
   - 悬疑
-enablePreset: false
 primaryTone: 唯美浪漫
 secondaryTones:
   - 沉郁黑暗
   - 冷峻克制
-worldType: 星际科幻
 worldShape: 星球
 createdAt: '2026-07-01T10:00:00.000Z'
 updatedAt: '2026-07-14T13:36:29.011Z'

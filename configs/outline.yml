@@ -1,7 +1,7 @@
 entity: Outline
 
 fields:
-  title:
+  name:
     type: text
     label: 章纲标题
     placeholder: 章纲标题
@@ -38,14 +38,17 @@ fields:
     type: tagselect
     label: 出场人物
     entity: characters
+    rootClassName: flex items-center gap-1
   locationIds:
     type: tagselect
     label: 地点
     entity: locations
+    rootClassName: flex items-center gap-1
   foreshadowingIds:
     type: tagselect
     label: 伏笔
     entity: foreshadowings
+    rootClassName: flex items-center gap-1
 
 sections:  
   - type: grid
@@ -59,7 +62,7 @@ sections:
             title: 基本信息
             icon: FileText
             class: space-y-3
-            fields: [title, contentBrief, contentDetail, status]
+            fields: [name, contentBrief, contentDetail, status]
       - type: grid
         colspan: 1
         cols: 1

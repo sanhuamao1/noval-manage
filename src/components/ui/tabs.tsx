@@ -57,7 +57,7 @@ const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex items-center gap-0 px-4 pt-4", className)}
+      className={cn("flex items-center gap-0 px-4", className)}
       {...props}
     />
   )
@@ -141,6 +141,7 @@ export { Tabs, TabsList, TabsTrigger, TabsContent, SimpleTabs }
 interface SimpleTab {
   key: string
   label: string
+  icon?: React.ReactNode
 }
 
 interface SimpleTabsProps {
@@ -149,27 +150,35 @@ interface SimpleTabsProps {
   onChange: (key: string) => void
   counts?: Record<string, number>
   className?: string
+  expanded?: boolean
 }
 
-function SimpleTabs({ tabs, value, onChange, counts, className }: SimpleTabsProps) {
+function SimpleTabs({ tabs, value, onChange, counts, className, expanded=true}: SimpleTabsProps) {
+
+
   return (
     <div className={cn("flex gap-1 bg-muted rounded-lg p-1", className)}>
-      {tabs.map((tab) => (
-        <button
-          key={tab.key}
-          onClick={() => onChange(tab.key)}
-          className={`flex-1 text-xs py-1.5 rounded-md transition-colors ${
-            value === tab.key
-              ? "bg-background text-foreground font-medium shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {tab.label}
-          {counts && counts[tab.key] !== undefined && (
-            <span className="ml-1">({counts[tab.key]})</span>
-          )}
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const isActive = value === tab.key;
+        return (
+          <Button
+            key={tab.key}
+            variant="secondary"
+            size="sm"
+            onClick={() => onChange(tab.key)}
+            isActive={isActive}
+            className={cn(
+              expanded ? "flex-1" : '', 'gap-2'
+            )}
+          >
+            {tab.icon}
+            {tab.label}
+            {counts && counts[tab.key] !== undefined && (
+              <span className="ml-1">({counts[tab.key]})</span>
+            )}
+          </Button>
+        );
+      })}
     </div>
   )
 }

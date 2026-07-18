@@ -20,10 +20,16 @@ export interface ListSubField {
   placeholder: string;
   /** Tailwind 宽度类，如 "w-1/3"、"flex-1"（可选，默认 "flex-1"） */
   width?: string;
+  /** 子字段控件类型（可选，默认 "text"） */
+  type?: "text" | "select";
+  /** type="select" 时，引用的字段 key，选项从该字段的 list 值中提取（与 entity 互斥） */
+  optionsFrom?: string;
+  /** type="select" 时，引用的实体 key，选项从全局 store 中获取（如 "characters"、"organizations"，与 optionsFrom 互斥） */
+  entity?: string;
 }
 
 /** 字段控件类型 */
-export type FieldType = "single" | "multi" | "toggle" | "list" | "text" | "longtext" | "tagselect";
+export type FieldType = "single" | "multi" | "toggle" | "list" | "text" | "longtext" | "tagselect" | "tags";
 
 export interface ConfigFieldDef<K extends string = string> {
   key: K;
@@ -44,6 +50,8 @@ export interface ConfigFieldDef<K extends string = string> {
   subFields?: ListSubField[];
   /** 自定义 Tailwind 类名，会附加到 FormItem 的外层 div 上 */
   className?: string;
+  /** 自定义 Tailwind 类名，会附加到 FormItem 的最外层容器上 */
+  rootClassName?: string;
   /** 不显示 label，优先级高于 renderField 的 noLabel 参数 */
   noLabel?: boolean;
   /** 控件变体，如 "box"（multi/single 类型适用） */
@@ -111,6 +119,7 @@ interface TypeValueMap {
   text: string | undefined;
   longtext: string | undefined;
   tagselect: string[];
+  tags: string[];
 }
 
 /** 从字段定义数组推导配置对象类型 */

@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-14T14:36:20.337Z，勿手动编辑
+// 自动生成于 2026-07-18T16:45:07.144Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 // ── 配置类型接口（由 YAML 字段定义自动推导）──
@@ -6,14 +6,13 @@
 /** Novel 配置类型 */
 export interface NovelConfig {
   title?: string | undefined;
+  oneLineSummary?: string | undefined;
   description?: string | undefined;
   status?: string | undefined;
   genre?: string[];
-  enablePreset?: boolean;
   presetStyle?: string | undefined;
   primaryTone?: string | undefined;
   secondaryTones?: string[];
-  worldType?: string | undefined;
   worldShape?: string | undefined;
 }
 
@@ -26,18 +25,21 @@ export interface CharacterConfig {
   identity?: string | undefined;
   item?: string | undefined;
   coreConflict?: string | undefined;
+  surfaceGoal?: string | undefined;
+  deepNeed?: string | undefined;
   emotionExpression?: string | undefined;
   abilities?: string[];
   growthArcs?: string[];
   relationships?: string[];
   notes?: string[];
+  experience?: string[];
   narrativeFunction?: string[];
   innerMotivation?: string[];
 }
 
 /** Outline 配置类型 */
 export interface OutlineConfig {
-  title?: string | undefined;
+  name?: string | undefined;
   contentBrief?: string | undefined;
   contentDetail?: string | undefined;
   status?: string | undefined;
@@ -71,5 +73,30 @@ export interface PolishSampleConfig {
   sceneType?: string | undefined;
   text?: string | undefined;
   isNegative?: boolean;
+}
+
+/** Organization 配置类型 */
+export interface OrganizationConfig {
+  name?: string | undefined;
+  description?: string | undefined;
+  type?: string[];
+  status?: string | undefined;
+  foundingBackground?: string | undefined;
+  founder?: string | undefined;
+  currentLeader?: string | undefined;
+  operationLogic?: string | undefined;
+  structure?: string[];
+  headquarters?: string[];
+  members?: string[];
+  opponents?: string[];
+  mortalEnemies?: string[];
+  allies?: string[];
+}
+
+/** Location 配置类型 */
+export interface LocationConfig {
+  name?: string | undefined;
+  description?: string | undefined;
+  locationType?: string | undefined;
 }
 

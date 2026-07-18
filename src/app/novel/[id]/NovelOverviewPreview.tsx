@@ -1,22 +1,19 @@
 "use client";
 
-import { Card, CardHeader, CardContent, Tag } from "@/components/ui";
+import { Card, CardHeader, CardContent } from "@/components/ui";
 import { BookOpen, Calendar, Hash, Tags, Clock } from "lucide-react";
 import { renderOptions } from "@/lib/configs/render-utils";
 import { formatDateStr, formatWordCount } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 
-
-
 export function NovelOverviewPreview() {
-  const { novel } = useAppStore()
-  const { fieldsMap } = getEntry(ConfigEntity.NOVEL)
+  const { novel } = useAppStore();
+  const { fieldsMap } = getEntry(ConfigEntity.NOVEL);
 
   if (novel === null) {
-    return <NovelOverviewSkeleton />
+    return <NovelOverviewSkeleton />;
   }
-
 
   return (
     <>
@@ -51,10 +48,10 @@ export function NovelOverviewPreview() {
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              {renderOptions(fieldsMap['status']?.options, novel.status)}
-              {renderOptions(fieldsMap['genre']?.options, novel.genre)}
-              {renderOptions(fieldsMap['primaryTone']?.options, novel.primaryTone)}
-              {renderOptions(fieldsMap['secondaryTone']?.options, novel.secondaryTones)}
+              {renderOptions(fieldsMap["status"]?.options, novel.status)}
+              {renderOptions(fieldsMap["genre"]?.options, novel.genre)}
+              {renderOptions(fieldsMap["primaryTone"]?.options, novel.primaryTone)}
+              {renderOptions(fieldsMap["secondaryTone"]?.options, novel.secondaryTones)}
             </div>
             {novel.description && (
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -64,40 +61,6 @@ export function NovelOverviewPreview() {
           </div>
         </div>
       </Card>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader icon={Tags} title="核心标签" />
-          <CardContent>
-            <div className="flex flex-wrap items-center gap-2">
-              <Tag color="default" icon={undefined}>
-                主角无敌
-              </Tag>
-              <Tag color="default" icon={undefined}>
-                群像
-              </Tag>
-              <Tag color="default" icon={undefined}>
-                系统
-              </Tag>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader icon={Calendar} title="创作日志" />
-          <CardContent className="space-y-3">
-            <div className="text-sm text-muted-foreground">
-              <span>10-12</span> 更新了第120章
-            </div>
-            <div className="text-sm text-muted-foreground">
-              <span>10-10</span> 修改了大纲设定
-            </div>
-            <div className="text-sm text-muted-foreground">
-              <span>08-01</span> 创建了项目
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </>
   );
 }
@@ -108,28 +71,28 @@ function NovelOverviewSkeleton() {
       <Card className="overflow-hidden">
         <div className="flex">
           <div className="flex w-40 flex-shrink-0 items-center justify-center bg-muted/50">
-            <div className="rounded-lg bg-muted/60 h-24 w-20 animate-pulse" />
+            <div className="h-24 w-20 animate-pulse rounded-lg bg-muted/60" />
           </div>
 
           <div className="flex-1 p-6">
             <div className="mb-4">
-              <div className="mb-2 h-8 w-64 rounded-md bg-muted/60 animate-pulse" />
+              <div className="mb-2 h-8 w-64 animate-pulse rounded-md bg-muted/60" />
               <div className="flex items-center gap-4">
-                <div className="h-4 w-28 rounded bg-muted/60 animate-pulse" />
-                <div className="h-4 w-32 rounded bg-muted/60 animate-pulse" />
-                <div className="h-4 w-32 rounded bg-muted/60 animate-pulse" />
+                <div className="h-4 w-28 animate-pulse rounded bg-muted/60" />
+                <div className="h-4 w-32 animate-pulse rounded bg-muted/60" />
+                <div className="h-4 w-32 animate-pulse rounded bg-muted/60" />
               </div>
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              <div className="h-6 w-16 rounded-full bg-muted/60 animate-pulse" />
-              <div className="h-6 w-20 rounded-full bg-muted/60 animate-pulse" />
-              <div className="h-6 w-24 rounded-full bg-muted/60 animate-pulse" />
-              <div className="h-6 w-20 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-16 animate-pulse rounded-full bg-muted/60" />
+              <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60" />
+              <div className="h-6 w-24 animate-pulse rounded-full bg-muted/60" />
+              <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60" />
             </div>
             <div className="space-y-2">
-              <div className="h-4 w-full rounded bg-muted/60 animate-pulse" />
-              <div className="h-4 w-3/4 rounded bg-muted/60 animate-pulse" />
+              <div className="h-4 w-full animate-pulse rounded bg-muted/60" />
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted/60" />
             </div>
           </div>
         </div>
@@ -140,9 +103,9 @@ function NovelOverviewSkeleton() {
           <CardHeader icon={Tags} title="核心标签" />
           <CardContent>
             <div className="flex flex-wrap items-center gap-2">
-              <div className="h-6 w-16 rounded-full bg-muted/60 animate-pulse" />
-              <div className="h-6 w-20 rounded-full bg-muted/60 animate-pulse" />
-              <div className="h-6 w-14 rounded-full bg-muted/60 animate-pulse" />
+              <div className="h-6 w-16 animate-pulse rounded-full bg-muted/60" />
+              <div className="h-6 w-20 animate-pulse rounded-full bg-muted/60" />
+              <div className="h-6 w-14 animate-pulse rounded-full bg-muted/60" />
             </div>
           </CardContent>
         </Card>
@@ -150,9 +113,9 @@ function NovelOverviewSkeleton() {
         <Card>
           <CardHeader icon={Calendar} title="创作日志" />
           <CardContent className="space-y-3">
-            <div className="h-4 w-full rounded bg-muted/60 animate-pulse" />
-            <div className="h-4 w-5/6 rounded bg-muted/60 animate-pulse" />
-            <div className="h-4 w-2/3 rounded bg-muted/60 animate-pulse" />
+            <div className="h-4 w-full animate-pulse rounded bg-muted/60" />
+            <div className="h-4 w-5/6 animate-pulse rounded bg-muted/60" />
+            <div className="h-4 w-2/3 animate-pulse rounded bg-muted/60" />
           </CardContent>
         </Card>
       </div>

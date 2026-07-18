@@ -10,6 +10,7 @@ export interface FormItemProps {
     handler?: ReactNode;
     flexCols?: number;
     className?: string;
+    rootClassName?:string
 }
 
 export function FormItem({
@@ -19,6 +20,7 @@ export function FormItem({
     handler,
     flexCols = 3,
     className,
+    rootClassName = ''
 }: FormItemProps) {
     // 处理 label 和 handler 的布局
     const renderLabelWithHandler = () => (
@@ -48,7 +50,7 @@ export function FormItem({
     };
 
     return (
-        <div className={["space-y-1.5", display === "between" && label ? "flex items-center justify-between" : ""].filter(Boolean).join(" ")}>
+        <div className={[rootClassName?rootClassName:"space-y-1.5", display === "between" && label ? "flex items-center justify-between" : ""].filter(Boolean).join(" ")}>
             {label && (handler ? renderLabelWithHandler() : <Label>{label}</Label>)}
             {renderChildren()}
         </div>

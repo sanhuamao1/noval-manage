@@ -14,8 +14,10 @@ fields:
   role:
     type: single
     label: 角色类型
+    noLabel: true
     options: role
     display: flex
+    rootClassName: col-span-full
   age:
     type: text
     label: 年龄
@@ -32,19 +34,25 @@ fields:
     type: text
     label: 核心矛盾
     placeholder: 一句话概括
+    rootClassName: col-span-full
+  surfaceGoal:
+    type: text
+    label: 表层目标
+    placeholder: 角色表面追求的目标...
+  deepNeed:
+    type: text
+    label: 深层需求
+    placeholder: 角色内心真正渴望的...
   emotionExpression:
     type: single
     label: 情感表达方式
     options: emotion-expression
     display: flex
-    className: col-span-full
+    rootClassName: col-span-full
   abilities:
-    type: list
+    type: tags
     label: 能力
     noLabel: true
-    subFields:
-      - { placeholder: 擅长什么, width: w-1/3 }
-      - { placeholder: 具体表现, width: flex-1 }
   growthArcs:
     type: list
     label: 成长弧光
@@ -58,7 +66,7 @@ fields:
     label: 关系网络
     noLabel: true
     subFields:
-      - { placeholder: 角色姓名, width: w-1/3 }
+      - { placeholder: 角色姓名, width: w-1/3, type: select, entity: characters }
       - { placeholder: 与 TA 的关系, width: flex-1 }
   notes:
     type: list
@@ -71,6 +79,12 @@ fields:
     subFields:
       - { placeholder: 标签, width: w-1/3 }
       - { placeholder: 内容, width: flex-1 }
+  experience:
+    type: list
+    label: 人物经历
+    noLabel: true
+    subFields:
+      - { placeholder: 经历描述 }
   narrativeFunction:
     type: multi
     label: 叙事功能原型
@@ -89,44 +103,46 @@ fields:
     variant: box
 
 sections:
+  - type: card
+    title: 角色名称
+    icon: UserRound
+    titleKey: name
+    titleEditable: true
+    class: grid grid-cols-2 gap-4
+    fields: [role,coreConflict, surfaceGoal, deepNeed, emotionExpression]
   - type: grid
-    cols: 3
+    cols: 2
     sections:
-      - type: grid
-        colspan: 2
-        cols: 1
-        sections:
-          - type: card
-            title: 角色名称
-            icon: UserRound
-            titleKey: name
-            titleEditable: true
-            class: grid grid-cols-2 gap-3 parent
-            fields: [gender, role, age, identity, item, coreConflict, emotionExpression]
-          - type: tabs
-            title: 能力与关系
-            children:
-              - key: abilities
-                label: 能力
-                fields: [abilities]
-              - key: growthArcs
-                label: 成长弧光
-                fields: [growthArcs]
-              - key: relationships
-                label: 关系网络
-                fields: [relationships]
-              - key: notes
-                label: 写作注意事项
-                fields: [notes]
-      - type: grid
-        colspan: 1
-        cols: 1
-        sections:
-          - type: card
-            title: 叙事功能原型（沃格勒体系）
+      - type: card
+        title: 基础信息
+        icon: Info
+        fields: [gender, age, identity, item ]
+      - type: tabs
+        title: 角色原型
+        children:
+          - key: narrativeFunction
+            label: 叙事功能
             icon: Shield
             fields: [narrativeFunction]
-          - type: card
-            title: 内在动机原型（皮尔逊体系）
+          - key: innerMotivation
+            label: 内在动机
             icon: Heart
             fields: [innerMotivation]
+  - type: tabs
+    title: 能力与关系
+    children:
+      - key: abilities
+        label: 能力
+        fields: [abilities]
+      - key: growthArcs
+        label: 成长弧光
+        fields: [growthArcs]
+      - key: relationships
+        label: 关系网络
+        fields: [relationships]
+      - key: notes
+        label: 写作注意事项
+        fields: [notes]
+      - key: experience
+        label: 人物经历
+        fields: [experience]

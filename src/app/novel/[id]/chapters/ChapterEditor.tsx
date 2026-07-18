@@ -1,8 +1,7 @@
 "use client"
 
-import { useRef } from "react"
 import { Textarea } from "@/components/ui/textarea"
-import { usePolishContext } from "@/components/polish/PolishContext"
+import { useMenuStore } from "@/stores/useMenuStore"
 
 interface ChapterEditorProps {
   editContent: string
@@ -11,15 +10,16 @@ interface ChapterEditorProps {
 }
 
 export function ChapterEditor({ editContent, setEditContent, editorRef }: ChapterEditorProps) {
-  const { handleTextSelection, handleTextareaMouseUp } = usePolishContext()
+  const handleTextSelection = useMenuStore((s) => s.handleTextSelection);
+  const handleTextareaMouseUp = useMenuStore((s) => s.handleTextareaMouseUp);
 
   return (
     <Textarea
       ref={editorRef}
       value={editContent}
       onChange={(e) => setEditContent(e.target.value)}
-      onMouseUp={handleTextareaMouseUp}
-      onKeyUp={handleTextSelection}
+      onMouseUp={(e) => handleTextareaMouseUp(e, editContent, editorRef)}
+      onKeyUp={() => handleTextSelection(editContent, editorRef)}
       onKeyDown={(e) => {
         if (e.key === "Tab") {
           e.preventDefault()
@@ -33,8 +33,7 @@ export function ChapterEditor({ editContent, setEditContent, editorRef }: Chapte
           })
         }
       }}
-      className="min-h-full border-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-transparent focus:outline-none text-base leading-relaxed text-foreground/85 font-serif mx-auto max-w-[800px] [tab-size:4] [&::-webkit-scrollbar]:hidden"
-      style={{ scrollbarWidth: "none" } as React.CSSProperties}
+      className="min-h-full border-none resize-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-transparent focus:outline-none text-base leading-relaxed text-foreground/85 font-serif mx-auto max-w-[800px] [tab-size:4]"
       placeholder="开始写作..."
     />
   )
