@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Input } from "@/components/ui";
-import { Save, Loader2, Send, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui";
+import { Save, Loader2, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useFactory } from "@/stores/useFactoryStore";
@@ -11,14 +11,12 @@ import { ErrorState } from "./components/error-state";
 import { EmptyState } from "./components/empty-state";
 
 export default function GenOutline() {
-  const { error, loading, content, analysis, handleGenerate } = useFactory();
+  const { error, loading, content, handleGenerate } = useFactory();
   const novelId = useAppStore((s) => s.novel?.id);
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [followUpPrompt, setFollowUpPrompt] = useState("");
   const [existingContent, setExistingContent] = useState("");
-  const [existingAnalysis, setExistingAnalysis] = useState("");
   const [loadedExisting, setLoadedExisting] = useState(false);
 
   // 加载已有大纲
@@ -30,7 +28,6 @@ export default function GenOutline() {
       .then((d) => {
         if (d.content) {
           setExistingContent(d.content);
-          setExistingAnalysis(d.analysis || "");
         }
       })
       .catch(() => {})
@@ -38,7 +35,6 @@ export default function GenOutline() {
   }, [novelId]);
 
   const displayContent = content || existingContent;
-  const displayAnalysis = analysis || existingAnalysis;
 
   const handleSave = async () => {
     if (!novelId || saving || !displayContent) return;
@@ -48,13 +44,12 @@ export default function GenOutline() {
       const res = await fetch("/api/factory/gen-outline/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ novelId, content: displayContent, analysis: displayAnalysis }),
+        body: JSON.stringify({ novelId, content: displayContent }),
       });
       const data = await res.json();
       if (!data.error) {
         setSaved(true);
         setExistingContent(displayContent);
-        setExistingAnalysis(displayAnalysis);
         setTimeout(() => setSaved(false), 2000);
       }
     } catch {
@@ -62,13 +57,6 @@ export default function GenOutline() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleFollowUp = () => {
-    if (!followUpPrompt.trim() || loading || !displayContent) return;
-    const combined = `基于当前大纲内容进行修改：\n\n${displayContent}\n\n修改要求：${followUpPrompt}`;
-    handleGenerate({ prompt: combined });
-    setFollowUpPrompt("");
   };
 
   const handleRegenerate = () => {
@@ -111,30 +99,6 @@ export default function GenOutline() {
         </h2>
 
         <div className="flex items-center gap-2">
-          {/* 追加输入 */}
-          <div className="flex items-center gap-1.5">
-            <Input
-              placeholder="输入修改要求..."
-              value={followUpPrompt}
-              onChange={(e) => setFollowUpPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleFollowUp();
-              }}
-              disabled={loading}
-              className="h-8 w-[180px] text-xs"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleFollowUp}
-              disabled={loading || !followUpPrompt.trim()}
-              className="h-8 gap-1 text-xs"
-            >
-              <Send className="h-3 w-3" />
-              追加
-            </Button>
-          </div>
-
           {/* 重新生成 */}
           <Button
             variant="outline"
@@ -170,14 +134,6 @@ export default function GenOutline() {
           )}
         </div>
       </div>
-
-      {/* analysis 分析区域 */}
-      {displayAnalysis && (
-        <div className="mt-3 shrink-0 rounded-lg border border-border/60 bg-bg-900 p-3">
-          <p className="text-xs font-medium text-muted-foreground">分析</p>
-          <p className="mt-1 text-sm leading-relaxed text-fg-secondary">{displayAnalysis}</p>
-        </div>
-      )}
 
       {/* 大纲内容：可滚动容器 */}
       <div className="mt-3 h-[520px] overflow-y-auto rounded-xl border border-border/60 bg-bg-800 p-6">
