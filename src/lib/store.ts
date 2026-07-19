@@ -201,3 +201,90 @@ export function getNovelWordCount(novelId: string): number {
 export function count(entity: string, novelId: string): number {
   return list(entity, novelId).length;
 }
+
+// ── 关系数据 ──
+// 存储路径：data/novels/{novelId}/relations.yml
+// 格式：{ relations: { links: [{ source, target, description }], positions: { [charId]: { x, y } } } }
+
+export interface RelationRecord {
+  source: string;
+  target: string;
+  description: string;
+}
+
+export interface NodePosition {
+  x: number;
+  y: number;
+}
+
+interface RelationsFile {
+  relations?: {
+    links?: RelationRecord[];
+    positions?: Record<string, NodePosition>;
+  };
+}
+
+/** 读取关系数据（含 links 和 positions） */
+export function getRelations(novelId: string): { links: RelationRecord[]; positions: Record<string, NodePosition> } {
+  const path = resolve(DATA_DIR, "novels", novelId, "relations.yml");
+  const data = readYaml<RelationsFile>(path);
+  return {
+    links: data?.relations?.links ?? [],
+    positions: data?.relations?.positions ?? {},
+  };
+}
+
+/** 保存小说关系列表 */
+export function saveRelations(novelId: string, links: RelationRecord[]): void {
+  const path = resolve(DATA_DIR, "novels", novelId, "relations.yml");
+  const dir = resolve(path, "..");
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const existing = readYaml<RelationsFile>(path);
+  const positions = existing?.relations?.positions ?? {};
+  writeYaml(path, { relations: { links, positions } });
+}
+
+/** 保存节点位置 */
+export function savePositions(novelId: string, positions: Record<string, NodePosition>): void {
+  const path = resolve(DATA_DIR, "novels", novelId, "relations.yml");
+  const dir = resolve(path, "..");
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const existing = readYaml<RelationsFile>(path);
+  const links = existing?.relations?.links ?? [];
+  writeYaml(path, { relations: { links, positions } });
+}
+
+/** 追加单条关系 link */
+export function appendRelationLink(novelId: string, link: RelationRecord): void {
+  const path = resolve(DATA_DIR, "novels", novelId, "relations.yml");
+  const existing = readYaml<RelationsFile>(path);
+  const links = [...(existing?.relations?.links ?? []), link];
+  const positions = existing?.relations?.positions ?? {};
+  writeYaml(path, { relations: { links, positions } });
+}
+
+// ── 梦工厂对话 ──
+// 存储路径：data/novels/{novelId}/factory/{convId}.yml
+
+interface FactoryConversationFile {
+  messages: Array<{ role: string; content: string }>;
+}
+
+function factoryConvPath(novelId: string, convId: string): string {
+  return resolve(DATA_DIR, "novels", novelId, "factory", `${convId}.yml`);
+}
+
+/** 读取梦工厂对话历史 */
+export function getFactoryConversation(novelId: string, convId: string): Array<{ role: string; content: string }> {
+  const data = readYaml<FactoryConversationFile>(factoryConvPath(novelId, convId));
+  return data?.messages ?? [];
+}
+
+/** 保存梦工厂对话历史 */
+export function saveFactoryConversation(
+  novelId: string,
+  convId: string,
+  messages: Array<{ role: string; content: string }>,
+): void {
+  writeYaml(factoryConvPath(novelId, convId), { messages });
+}

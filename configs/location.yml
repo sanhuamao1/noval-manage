@@ -12,7 +12,7 @@ fields:
     placeholder: 地点的简要描述
     maxLength: 200
   locationType:
-    type: single
+    type: multi
     label: 地点类型
     noLabel: true
     options: location-type

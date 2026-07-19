@@ -60,3 +60,142 @@
     @apply bg-bg-950 text-fg-primary;
   }
 }
+
+/* ═══════════ Markdown 渲染样式 ═══════════ */
+.markdown-body {
+  @apply text-fg-primary leading-relaxed;
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+/* ── 标题 ── */
+.markdown-body h1 {
+  @apply text-2xl font-bold text-amber-400 mt-10 mb-5 pb-3;
+  border-bottom: 2px solid hsl(28 45% 60% / 0.25);
+  letter-spacing: 0.01em;
+}
+.markdown-body h2 {
+  @apply text-xl font-semibold text-fg-primary mt-8 mb-4 pb-2;
+  border-bottom: 1px solid hsl(30 15% 24%);
+  letter-spacing: 0.005em;
+}
+.markdown-body h3 {
+  @apply text-lg font-medium text-amber-300/90 mt-6 mb-3;
+}
+
+/* ── 段落 ── */
+.markdown-body p {
+  @apply mb-4 leading-relaxed;
+}
+
+/* ── 水平分隔线 ── */
+.markdown-body hr {
+  @apply my-8 border-0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    hsl(28 45% 60% / 0.35),
+    hsl(28 45% 60% / 0.35),
+    transparent
+  );
+}
+
+/* ── 列表 ── */
+.markdown-body ul,
+.markdown-body ol {
+  @apply my-4 pl-6;
+}
+.markdown-body ul {
+  list-style: disc;
+}
+.markdown-body ol {
+  list-style: decimal;
+}
+.markdown-body li {
+  @apply mb-1.5 leading-relaxed;
+}
+.markdown-body li > ul,
+.markdown-body li > ol {
+  @apply my-1;
+}
+
+/* ── 引用块 ── */
+.markdown-body blockquote {
+  @apply my-5 py-3 pl-5 pr-4 rounded-r-lg;
+  border-left: 3px solid hsl(28 45% 60%);
+  background: hsl(28 45% 60% / 0.06);
+  color: hsl(40 20% 82%);
+}
+.markdown-body blockquote p {
+  @apply mb-1;
+}
+
+/* ── 行内代码 ── */
+.markdown-body code:not(pre code) {
+  @apply px-1.5 py-0.5 rounded text-sm;
+  background: hsl(30 10% 18%);
+  color: hsl(28 45% 70%);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 0.85em;
+}
+
+/* ── 代码块 ── */
+.markdown-body pre {
+  @apply my-5 p-5 rounded-lg overflow-auto;
+  background: hsl(30 5% 8%);
+  border: 1px solid hsl(30 10% 16%);
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.markdown-body pre code {
+  @apply p-0 bg-transparent text-fg-primary;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+
+/* ── 加粗 & 强调 ── */
+.markdown-body strong {
+  @apply font-semibold text-amber-300/95;
+}
+.markdown-body em {
+  @apply italic text-fg-primary/90;
+}
+
+/* ── 链接 ── */
+.markdown-body a {
+  @apply text-amber-400 underline underline-offset-2 decoration-amber-400/30;
+  transition: text-decoration-color 0.2s;
+}
+.markdown-body a:hover {
+  @apply decoration-amber-400/70;
+}
+
+/* ── 表格（GFM） ── */
+.markdown-body table {
+  @apply my-5 w-full border-collapse text-sm;
+}
+.markdown-body thead {
+  @apply border-b-2 border-border;
+}
+.markdown-body th {
+  @apply px-4 py-2.5 text-left font-semibold text-amber-300/90;
+}
+.markdown-body td {
+  @apply px-4 py-2 border-b border-border/50;
+}
+.markdown-body tbody tr:hover {
+  background: hsl(30 10% 14%);
+}
+
+/* ── 首个 & 末个元素边距收拢 ── */
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+.markdown-body > *:last-child {
+  margin-bottom: 0;
+}
+
+/* ── 流式渲染过程中的 raw text 样式 ── */
+.markdown-raw {
+  @apply whitespace-pre-wrap font-sans text-sm leading-relaxed text-fg-secondary;
+}

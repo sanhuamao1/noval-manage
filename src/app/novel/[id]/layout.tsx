@@ -74,7 +74,7 @@ export default function NovelLayout({
       </aside>
 
       {/* 主内容区 */}
-      <main className="flex-1 overflow-auto flex">
+      <main className="flex-1 flex">
         {children}
       </main>
     </>

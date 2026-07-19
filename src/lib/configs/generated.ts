@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-18T16:45:07.146Z，勿手动编辑
+// 自动生成于 2026-07-19T15:03:01.024Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -1009,24 +1009,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             ]
           },
           {
-            "key": "relationships",
-            "label": "关系网络",
-            "type": "list",
-            "noLabel": true,
-            "subFields": [
-              {
-                "placeholder": "角色姓名",
-                "width": "w-1/3",
-                "type": "select",
-                "entity": "characters"
-              },
-              {
-                "placeholder": "与 TA 的关系",
-                "width": "flex-1"
-              }
-            ]
-          },
-          {
             "key": "notes",
             "label": "写作注意事项",
             "type": "list",
@@ -1199,24 +1181,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "placeholder": "成长方向",
             "width": "w-1/3"
-          }
-        ]
-      },
-      {
-        "key": "relationships",
-        "label": "关系网络",
-        "type": "list",
-        "noLabel": true,
-        "subFields": [
-          {
-            "placeholder": "角色姓名",
-            "width": "w-1/3",
-            "type": "select",
-            "entity": "characters"
-          },
-          {
-            "placeholder": "与 TA 的关系",
-            "width": "flex-1"
           }
         ]
       },
@@ -2254,232 +2218,217 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
     "entity": "Organization",
     "sections": [
       {
-        "type": "grid",
-        "cols": 3,
-        "sections": [
+        "type": "card",
+        "title": "基本信息",
+        "icon": "Building2",
+        "class": "grid grid-cols-2 gap-3",
+        "titleKey": "name",
+        "titleEditable": true,
+        "children": [
           {
-            "type": "grid",
-            "cols": 1,
-            "colspan": 2,
-            "sections": [
+            "key": "founder",
+            "label": "创始人",
+            "type": "text",
+            "placeholder": "创始人姓名"
+          },
+          {
+            "key": "currentLeader",
+            "label": "当前负责人",
+            "type": "text",
+            "placeholder": "当前负责人姓名"
+          },
+          {
+            "key": "status",
+            "label": "状态",
+            "type": "single",
+            "options": [
               {
-                "type": "card",
-                "title": "基本信息",
-                "icon": "Building2",
-                "class": "grid grid-cols-2 gap-3",
-                "titleKey": "name",
-                "titleEditable": true,
-                "children": [
-                  {
-                    "key": "founder",
-                    "label": "创始人",
-                    "type": "text",
-                    "placeholder": "创始人姓名"
-                  },
-                  {
-                    "key": "currentLeader",
-                    "label": "当前负责人",
-                    "type": "text",
-                    "placeholder": "当前负责人姓名"
-                  },
-                  {
-                    "key": "status",
-                    "label": "状态",
-                    "type": "single",
-                    "options": [
-                      {
-                        "value": "活跃",
-                        "icon": "Zap",
-                        "color": "success"
-                      },
-                      {
-                        "value": "蛰伏",
-                        "icon": "Clock",
-                        "color": "warn"
-                      },
-                      {
-                        "value": "已解散",
-                        "icon": "CircleOff",
-                        "color": "danger"
-                      }
-                    ],
-                    "display": "flex",
-                    "noLabel": true,
-                    "rootClassName": "col-span-full"
-                  }
-                ]
+                "value": "活跃",
+                "icon": "Zap",
+                "color": "success"
               },
               {
-                "type": "tabs",
-                "title": "组织详情",
-                "children": [
-                  {
-                    "key": "description",
-                    "label": "描述",
-                    "type": "longtext",
-                    "placeholder": "组织的简要描述",
-                    "maxLength": 100,
-                    "noLabel": true
-                  },
-                  {
-                    "key": "foundingBackground",
-                    "label": "成立背景",
-                    "type": "longtext",
-                    "placeholder": "组织成立的背景与契机",
-                    "maxLength": 200,
-                    "noLabel": true
-                  },
-                  {
-                    "key": "operationLogic",
-                    "label": "运行逻辑",
-                    "type": "longtext",
-                    "placeholder": "组织的运作方式和逻辑",
-                    "maxLength": 100,
-                    "noLabel": true
-                  },
-                  {
-                    "key": "structure",
-                    "label": "结构",
-                    "type": "list",
-                    "noLabel": true,
-                    "subFields": [
-                      {
-                        "placeholder": "等级",
-                        "width": "w-1/4"
-                      },
-                      {
-                        "placeholder": "作用/职责",
-                        "width": "flex-1"
-                      }
-                    ]
-                  },
-                  {
-                    "key": "members",
-                    "label": "成员",
-                    "type": "list",
-                    "noLabel": true,
-                    "subFields": [
-                      {
-                        "placeholder": "代号",
-                        "width": "w-1/4"
-                      },
-                      {
-                        "placeholder": "等级",
-                        "width": "w-1/4",
-                        "type": "select",
-                        "optionsFrom": "structure"
-                      },
-                      {
-                        "placeholder": "备注",
-                        "width": "flex-1"
-                      }
-                    ]
-                  }
-                ]
+                "value": "蛰伏",
+                "icon": "Clock",
+                "color": "warn"
+              },
+              {
+                "value": "已解散",
+                "icon": "CircleOff",
+                "color": "danger"
+              }
+            ],
+            "display": "flex",
+            "noLabel": true,
+            "rootClassName": "col-span-full"
+          }
+        ]
+      },
+      {
+        "type": "tabs",
+        "title": "组织详情",
+        "children": [
+          {
+            "key": "description",
+            "label": "描述",
+            "type": "longtext",
+            "placeholder": "组织的简要描述",
+            "maxLength": 300,
+            "noLabel": true
+          },
+          {
+            "key": "foundingBackground",
+            "label": "成立背景",
+            "type": "longtext",
+            "placeholder": "组织成立的背景与契机",
+            "maxLength": 200,
+            "noLabel": true
+          },
+          {
+            "key": "operationLogic",
+            "label": "运行逻辑",
+            "type": "longtext",
+            "placeholder": "组织的运作方式和逻辑",
+            "maxLength": 300,
+            "noLabel": true
+          },
+          {
+            "key": "structure",
+            "label": "结构",
+            "type": "list",
+            "noLabel": true,
+            "subFields": [
+              {
+                "placeholder": "等级",
+                "width": "w-1/4"
+              },
+              {
+                "placeholder": "作用/职责",
+                "width": "flex-1"
               }
             ]
           },
           {
-            "type": "grid",
-            "cols": 1,
-            "colspan": 1,
-            "sections": [
+            "key": "members",
+            "label": "成员",
+            "type": "list",
+            "noLabel": true,
+            "subFields": [
               {
-                "type": "card",
-                "title": "组织类型",
-                "icon": "Tag",
-                "children": [
-                  {
-                    "key": "type",
-                    "label": "组织类型",
-                    "type": "multi",
-                    "options": [
-                      {
-                        "value": "情报组织",
-                        "icon": "Eye"
-                      },
-                      {
-                        "value": "研究机构",
-                        "icon": "FlaskConical"
-                      },
-                      {
-                        "value": "犯罪集团",
-                        "icon": "Skull"
-                      },
-                      {
-                        "value": "宗教组织",
-                        "icon": "Church"
-                      },
-                      {
-                        "value": "政府机构",
-                        "icon": "Landmark"
-                      },
-                      {
-                        "value": "商业集团",
-                        "icon": "Building2"
-                      },
-                      {
-                        "value": "佣兵团",
-                        "icon": "Sword"
-                      },
-                      {
-                        "value": "学院门派",
-                        "icon": "GraduationCap"
-                      },
-                      {
-                        "value": "秘密结社",
-                        "icon": "Lock"
-                      },
-                      {
-                        "value": "反抗军",
-                        "icon": "Flag"
-                      }
-                    ],
-                    "max": 2,
-                    "display": "flex",
-                    "noLabel": true,
-                    "rootClassName": "col-span-full"
-                  }
-                ]
+                "placeholder": "代号",
+                "width": "w-1/4"
               },
               {
-                "type": "card",
-                "title": "据点",
-                "icon": "MapPin",
-                "children": [
-                  {
-                    "key": "headquarters",
-                    "label": "总部/据点",
-                    "type": "tags",
-                    "noLabel": true
-                  }
-                ]
+                "placeholder": "等级",
+                "width": "w-1/4",
+                "type": "select",
+                "optionsFrom": "structure"
               },
               {
-                "type": "card",
-                "title": "外部关系",
-                "icon": "Users",
-                "class": "space-y-2",
-                "children": [
-                  {
-                    "key": "opponents",
-                    "label": "对手",
-                    "type": "tags",
-                    "rootClassName": "flex items-center gap-1"
-                  },
-                  {
-                    "key": "mortalEnemies",
-                    "label": "死敌",
-                    "type": "tags",
-                    "rootClassName": "flex items-center gap-1"
-                  },
-                  {
-                    "key": "allies",
-                    "label": "盟友",
-                    "type": "tags",
-                    "rootClassName": "flex items-center gap-1"
-                  }
-                ]
+                "placeholder": "备注",
+                "width": "flex-1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "card",
+        "title": "组织类型",
+        "icon": "Tag",
+        "children": [
+          {
+            "key": "type",
+            "label": "组织类型",
+            "type": "multi",
+            "options": [
+              {
+                "value": "情报组织",
+                "icon": "Eye"
+              },
+              {
+                "value": "研究机构",
+                "icon": "FlaskConical"
+              },
+              {
+                "value": "犯罪集团",
+                "icon": "Skull"
+              },
+              {
+                "value": "宗教组织",
+                "icon": "Church"
+              },
+              {
+                "value": "政府机构",
+                "icon": "Landmark"
+              },
+              {
+                "value": "商业集团",
+                "icon": "Building2"
+              },
+              {
+                "value": "佣兵团",
+                "icon": "Sword"
+              },
+              {
+                "value": "学院门派",
+                "icon": "GraduationCap"
+              },
+              {
+                "value": "秘密结社",
+                "icon": "Lock"
+              },
+              {
+                "value": "反抗军",
+                "icon": "Flag"
+              }
+            ],
+            "max": 2,
+            "noLabel": true,
+            "className": "grid grid-cols-4 gap-1"
+          }
+        ]
+      },
+      {
+        "type": "grid",
+        "cols": 2,
+        "sections": [
+          {
+            "type": "card",
+            "title": "据点",
+            "icon": "MapPin",
+            "children": [
+              {
+                "key": "headquarters",
+                "label": "总部/据点",
+                "type": "tags",
+                "noLabel": true
+              }
+            ]
+          },
+          {
+            "type": "card",
+            "title": "外部关系",
+            "icon": "Users",
+            "class": "space-y-2",
+            "children": [
+              {
+                "key": "opponents",
+                "label": "对手",
+                "type": "tags",
+                "rootClassName": "flex items-center gap-1"
+              },
+              {
+                "key": "mortalEnemies",
+                "label": "死敌",
+                "type": "tags",
+                "rootClassName": "flex items-center gap-1"
+              },
+              {
+                "key": "allies",
+                "label": "盟友",
+                "type": "tags",
+                "rootClassName": "flex items-center gap-1"
               }
             ]
           }
@@ -2498,7 +2447,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "label": "描述",
         "type": "longtext",
         "placeholder": "组织的简要描述",
-        "maxLength": 100,
+        "maxLength": 300,
         "noLabel": true
       },
       {
@@ -2548,9 +2497,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "max": 2,
-        "display": "flex",
         "noLabel": true,
-        "rootClassName": "col-span-full"
+        "className": "grid grid-cols-4 gap-1"
       },
       {
         "key": "status",
@@ -2602,7 +2550,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "label": "运行逻辑",
         "type": "longtext",
         "placeholder": "组织的运作方式和逻辑",
-        "maxLength": 100,
+        "maxLength": 300,
         "noLabel": true
       },
       {
@@ -2682,39 +2630,42 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "key": "locationType",
             "label": "地点类型",
-            "type": "single",
+            "type": "multi",
             "options": [
               {
-                "value": "城市",
-                "icon": "Building2"
+                "value": "安全据点",
+                "icon": "Shield",
+                "description": "功能：提供临时休息、医疗恢复、物资补给和情报交换。适合推进人际关系和承接委托。\n场景：安全屋、医院病房、社区庇护所、旅馆房间。\n"
               },
               {
-                "value": "建筑",
-                "icon": "Building"
+                "value": "交通枢纽",
+                "icon": "GitFork",
+                "description": "功能：连接不同区域的必经节点，决定移动路线。汇聚各方消息，可能遇到意外同行者或追击者，打破线性叙事。\n场景：火车站、长途汽车站、码头渡口、高速公路服务区、地铁换乘站。\n"
               },
               {
-                "value": "自然景观",
-                "icon": "Mountain"
+                "value": "高危地带",
+                "icon": "AlertTriangle",
+                "description": "功能：存在物理或法律风险，进入需承担后果，但通常藏有必须清除的障碍或关键线索。\n场景：废弃化工厂、坍塌矿洞、未爆弹区、滑坡路段、帮派旧楼。\n"
               },
               {
-                "value": "秘境",
-                "icon": "Eye"
+                "value": "资源产地",
+                "icon": "ShoppingBag",
+                "description": "功能：获取特定材料、零件、食物或资金，支撑装备维护、道具制作或经济运转，常有固定规则或竞争者。\n场景：建材市场、机械修理铺、果林/农田、渔港、废品回收站、黑市小摊。\n"
               },
               {
-                "value": "地下城",
-                "icon": "DoorOpen"
+                "value": "信息中心",
+                "icon": "Library",
+                "description": "功能：存放过往记录或实时情报，通过查阅档案、询问知情人或破译资料获取关键信息，推动推理或揭秘。\n场景：街道档案馆、老报纸库、网吧本地论坛、搬家的厂办、退休警察笔记室。\n"
               },
               {
-                "value": "战场/遗迹",
-                "icon": "Sword"
+                "value": "历史遗存",
+                "icon": "Clock",
+                "description": "功能：承载过去事件的痕迹，通过勘查、回忆或访谈还原真相，获得解决当下难题的启示。\n场景：旧战场遗址、百年老宅、废弃军营、坍塌桥梁、旧矿区入口。\n"
               },
               {
-                "value": "虚空/位面",
-                "icon": "Orbit"
-              },
-              {
-                "value": "其他",
-                "icon": "MapPin"
+                "value": "隐秘空间",
+                "icon": "EyeOff",
+                "description": "功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。\n场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。\n"
               }
             ],
             "display": "flex",
@@ -2750,39 +2701,42 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
       {
         "key": "locationType",
         "label": "地点类型",
-        "type": "single",
+        "type": "multi",
         "options": [
           {
-            "value": "城市",
-            "icon": "Building2"
+            "value": "安全据点",
+            "icon": "Shield",
+            "description": "功能：提供临时休息、医疗恢复、物资补给和情报交换。适合推进人际关系和承接委托。\n场景：安全屋、医院病房、社区庇护所、旅馆房间。\n"
           },
           {
-            "value": "建筑",
-            "icon": "Building"
+            "value": "交通枢纽",
+            "icon": "GitFork",
+            "description": "功能：连接不同区域的必经节点，决定移动路线。汇聚各方消息，可能遇到意外同行者或追击者，打破线性叙事。\n场景：火车站、长途汽车站、码头渡口、高速公路服务区、地铁换乘站。\n"
           },
           {
-            "value": "自然景观",
-            "icon": "Mountain"
+            "value": "高危地带",
+            "icon": "AlertTriangle",
+            "description": "功能：存在物理或法律风险，进入需承担后果，但通常藏有必须清除的障碍或关键线索。\n场景：废弃化工厂、坍塌矿洞、未爆弹区、滑坡路段、帮派旧楼。\n"
           },
           {
-            "value": "秘境",
-            "icon": "Eye"
+            "value": "资源产地",
+            "icon": "ShoppingBag",
+            "description": "功能：获取特定材料、零件、食物或资金，支撑装备维护、道具制作或经济运转，常有固定规则或竞争者。\n场景：建材市场、机械修理铺、果林/农田、渔港、废品回收站、黑市小摊。\n"
           },
           {
-            "value": "地下城",
-            "icon": "DoorOpen"
+            "value": "信息中心",
+            "icon": "Library",
+            "description": "功能：存放过往记录或实时情报，通过查阅档案、询问知情人或破译资料获取关键信息，推动推理或揭秘。\n场景：街道档案馆、老报纸库、网吧本地论坛、搬家的厂办、退休警察笔记室。\n"
           },
           {
-            "value": "战场/遗迹",
-            "icon": "Sword"
+            "value": "历史遗存",
+            "icon": "Clock",
+            "description": "功能：承载过去事件的痕迹，通过勘查、回忆或访谈还原真相，获得解决当下难题的启示。\n场景：旧战场遗址、百年老宅、废弃军营、坍塌桥梁、旧矿区入口。\n"
           },
           {
-            "value": "虚空/位面",
-            "icon": "Orbit"
-          },
-          {
-            "value": "其他",
-            "icon": "MapPin"
+            "value": "隐秘空间",
+            "icon": "EyeOff",
+            "description": "功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。\n场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。\n"
           }
         ],
         "display": "flex",
@@ -2792,3 +2746,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
     ]
   }
 };
+
+/** 大纲框架选项（由 scripts/generate-configs.cjs 扫描 configs/frameworks/*.md 生成） */
+export const OUTLINE_FRAMEWORKS: { value: string }[] = [{"value":"三幕剧结构"},{"value":"斯奈德节拍表"},{"value":"英雄之旅"},{"value":"起承转合"}];

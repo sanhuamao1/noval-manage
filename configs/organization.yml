@@ -10,15 +10,14 @@ fields:
     label: 描述
     noLabel: true
     placeholder: 组织的简要描述
-    maxLength: 100
+    maxLength: 300
   type:
     type: multi
     max: 2
     label: 组织类型
     noLabel: true
     options: org-type
-    display: flex
-    rootClassName: col-span-full
+    className: grid grid-cols-4 gap-1
   status:
     type: single
     label: 状态
@@ -45,7 +44,7 @@ fields:
     label: 运行逻辑
     noLabel: true
     placeholder: 组织的运作方式和逻辑
-    maxLength: 100
+    maxLength: 300
   structure:
     type: list
     label: 结构
@@ -79,52 +78,45 @@ fields:
     rootClassName: flex items-center gap-1
 
 sections:
-  - type: grid
-    cols: 3
-    sections:
-      - type: grid
-        colspan: 2
-        cols: 1
-        sections:
-          - type: card
-            title: 基本信息
-            icon: Building2
-            titleKey: name
-            titleEditable: true
-            class: grid grid-cols-2 gap-3
-            fields: [founder, currentLeader, status]
-          - type: tabs
-            title: 组织详情
-            children:
-              - key: description
-                label: 描述
-                fields: [description]
-              - key: foundingBackground
-                label: 成立背景
-                fields: [foundingBackground]
-              - key: operationLogic
-                label: 运行逻辑
-                fields: [operationLogic]
-              - key: structure
-                label: 等级结构
-                fields: [structure]
-              - key: members
-                label: 成员名单
-                fields: [members]
-      - type: grid
-        colspan: 1
-        cols: 1
-        sections:
-          - type: card
-            title: 组织类型
-            icon: Tag
-            fields: [type]
-          - type: card
-            title: 据点
-            icon: MapPin
-            fields: [headquarters]
-          - type: card
-            title: 外部关系
-            icon: Users
-            class: space-y-2
-            fields: [opponents, mortalEnemies, allies]
+- type: card
+  title: 基本信息
+  icon: Building2
+  titleKey: name
+  titleEditable: true
+  class: grid grid-cols-2 gap-3
+  fields: [founder, currentLeader, status]
+- type: tabs
+  title: 组织详情
+  children:
+    - key: description
+      label: 描述
+      fields: [description]
+    - key: foundingBackground
+      label: 成立背景
+      fields: [foundingBackground]
+    - key: operationLogic
+      label: 运行逻辑
+      fields: [operationLogic]
+    - key: structure
+      label: 等级结构
+      fields: [structure]
+    - key: members
+      label: 成员名单
+      fields: [members]
+- type: card
+  title: 组织类型
+  icon: Tag
+  fields: [type]
+- type: grid
+  cols: 2
+  sections:
+    - type: card
+      title: 据点
+      icon: MapPin
+      fields: [headquarters]
+    - type: card
+      title: 外部关系
+      icon: Users
+      class: space-y-2
+      fields: [opponents, mortalEnemies, allies]
+

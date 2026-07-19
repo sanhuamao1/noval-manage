@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { get, list, put } from "@/lib/store";
-import { callAI, buildPolishPrompt, buildStylePrompt } from "@/lib/ai";
+import { callAI } from "@/lib/ai";
+import { buildPolishPrompt } from "@/lib/ai/prompt/polish";
+import { buildStylePrompt } from "@/lib/ai/prompt/style";
 
 export async function POST(req: NextRequest) {
   try {

@@ -1,215 +1,38 @@
-# YAML 配置定义 (`configs/*.yml`)
+# Config YML 速查
 
-`configs/` 是配置系统的**唯一数据源**，由 `scripts/generate-configs.cjs` 编译为 `src/lib/configs/generated.ts`（TypeScript 类型 + 运行时数据）。
+Config YML 的详细说明已迁移至 [yml-guide.md](yml-guide.md)（Config YML 章节）。本文档仅保留快速参考。
 
-```
-configs/
-├── shared-options.yml    # 跨实体共享的选项
-├── preset-styles.yml     # 独立选项集合
-├── novel.yml / character.yml / outline.yml / polish-rule.yml / polish-sample.yml
-```
-
-## 新增实体流程
+## 新增实体三步
 
 1. 在 `configs/` 下新建 `<name>.yml`
 2. 在 `scripts/generate-configs.cjs` 的 `entities` 数组中添加文件名
-3. 运行 `node scripts/generate-configs.cjs` 重新生成
+3. 运行 `node scripts/generate-configs.cjs`
 
-> 枚举 Key 自动转 SCREAMING_SNAKE（`polish-rule` → `POLISH_RULE`），类型名自动转 PascalCase（`polish-rule` → `PolishRuleConfig`）。
+## 字段类型速查
 
-## YAML 结构
+| 类型 | TS 默认值 | 说明 |
+|------|-----------|------|
+| `text` | `undefined` | 单行文本 |
+| `longtext` | `undefined` | 多行文本（设 `maxLength`） |
+| `single` | `undefined` | 单选 |
+| `multi` | `[]` | 多选（设 `max`） |
+| `toggle` | `false` | 开关 |
+| `list` | `[]` | 动态列表（`subFields`） |
+| `tagselect` | `[]` | 实体标签选择（`entity`） |
+| `tags` | `[]` | 自定义标签 |
 
-```yaml
-entity: Character          # 实体显示名（供 AI prompt 等处使用）
+## 布局类型速查
 
-fields:                    # 字段定义字典
-  name:
-    type: text
-    label: 角色名称
-    placeholder: 角色名称
-    defaultValue: ""
-
-sections:                  # 布局定义，引用 fields 中的 key
-  - type: card
-    fields: [name, ...]
-```
-
-## 字段类型
-
-| 类型 | TS 类型 | 默认值 | 说明 |
-|------|---------|--------|------|
-| `text` | `string \| undefined` | `undefined` | 单行文本 |
-| `longtext` | `string \| undefined` | `undefined` | 多行文本（带字数统计，需 `maxLength`） |
-| `single` | `string \| undefined` | `undefined` | 单选 |
-| `multi` | `string[]` | `[]` | 多选（可设 `max` 上限） |
-| `toggle` | `boolean` | `false` | 开关 |
-| `list` | `string[]` | `[]` | 动态列表，子字段用 `;` 拼接 |
-| `tagselect` | `string[]` | `[]` | 从关联实体选择（需 `entity` 字段） |
-| `tags` | `string[]` | `[]` | 自定义标签输入 |
-
-## 字段属性
-
-| 属性 | 适用类型 | 说明 |
-|------|---------|------|
-| `label` | 全部 | **必填**。显示标签 |
-| `defaultValue` | 全部 | 自定义默认值，优先级高于类型推导 |
-| `placeholder` | text/longtext | 输入框占位文本 |
-| `maxLength` | longtext | 文本最大长度 |
-| `icon` | 全部 | Lucide 图标名，在 tabs trigger 等处显示 |
-| `noLabel` | 全部 | 不显示 label |
-| `display` | single/multi | 排列方式：`default` / `flex` / `grid` / `between` |
-| `className` | 全部 | 控件内容 Tailwind 类名 |
-| `rootClassName` | 全部 | 控件外层 Tailwind 类名 |
-| `options` | single/multi | 选项列表（内联数组）或引用名（字符串） |
-| `max` | multi | 最大可选数 |
-| `variant` | single/multi | 控件变体，如 `"box"` |
-| `subFields` | list | 子字段定义：`[{ placeholder, width, type?, optionsFrom?, entity? }]` |
-| `entity` | tagselect | **必填**。关联实体名，选项从 store 动态获取 |
-| `entity` | list subField (type="select") | 关联实体名，选项从全局 store 对应实体中取 `name` 字段（如 `"characters"`、`"organizations"`），与 `optionsFrom` 互斥 |
-
-### defaultValue 使用场景
-
-```yaml
-# text 默认是 undefined，改为空字符串
-name:
-  type: text
-  label: 角色名称
-  defaultValue: ""
-
-# list 默认是 []，预填提示项
-notes:
-  type: list
-  label: 写作注意事项
-  defaultValue:
-    - "破局方式;"
-    - "关键行为模式;"
-```
-
-### list 子字段扩展
-
-每个 `subFields` 条目除 `placeholder`、`width` 外，还支持以下可选属性：
-
-| 属性 | 说明 |
+| 类型 | 说明 |
 |------|------|
-| `type` | 控件类型，默认 `"text"`（Input）。设为 `"select"` 渲染下拉框 |
-| `optionsFrom` | 当 `type: select` 时，引用同实体中另一个 `list` 字段的 key，自动提取其第一列子值作为下拉选项 |
-| `entity` | 当 `type: select` 时，引用全局实体名（如 `"characters"`），从 store 中取 `name` 字段作为下拉选项。与 `optionsFrom` 互斥 |
+| `card` | 卡片容器，`fields` 引用字段 key |
+| `tabs` | 标签页，支持单字段 tab 或 `tab-group` |
+| `grid` | 网格，`sections` 嵌套子布局 |
 
-**跨字段依赖示例** — members 的等级选项来自 structure 定义：
-
-```yaml
-fields:
-  structure:
-    type: list
-    subFields:
-      - { placeholder: 等级 }
-      - { placeholder: 职能 }
-  members:
-    type: list
-    subFields:
-      - { placeholder: 代号, width: w-1/3 }
-      - { placeholder: 等级, width: w-1/3, type: select, optionsFrom: structure }
-      - { placeholder: 备注, width: flex-1 }
-```
-
-**实体关联示例** — relationships 中角色姓名选项来自已有角色列表：
-
-```yaml
-fields:
-  relationships:
-    type: list
-    subFields:
-      - { placeholder: 角色姓名, width: w-1/3, type: select, entity: characters }
-      - { placeholder: 与 TA 的关系, width: flex-1 }
-```
-
-
-## 选项系统
-
-**内联定义** — 选项直接写在 `options:` 下：
-
-```yaml
-pace:
-  type: single
-  options:
-    - { value: 快 }
-    - { value: 中 }
-    - { value: 慢 }
-```
-
-**共享引用** — `options: genre` 引用 `shared-options.yml` 中的 `genre:` 列表：
-
-```yaml
-genre:
-  type: multi
-  options: genre        # 字符串引用名
-```
-
-选项对象支持：`value`（必填）、`label`、`icon`（Lucide 名）、`color`、`description`。
-
-## 布局类型
-
-### card — 卡片容器
-
-```yaml
-- type: card
-  title: 基本信息
-  icon: BookOpen
-  class: grid grid-cols-2 gap-4    # 内容区 Tailwind
-  titleKey: name                   # 从 config 取动态标题
-  titleEditable: true              # 标题可编辑（需 titleKey）
-  fields: [gender, role]           # 引用字段 key
-```
-
-### tabs — 标签页容器
-
-```yaml
-- type: tabs
-  title: 能力与关系
-  children:
-    - key: abilities               # 单字段 tab
-      label: 能力
-      fields: [abilities]
-    - key: mainTone       # 多字段 tab 组
-      label: 基调
-      type: tab-group
-      class: space-y-2    # tab-group 内容区 Tailwind 类名
-      fields: [primaryTone, secondaryTones]
-```
-
-### grid — 网格容器
-
-```yaml
-- type: grid
-  cols: 3
-  colspan: 2                      # 在父级中跨越的列数
-  sections:
-    - type: card
-      fields: [...]
-```
-
-布局可**任意深度嵌套**，grid 内可嵌套 card、tabs、grid。
-
-## 构建命令
-
-```bash
-node scripts/generate-configs.cjs
-```
-
-读取 `configs/*.yml`，生成三个文件：
-- `src/types/entity.ts`（实体枚举与类型）、
-- `src/types/entityConfig.ts`（字段配置接口）
-- `src/lib/configs/generated.ts`（运行时配置数据）
-
-
-## 何时询问用户
-
-- **现有字段类型不够用**（如需要特殊输入方式）时，说明类型系统边界，让用户决定调整设计还是接受替代方案
-- **布局方案不明确**（如不确定用 tabs 还是 grid），列出利弊让用户选
-- **不确定字段归属**或**是否需要拆分实体**，先问用户再动手
+> 完整的字段属性表、选项系统、list subFields 说明见 [yml-guide.md](yml-guide.md)。
 
 ## 参考文件
 
+- [yml-guide.md](yml-guide.md) — 完整 Config YML 规范 + Data YML 体系
 - 简单示例：[configs/novel.yml](../../../configs/novel.yml)
-- 复杂嵌套：[configs/character.yml](../../../configs/character.yml)（grid + tabs + tab-group 三层嵌套）
-- 共享选项：[configs/shared-options.yml](../../../configs/shared-options.yml)
+- 复杂示例：[configs/character.yml](../../../configs/character.yml)

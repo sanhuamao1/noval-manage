@@ -10,7 +10,7 @@ interface TooltipProps {
   className?: string
 }
 
-export function Tooltip({ content, children, side = "top", className }: TooltipProps) {
+export function Tooltip({ content, children, side = "bottom", className }: TooltipProps) {
   const [open, setOpen] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
 
@@ -36,7 +36,7 @@ export function Tooltip({ content, children, side = "top", className }: TooltipP
         <div
           role="tooltip"
           className={cn(
-            "absolute z-50 px-2.5 py-1.5 rounded-md bg-popover text-popover-foreground text-xs shadow-md whitespace-pre-wrap break-words w-60 pointer-events-none",
+            "absolute z-50 px-2.5 py-1.5 rounded-md bg-popover text-popover-foreground text-xs shadow-md whitespace-pre-wrap break-words w-40 pointer-events-none",
             "animate-in fade-in duration-150",
             side === "top"
               ? "bottom-full left-1/2 -translate-x-1/2 mb-2"

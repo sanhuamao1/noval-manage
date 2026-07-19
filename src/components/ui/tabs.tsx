@@ -138,7 +138,7 @@ export { Tabs, TabsList, TabsTrigger, TabsContent, SimpleTabs }
 
 // ── SimpleTabs ─────────────────────────────────────────
 
-interface SimpleTab {
+export interface SimpleTab {
   key: string
   label: string
   icon?: React.ReactNode
@@ -151,15 +151,44 @@ interface SimpleTabsProps {
   counts?: Record<string, number>
   className?: string
   expanded?: boolean
+  /** tab = 默认卡片式；segment = 分段控件式 */
+  variant?: "tab" | "segment"
 }
 
-function SimpleTabs({ tabs, value, onChange, counts, className, expanded=true}: SimpleTabsProps) {
-
+function SimpleTabs({ tabs, value, onChange, counts, className, expanded = true, variant = "tab" }: SimpleTabsProps) {
+  const isSegment = variant === "segment";
 
   return (
-    <div className={cn("flex gap-1 bg-muted rounded-lg p-1", className)}>
+    <div
+      className={cn(
+        isSegment
+          ? "flex rounded-md border border-bg-600 bg-bg-800 p-0.5"
+          : "flex gap-1 bg-muted rounded-lg p-1",
+        className,
+      )}
+    >
       {tabs.map((tab) => {
         const isActive = value === tab.key;
+
+        if (isSegment) {
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => onChange(tab.key)}
+              className={cn(
+                "flex items-center gap-1 rounded px-2.5 py-1 text-xs transition-colors",
+                isActive
+                  ? "bg-bg-600 text-fg-primary"
+                  : "text-fg-tertiary hover:text-fg-secondary",
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          );
+        }
+
         return (
           <Button
             key={tab.key}
@@ -167,9 +196,7 @@ function SimpleTabs({ tabs, value, onChange, counts, className, expanded=true}: 
             size="sm"
             onClick={() => onChange(tab.key)}
             isActive={isActive}
-            className={cn(
-              expanded ? "flex-1" : '', 'gap-2'
-            )}
+            className={cn(expanded ? "flex-1" : "", "gap-2")}
           >
             {tab.icon}
             {tab.label}
@@ -180,6 +207,6 @@ function SimpleTabs({ tabs, value, onChange, counts, className, expanded=true}: 
         );
       })}
     </div>
-  )
+  );
 }
 SimpleTabs.displayName = "SimpleTabs"

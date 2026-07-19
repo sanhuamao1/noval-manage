@@ -1,15 +1,65 @@
-import { buildConfigInstructions, ConfigEntity, getEntry } from "@/lib/configs/config-registry"
-import { fillConfig } from "@/lib/configs/config-utils"
-import type { PolishRuleConfig, PolishSampleConfig } from '@/types/entityConfig'
-import { api } from './api'
+import { api } from "./api";
 
-export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {
-  const url = (process.env.AI_BASE_URL || "") + "/chat/completions"
-  const model = process.env.AI_MODEL
-  const key = apiKey ?? process.env.AI_API_KEY
+function buildChatUrl(): string {
+  const base = process.env.AI_BASE_URL || "";
+  if (base.endsWith("/chat/completions")) return base;
+  return base + "/chat/completions";
+}
+
+export interface ChatMessage {
+  role: string;
+  content: string;
+}
+
+/**
+ * 非流式多轮对话调用 AI，返回完整文本
+ * messages 为标准 OpenAI 格式 [{ role, content }]
+ */
+export async function callAIChat(
+  messages: ChatMessage[],
+  options?: {
+    systemPrompt?: string;
+    temperature?: number;
+    max_tokens?: number;
+    apiKey?: string;
+  },
+): Promise<string> {
+  const url = buildChatUrl();
+  const model = process.env.AI_MODEL;
+  const key = options?.apiKey ?? process.env.AI_API_KEY;
 
   if (!key) {
-    throw new Error('请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）')
+    throw new Error("请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）");
+  }
+
+  const { systemPrompt, temperature = 0.7, max_tokens = 4096 } = options ?? {};
+
+  const requestData: Record<string, unknown> = {
+    model,
+    messages: systemPrompt
+      ? [{ role: "system", content: systemPrompt }, ...messages]
+      : messages,
+    temperature,
+    max_tokens,
+  };
+
+  const res = await api<{ choices: Array<{ message: { content: string } }> }>({
+    url,
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}` },
+    data: requestData as Record<string, unknown>,
+  });
+
+  return res.choices[0].message.content;
+}
+
+export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {
+  const url = buildChatUrl();
+  const model = process.env.AI_MODEL;
+  const key = apiKey ?? process.env.AI_API_KEY;
+
+  if (!key) {
+    throw new Error("请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）");
   }
 
   const res = await api<{ choices: Array<{ message: { content: string } }> }>({
@@ -19,68 +69,98 @@ export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) 
     data: {
       model,
       messages: [
-        { role: 'system', content: '你是一个专业的小说创作助手。请根据用户的要求进行文本润色。' },
-        { role: 'user', content: prompt },
+        { role: "system", content: "你是一个专业的小说创作助手。请根据用户的要求进行文本润色。" },
+        { role: "user", content: prompt },
       ],
       temperature: 0.7,
       max_tokens: 4096,
     },
-  })
+  });
 
-  return res.choices[0].message.content
+  return res.choices[0].message.content;
 }
 
-
-
-/** 构建风格样本注入 Prompt（只塞标题 + 注释 + 原文，不塞数值特征） */
-export function buildStylePrompt(
-  samples: PolishSampleConfig[],
-): string {
-  if (samples.length === 0) return ""
-
-  let prompt = "【风格参考】\n\n"
-
-  samples.forEach((s, i) => {
-    if (s.isNegative) {
-      prompt += `【反例 ${i + 1} - 请避免】${s.name}\n`
-    } else {
-      prompt += `【样本 ${i + 1}】${s.name}\n`
-    }
-    if (s.prompt) {
-      prompt += `提示：${s.prompt}\n`
-    }
-    prompt += `${s.text}\n\n`
-  })
-
-  return prompt
+export interface AIStreamOptions {
+  prompt: string;
+  /** system prompt，默认为通用创作助手 */
+  systemPrompt?: string;
+  temperature?: number;
+  max_tokens?: number;
+  apiKey?: string;
 }
 
-/** 润色规则构建 */
-export function buildPolishPrompt(
-  rule: PolishRuleConfig,
-  text: string,
-): string {
-  const parts: string[] = []
-  parts.push(`请按照以下要求对文本进行润色（结果需要缩进，每段不需要换行）：`)
+/**
+ * 流式调用 AI，返回一个 AsyncGenerator 逐个产出文本块
+ * 用法：for await (const chunk of callAIStream({ prompt })) { ... }
+ */
+export async function* callAIStream(options: AIStreamOptions): AsyncGenerator<string> {
+  const {
+    prompt,
+    systemPrompt = "你是一个专业的小说创作助手。",
+    temperature = 0.7,
+    max_tokens = 4096,
+    apiKey: overrideKey,
+  } = options;
 
-  if (rule.description) {
-    parts.push(`\n规则说明：${rule.description}`)
+  const url = buildChatUrl();
+  const model = process.env.AI_MODEL;
+  const key = overrideKey ?? process.env.AI_API_KEY;
+
+  if (!key) {
+    throw new Error("请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）");
   }
 
-  // 从注册表获取字段定义和默认值，只填充合法字段
-  const { fields, defaults } = getEntry(ConfigEntity.POLISH_RULE)
-  const config = fillConfig(rule, defaults, fields) as Record<string, unknown>
-  const section = buildConfigInstructions(config, fields)
-  if (section.trim()) {
-    parts.push(`\n${section}`)
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt },
+      ],
+      temperature,
+      max_tokens,
+      stream: true,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`AI 请求失败: ${res.status} ${errText}`);
   }
 
-  if (rule.prompt && !section) {
-    parts.push(`\n规则补充：${rule.prompt}`)
+  const reader = res.body?.getReader();
+  if (!reader) throw new Error("无法读取 AI 响应流");
+
+  const decoder = new TextDecoder();
+  let buf = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split("\n");
+    buf = lines.pop() || "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith("data:")) continue;
+
+      const dataStr = trimmed.slice(5).trim();
+      if (dataStr === "[DONE]") return;
+
+      try {
+        const parsed = JSON.parse(dataStr);
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (content) yield content;
+      } catch {
+        // 跳过解析失败的行
+      }
+    }
   }
-
-  parts.push(`\n原文：\n${text}`)
-  parts.push(`\n请直接返回润色后的结果，不要添加任何解释。`)
-
-  return parts.join('\n')
 }

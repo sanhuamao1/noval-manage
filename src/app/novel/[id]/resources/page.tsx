@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useCallback } from "react";
+import { useParams } from "next/navigation";
 import {
   AddButton,
   SlidingDrawer,
@@ -13,8 +15,11 @@ import {
 import { renderOptions } from "@/lib/configs/render-utils";
 import { ConfigEntity } from "@/lib/configs/config-registry";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
-import { Users, Building2, MapPin } from "lucide-react";
-import type { CharacterConfig, OrganizationConfig, PolishRuleConfig } from "@/types";
+import { Users, Building2, MapPin, List, GitBranch } from "lucide-react";
+import type { CharacterConfig, OrganizationConfig } from "@/types";
+import RelationCanvas from "./relation-canvas";
+
+type ViewMode = "list" | "canvas";
 
 const TABS = [
   { key: ConfigEntity.CHARACTER, label: "人物", icon: <Users className="h-3.5 w-3.5" /> },
@@ -22,7 +27,15 @@ const TABS = [
   { key: ConfigEntity.LOCATION, label: "地点", icon: <MapPin className="h-3.5 w-3.5" /> },
 ];
 
+const VIEW_MODES = [
+  { key: "list", label: "列表视图", icon: <List className="h-3 w-3" /> },
+  { key: "canvas", label: "画布视图", icon: <GitBranch className="h-3 w-3" /> },
+];
+
 export default function ResourcesPage() {
+  const params = useParams();
+  const novelId = params.id as string;
+
   const {
     items,
     mode,
@@ -41,8 +54,23 @@ export default function ResourcesPage() {
     switchEntity,
   } = useEntityCrud(ConfigEntity.CHARACTER);
 
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+
   const isCharacter = currentEntity === ConfigEntity.CHARACTER;
   const isOrganization = currentEntity === ConfigEntity.ORGANIZATION;
+  const showCanvas = isCharacter && viewMode === "canvas";
+
+  const handleSwitchEntity = useCallback(
+    (key: ConfigEntity) => {
+      switchEntity(key);
+      if (key !== ConfigEntity.CHARACTER) setViewMode("list");
+    },
+    [switchEntity],
+  );
+
+  const handleViewChange = (key: string) => {
+    setViewMode(key as ViewMode);
+  };
 
   return (
     <PageLayout
@@ -61,17 +89,32 @@ export default function ResourcesPage() {
           />
         </SlidingDrawer>
       }
+      header={
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SimpleTabs
+              tabs={TABS}
+              value={currentEntity}
+              onChange={(key) => handleSwitchEntity(key as ConfigEntity)}
+            />
+
+            {isCharacter && (
+              <SimpleTabs
+                tabs={VIEW_MODES}
+                value={viewMode}
+                onChange={handleViewChange}
+                variant="segment"
+              />
+            )}
+          </div>
+
+          <AddButton onClick={openAdd} />
+        </div>
+      }
     >
-      <div className="flex justify-between mb-4">
-        <SimpleTabs
-        tabs={TABS}
-        value={currentEntity}
-        onChange={(key) => switchEntity(key as ConfigEntity)}
-      />
-      <AddButton onClick={openAdd} />
-      </div>
-      {/* ── 人物 ── */}
-      {isCharacter && (
+      {showCanvas && <RelationCanvas onEditCharacter={openEdit} />}
+
+      {isCharacter && !showCanvas && (
         <CardList emptyText="还没有人物，点击上方按钮添加">
           {items.map((char) => (
             <SimpleCard
@@ -97,7 +140,6 @@ export default function ResourcesPage() {
         </CardList>
       )}
 
-      {/* ── 组织 ── */}
       {isOrganization && (
         <CardList emptyText="还没有组织，点击上方按钮添加">
           {items.map((org) => (
@@ -124,7 +166,6 @@ export default function ResourcesPage() {
         </CardList>
       )}
 
-      {/* ── 地点 ── */}
       {!isCharacter && !isOrganization && (
         <CardList emptyText="还没有地点，点击上方按钮添加">
           {items.map((loc) => (
@@ -138,7 +179,7 @@ export default function ResourcesPage() {
               <div className="space-x-2">
                 {renderOptions(
                   fieldsMap["locationType"]?.options,
-                  loc.locationType ? [loc.locationType] : [],
+                  loc.locationType ? loc.locationType : [],
                 )}
               </div>
             </SimpleCard>

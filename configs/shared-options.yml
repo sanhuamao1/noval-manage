@@ -130,25 +130,48 @@ org-status:
 
 # ─── 地点类型（location 用）──
 location-type:
-  - { value: 城市, icon: Building2 }
-  - { value: 建筑, icon: Building }
-  - { value: 自然景观, icon: Mountain }
-  - { value: 秘境, icon: Eye }
-  - { value: 地下城, icon: DoorOpen }
-  - { value: 战场/遗迹, icon: Sword }
-  - { value: 虚空/位面, icon: Orbit }
-  - { value: 其他, icon: MapPin }
+  - value: 安全据点
+    icon: Shield
+    description: |
+      功能：提供临时休息、医疗恢复、物资补给和情报交换。适合推进人际关系和承接委托。
+      场景：安全屋、医院病房、社区庇护所、旅馆房间。
+  - value: 交通枢纽
+    icon: GitFork
+    description: |
+      功能：连接不同区域的必经节点，决定移动路线。汇聚各方消息，可能遇到意外同行者或追击者，打破线性叙事。
+      场景：火车站、长途汽车站、码头渡口、高速公路服务区、地铁换乘站。
+  - value: 高危地带
+    icon: AlertTriangle
+    description: |
+      功能：存在物理或法律风险，进入需承担后果，但通常藏有必须清除的障碍或关键线索。
+      场景：废弃化工厂、坍塌矿洞、未爆弹区、滑坡路段、帮派旧楼。
+  - value: 资源产地
+    icon: ShoppingBag
+    description: |
+      功能：获取特定材料、零件、食物或资金，支撑装备维护、道具制作或经济运转，常有固定规则或竞争者。
+      场景：建材市场、机械修理铺、果林/农田、渔港、废品回收站、黑市小摊。
+  - value: 信息中心
+    icon: Library
+    description: |
+      功能：存放过往记录或实时情报，通过查阅档案、询问知情人或破译资料获取关键信息，推动推理或揭秘。
+      场景：街道档案馆、老报纸库、网吧本地论坛、搬家的厂办、退休警察笔记室。
+  - value: 历史遗存
+    icon: Clock
+    description: |
+      功能：承载过去事件的痕迹，通过勘查、回忆或访谈还原真相，获得解决当下难题的启示。
+      场景：旧战场遗址、百年老宅、废弃军营、坍塌桥梁、旧矿区入口。
+  - value: 隐秘空间
+    icon: EyeOff
+    description: |
+      功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。
+      场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。
 
 # ─── 大纲架构框架（outline 用 · 由 scripts/generate-framework-options.cjs 从 configs/frameworks/*.md 生成）──
 outline-framework:
   - value: 三幕剧结构
-    icon: FileText
   - value: 斯奈德节拍表
-    icon: FileText
   - value: 英雄之旅
-    icon: FileText
   - value: 起承转合
-    icon: FileText
 inner-motivation:
   - { value: 天真者, icon: Heart, description: 追求安全与简单，赤子之心，相信世界本善。 }
   - { value: 孤儿, icon: Home, description: 追求归属与连接，学会在残酷现实中依靠同伴。 }

@@ -2,8 +2,8 @@
 // 构建时执行：读取 configs/*.yml → 生成 src/types/entity.ts, src/types/entityConfig.ts, src/lib/configs/generated.ts
 // 避免客户端 bundling 时遇到 fs/yaml 等 Node.js 模块
 
-const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("fs");
-const { resolve, dirname } = require("path");
+const { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } = require("fs");
+const { resolve, dirname, basename } = require("path");
 const yaml = require("js-yaml");
 
 const ROOT = resolve(__dirname, "..");
@@ -209,6 +209,17 @@ function generateEntityConfigFile() {
   return code;
 }
 
+// ── 扫描大纲框架选项 ──
+
+const frameworksDir = resolve(ROOT, "configs/frameworks");
+let outlineFrameworks = [];
+if (existsSync(frameworksDir)) {
+  outlineFrameworks = readdirSync(frameworksDir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => ({ value: basename(f, ".md") }))
+    .sort();
+}
+
 // ── 生成 src/lib/configs/generated.ts ──
 
 // ── 写出文件 ──
@@ -227,6 +238,8 @@ const entityConfigOutPath = resolve(ROOT, "src/types/entityConfig.ts");
 writeFileSync(entityConfigOutPath, entityConfigContent, "utf-8");
 console.log(`Generated ${entityConfigOutPath}`);
 
+const frameworksJson = JSON.stringify(outlineFrameworks);
+
 // 生成 generated.ts
 const generatedContent = `${"// "}自动生成于 ${new Date().toISOString()}，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
@@ -234,6 +247,9 @@ const generatedContent = `${"// "}自动生成于 ${new Date().toISOString()}，
 import { ConfigEntity, EntityConfig } from "@/types/entity";
 
 export const CONFIGS: Record<ConfigEntity, EntityConfig> = ${configsJson};
+
+/** 大纲框架选项（由 scripts/generate-configs.cjs 扫描 configs/frameworks/*.md 生成） */
+export const OUTLINE_FRAMEWORKS: { value: string }[] = ${frameworksJson};
 `;
 
 const generatedOutPath = resolve(ROOT, "src/lib/configs/generated.ts");

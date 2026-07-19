@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-18T16:45:07.144Z，勿手动编辑
+// 自动生成于 2026-07-19T15:03:01.024Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 // ── 配置类型接口（由 YAML 字段定义自动推导）──
@@ -30,7 +30,6 @@ export interface CharacterConfig {
   emotionExpression?: string | undefined;
   abilities?: string[];
   growthArcs?: string[];
-  relationships?: string[];
   notes?: string[];
   experience?: string[];
   narrativeFunction?: string[];
@@ -97,6 +96,6 @@ export interface OrganizationConfig {
 export interface LocationConfig {
   name?: string | undefined;
   description?: string | undefined;
-  locationType?: string | undefined;
+  locationType?: string[];
 }
 
