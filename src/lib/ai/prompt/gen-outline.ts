@@ -160,6 +160,8 @@ export function buildGenOutlinePrompt(
   parts.push(`\n1. 直接输出 markdown，不要用 JSON 或代码块包裹`);
   parts.push(`2. 开头必须展示【本轮变量抽取结果】`);
   parts.push(`3. 大纲内容要结合小说具体设定，不能泛泛而谈`);
+  parts.push(`4. 让情节发展合情合理，不要为了推动而推动，不要太过顺利`);
+  parts.push(`5. 不要使用莫名其妙的伪专业词汇，如果非得用，就先说大白话解释清楚`);
 
   return parts.join("\n");
 }
