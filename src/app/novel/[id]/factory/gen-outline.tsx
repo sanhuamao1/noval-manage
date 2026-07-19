@@ -59,10 +59,6 @@ export default function GenOutline() {
     }
   };
 
-  const handleRegenerate = () => {
-    handleGenerate();
-  };
-
   // 加载中
   if (loading) {
     return (
@@ -75,16 +71,12 @@ export default function GenOutline() {
 
   // 错误状态
   if (error && !displayContent) {
-    return <ErrorState error={error} onRetry={handleRegenerate} />;
+    return <ErrorState error={error} onRetry={handleGenerate} />;
   }
 
   // 空状态
   if (!loading && !error && !displayContent && loadedExisting) {
-    return (
-      <EmptyState>
-        点击设置按钮，选择大纲框架后让 AI 帮你生成小说大纲
-      </EmptyState>
-    );
+    return <EmptyState>点击设置按钮，选择大纲框架后让 AI 帮你生成小说大纲</EmptyState>;
   }
 
   // 未加载完成时暂不渲染
@@ -94,23 +86,9 @@ export default function GenOutline() {
     <div className="flex h-full flex-col">
       {/* 顶部：标题栏 & 按钮 */}
       <div className="flex shrink-0 items-center justify-between">
-        <h2 className="text-lg font-semibold">
-          {content ? "大纲生成结果" : "已保存的大纲"}
-        </h2>
+        <h2 className="text-lg font-semibold">{content ? "大纲生成结果" : "已保存的大纲"}</h2>
 
         <div className="flex items-center gap-2">
-          {/* 重新生成 */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRegenerate}
-            disabled={loading}
-            className="h-8 gap-1 text-xs"
-          >
-            <RefreshCw className="h-3 w-3" />
-            重新生成
-          </Button>
-
           {/* 保存 */}
           {saved ? (
             <span className="inline-flex h-8 items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs text-emerald-400">
@@ -124,11 +102,7 @@ export default function GenOutline() {
               disabled={saving || !displayContent}
               className="h-8 gap-1 text-xs"
             >
-              {saving ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Save className="h-3 w-3" />
-              )}
+              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
               保存
             </Button>
           )}
@@ -137,10 +111,8 @@ export default function GenOutline() {
 
       {/* 大纲内容：可滚动容器 */}
       <div className="mt-3 h-[520px] overflow-y-auto rounded-xl border border-border/60 bg-bg-800 p-6">
-        <div className="prose prose-invert prose-sm max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {displayContent}
-          </ReactMarkdown>
+        <div className="prose prose-sm prose-invert max-w-none">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayContent}</ReactMarkdown>
         </div>
       </div>
     </div>
