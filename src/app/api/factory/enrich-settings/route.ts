@@ -1,14 +1,24 @@
 import { NextRequest } from "next/server";
-import { getNovel, list, genId, getFactoryConversation, saveFactoryConversation } from "@/lib/store";
+import {
+  getNovel,
+  list,
+  genId,
+  getFactoryConversation,
+  saveFactoryConversation,
+} from "@/lib/store";
 import { callAIChat, type ChatMessage } from "@/ai";
 import { extractJSON } from "@/ai/json-parser";
-import { buildEnrichSettingPrompt } from "@/ai/prompt/enrich-settings";
+import { buildEnrichSettingPrompt } from "@/ai/prompt";
 import { validateOperation } from "@/ai/validators";
 import type { EnrichOperation } from "@/types/data";
 
 export async function POST(req: NextRequest) {
   try {
-    const { novelId, prompt: userPrompt, convId } = (await req.json()) as {
+    const {
+      novelId,
+      prompt: userPrompt,
+      convId,
+    } = (await req.json()) as {
       novelId: string;
       prompt?: string;
       convId?: string;
@@ -32,9 +42,9 @@ export async function POST(req: NextRequest) {
 
       // 历史丢失 → 回退为首轮模式重建完整上下文
       if (context.length === 0) {
-        const characters = await list("character", novelId) as Record<string, unknown>[];
-        const organizations = await list("organization", novelId) as Record<string, unknown>[];
-        const locations = await list("location", novelId) as Record<string, unknown>[];
+        const characters = (await list("character", novelId)) as Record<string, unknown>[];
+        const organizations = (await list("organization", novelId)) as Record<string, unknown>[];
+        const locations = (await list("location", novelId)) as Record<string, unknown>[];
 
         const fullPrompt = buildEnrichSettingPrompt(
           novelId,
@@ -63,9 +73,9 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // 首轮 → 构建完整上下文
-      const characters = await list("character", novelId) as Record<string, unknown>[];
-      const organizations = await list("organization", novelId) as Record<string, unknown>[];
-      const locations = await list("location", novelId) as Record<string, unknown>[];
+      const characters = (await list("character", novelId)) as Record<string, unknown>[];
+      const organizations = (await list("organization", novelId)) as Record<string, unknown>[];
+      const locations = (await list("location", novelId)) as Record<string, unknown>[];
 
       const fullPrompt = buildEnrichSettingPrompt(
         novelId,

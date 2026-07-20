@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { get, list, put } from "@/lib/store";
 import { callAI } from "@/ai";
-import { buildPolishPrompt } from "@/ai/prompt/polish";
-import { buildStylePrompt } from "@/ai/prompt/style";
+import { buildPolishPrompt, buildStylePrompt } from "@/ai/prompt";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,8 +21,8 @@ export async function POST(req: NextRequest) {
       const prompt = buildPolishPrompt(rule, text);
       const polishedText = await callAI(prompt);
 
-      await put('polish-rule', ruleId, { ...rule, useCount: ((rule.useCount as number) ?? 0) + 1 })
-      return NextResponse.json({ originalText: text, polishedText })
+      await put("polish-rule", ruleId, { ...rule, useCount: ((rule.useCount as number) ?? 0) + 1 });
+      return NextResponse.json({ originalText: text, polishedText });
     }
 
     // 样本模式
@@ -48,7 +47,8 @@ export async function POST(req: NextRequest) {
       if (sampleIds?.length > 0) {
         for (const sid of sampleIds) {
           const s = await get<Record<string, unknown>>("polish-sample", sid);
-          if (s) await put("polish-sample", sid, { ...s, useCount: ((s.useCount as number) ?? 0) + 1 });
+          if (s)
+            await put("polish-sample", sid, { ...s, useCount: ((s.useCount as number) ?? 0) + 1 });
         }
       }
 

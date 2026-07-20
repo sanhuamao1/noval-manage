@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getNovel, list, getRelations } from "@/lib/store";
 import { callAIChat } from "@/ai";
-import { buildGenOutlinePrompt } from "@/ai/prompt/gen-outline";
+import { buildGenOutlinePrompt } from "@/ai/prompt";
 
 /** 从 AI 原始输出中提取纯 markdown（兼容 JSON/代码块等格式） */
 function extractMarkdown(raw: string): string {
@@ -17,16 +17,26 @@ function extractMarkdown(raw: string): string {
     if (typeof parsed.content === "string") {
       try {
         const inner = JSON.parse(parsed.content);
-        if (Array.isArray(inner.contents) && inner.contents.every((s: unknown) => typeof s === "string")) {
+        if (
+          Array.isArray(inner.contents) &&
+          inner.contents.every((s: unknown) => typeof s === "string")
+        ) {
           return inner.contents.join("\n\n");
         }
-      } catch { /* content 就是纯文本 */ }
+      } catch {
+        /* content 就是纯文本 */
+      }
       return parsed.content;
     }
-    if (Array.isArray(parsed.contents) && parsed.contents.every((s: unknown) => typeof s === "string")) {
+    if (
+      Array.isArray(parsed.contents) &&
+      parsed.contents.every((s: unknown) => typeof s === "string")
+    ) {
       return parsed.contents.join("\n\n");
     }
-  } catch { /* 不是 JSON */ }
+  } catch {
+    /* 不是 JSON */
+  }
 
   const dashIdx = trimmed.indexOf("\n---\n");
   if (dashIdx !== -1) return trimmed.slice(dashIdx + 5).trim();
@@ -36,7 +46,12 @@ function extractMarkdown(raw: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { novelId, prompt: userPrompt, framework, frameworkContent } = (await req.json()) as {
+    const {
+      novelId,
+      prompt: userPrompt,
+      framework,
+      frameworkContent,
+    } = (await req.json()) as {
       novelId: string;
       prompt?: string;
       framework?: string;
@@ -56,13 +71,20 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "未找到该小说" }, { status: 404 });
     }
 
-    const characters = await list("character", novelId) as Record<string, unknown>[];
-    const organizations = await list("organization", novelId) as Record<string, unknown>[];
-    const locations = await list("location", novelId) as Record<string, unknown>[];
+    const characters = (await list("character", novelId)) as Record<string, unknown>[];
+    const organizations = (await list("organization", novelId)) as Record<string, unknown>[];
+    const locations = (await list("location", novelId)) as Record<string, unknown>[];
     const { links: relations } = await getRelations(novelId);
 
     const fullPrompt = buildGenOutlinePrompt(
-      novelId, novel, characters, organizations, locations, relations, framework, frameworkContent, userPrompt,
+      novel,
+      characters,
+      organizations,
+      locations,
+      relations,
+      framework,
+      frameworkContent,
+      userPrompt,
     );
 
     const rawText = await callAIChat([{ role: "user", content: fullPrompt }], {

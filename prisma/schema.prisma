@@ -58,7 +58,9 @@ model Character {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  novel            Novel      @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  sourceRelations  Relation[] @relation("sourceRelations")
+  targetRelations  Relation[] @relation("targetRelations")
 }
 
 // ── 大纲 ──
@@ -180,16 +182,18 @@ model CharacterEmotion {
 model Relation {
   id          String   @id
   novelId     String
-  source      String
-  target      String
+  sourceId    String
+  targetId    String
   description String   @default("")
   createdAt   DateTime @default(now())
 
-  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  novel  Novel     @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  source Character @relation("sourceRelations", fields: [sourceId], references: [id])
+  target Character @relation("targetRelations", fields: [targetId], references: [id])
 
   @@index([novelId])
-  @@index([source])
-  @@index([target])
+  @@index([sourceId])
+  @@index([targetId])
 }
 
 // ── 节点位置（从 relations.yml 拆分） ──

@@ -321,6 +321,8 @@ export interface RelationRecord {
   source: string;
   target: string;
   description: string;
+  sourceName?: string;
+  targetName?: string;
 }
 
 export interface NodePosition {
@@ -334,8 +336,25 @@ export async function getRelations(novelId: string): Promise<{
 }> {
   const links = await db.relation.findMany({
     where: { novelId },
-    select: { source: true, target: true, description: true },
+    select: { sourceId: true, targetId: true, description: true },
   });
+
+  // 批量查询涉及的角色名称（兜底悬挂的外键引用）
+  const charIds = new Set<string>();
+  for (const l of links) {
+    charIds.add(l.sourceId);
+    charIds.add(l.targetId);
+  }
+  const charMap: Record<string, string> = {};
+  if (charIds.size > 0) {
+    const chars = await db.character.findMany({
+      where: { id: { in: [...charIds] } },
+      select: { id: true, name: true },
+    });
+    for (const c of chars) {
+      charMap[c.id] = c.name;
+    }
+  }
 
   const positionRows = await db.nodePosition.findMany({
     where: { novelId },
@@ -347,7 +366,16 @@ export async function getRelations(novelId: string): Promise<{
     positions[p.charId] = { x: p.x, y: p.y };
   }
 
-  return { links, positions };
+  return {
+    links: links.map((l) => ({
+      source: l.sourceId,
+      target: l.targetId,
+      description: l.description,
+      sourceName: charMap[l.sourceId],
+      targetName: charMap[l.targetId],
+    })),
+    positions,
+  };
 }
 
 export async function saveRelations(
@@ -361,8 +389,8 @@ export async function saveRelations(
         data: {
           id: genId(),
           novelId,
-          source: l.source,
-          target: l.target,
+          sourceId: l.source,
+          targetId: l.target,
           description: l.description,
         },
       }),
@@ -418,8 +446,8 @@ export async function appendRelationLink(
     data: {
       id: genId(),
       novelId,
-      source: link.source,
-      target: link.target,
+      sourceId: link.source,
+      targetId: link.target,
       description: link.description,
     },
   });

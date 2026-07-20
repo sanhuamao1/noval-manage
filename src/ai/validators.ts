@@ -1,5 +1,24 @@
 import type { EnrichOperation } from "@/types/data";
-import { ALLOWED_APIS, isAllowedApiMethod } from "./operations-schema";
+
+// ── 集中配置 ──
+
+/** API 路由 → 标签名 + 允许的方法（单一数据源，同时驱动 validators 和 Prompt） */
+export const OPERATION_ENTITIES: Record<
+  string,
+  { label: string; methods: readonly string[] }
+> = {
+  "/api/characters": { label: "角色", methods: ["POST", "PUT", "DELETE"] },
+  "/api/organizations": { label: "组织/势力", methods: ["POST", "PUT", "DELETE"] },
+  "/api/locations": { label: "地点", methods: ["POST", "PUT", "DELETE"] },
+  "/api/relations/link": { label: "关系", methods: ["POST"] },
+};
+
+export const ALLOWED_APIS: readonly string[] = Object.keys(OPERATION_ENTITIES);
+
+export function isAllowedApiMethod(api: string, method: string): boolean {
+  const entry = OPERATION_ENTITIES[api];
+  return !!entry && (entry.methods as readonly string[]).includes(method);
+}
 
 /** 校验单个操作是否合法 */
 export function validateOperation(

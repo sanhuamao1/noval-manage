@@ -38,33 +38,34 @@ export function getEntry(key: ConfigEntity): ConfigEntry {
 
 // ── AI 指令生成 ──
 
+type LineFormatter = (label: string, value: unknown, field: ConfigFieldDef) => string | null;
+
+const LINE_FORMATTERS: Record<string, LineFormatter> = {
+  toggle: (label, value) => (value ? `- ${label}：开启` : null),
+  multi:  (label, value, field) => {
+    const arr = value as string[] | undefined;
+    if (!arr?.length) return null;
+    const descMap: Record<string, string> = {};
+    for (const o of field.options || []) {
+      if ((o as any).description) descMap[o.value] = (o as any).description;
+    }
+    return `- ${label}：${arr.map((l) => descMap[l] || l).join("；")}`;
+  },
+  longtext: (label, value) =>
+    value ? `- ${label}：${String(value).replace(/\n/g, "")}` : null,
+  default: (label, value) => (value ? `- ${label}：${value}` : null),
+};
+
 /** 根据润色规则配置构建 AI 可读的指令文本 */
 export function buildConfigInstructions(
   config: Record<string, unknown>,
   fields: ConfigFieldDef[],
 ): string {
-  const lines: string[] = [];
-
-  for (const field of fields) {
-    const value = config[field.key];
-    if (field.type === "toggle") {
-      if (value) lines.push(`${field.label}：开启`);
-    } else if (field.type === "single" && value) {
-      lines.push(`${field.label}：${value}`);
-    } else if (field.type === "multi") {
-      const arr = value as string[] | undefined;
-      if (arr && arr.length > 0) {
-        const descMap: Record<string, string> = {};
-        for (const o of field.options || []) {
-          if ("description" in o && (o as any).description) {
-            descMap[o.value] = (o as any).description!;
-          }
-        }
-        const parts = arr.map((l) => descMap[l] || l);
-        lines.push(`${field.label}：${parts.join("；")}`);
-      }
-    }
-  }
-
-  return lines.join("\n");
+  return fields
+    .map((field) => {
+      const fmt = LINE_FORMATTERS[field.type] ?? LINE_FORMATTERS.default;
+      return fmt(field.label, config[field.key], field);
+    })
+    .filter(Boolean)
+    .join("\n");
 }

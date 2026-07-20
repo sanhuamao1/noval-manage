@@ -1,7 +1,12 @@
 import { create } from "zustand";
-import type { CharacterData, OrganizationData, LocationData, OutlineData, ChapterSummary, RelationsData, FrameworkData } from "@/types/data";
-
-
+import type {
+  OrganizationData,
+  LocationData,
+  OutlineData,
+  ChapterSummary,
+  RelationsData,
+  FrameworkData,
+} from "@/types/data";
 
 interface EntityState {
   characters: { id: string; name: string }[];

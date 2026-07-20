@@ -100,13 +100,29 @@ emotion-expression:
 
 # ─── 叙事功能原型（character 用）──
 narrative-function:
-  - { value: 英雄, icon: Shield, description: 故事核心推动者，为达成目标直面终极挑战，并愿意为集体利益做出关键牺牲。 }
-  - { value: 导师, icon: GraduationCap, description: 向英雄提供智慧、装备、训练或精神指引的引导者，通常在前期登场，后期退场或升华。 }
+  - {
+      value: 英雄,
+      icon: Shield,
+      description: 故事核心推动者，为达成目标直面终极挑战，并愿意为集体利益做出关键牺牲。,
+    }
+  - {
+      value: 导师,
+      icon: GraduationCap,
+      description: 向英雄提供智慧、装备、训练或精神指引的引导者，通常在前期登场，后期退场或升华。,
+    }
   - { value: 信使, icon: Mail, description: 带来外部消息、发布冒险召唤、打破主角平静日常的角色。 }
-  - { value: 变形者, icon: Sparkles, description: 立场、忠诚度或真实身份模糊不定的角色，制造悬念、怀疑与戏剧翻转。 }
+  - {
+      value: 变形者,
+      icon: Sparkles,
+      description: 立场、忠诚度或真实身份模糊不定的角色，制造悬念、怀疑与戏剧翻转。,
+    }
   - { value: 阴影, icon: Skull, description: 与英雄核心价值观或目标直接对立的终极反派。 }
   - { value: 伙伴, icon: Users, description: 英雄的同行者，提供情感支持、战力互补或功能辅助。 }
-  - { value: 骗徒, icon: Theater, description: 以狡黠、幽默或非正当手段搅动局势的角色，常打破常规逻辑。 }
+  - {
+      value: 骗徒,
+      icon: Theater,
+      description: 以狡黠、幽默或非正当手段搅动局势的角色，常打破常规逻辑。,
+    }
   - { value: 边界守卫, icon: DoorOpen, description: 把守每一道关卡的测试者，负责筛选英雄资格。 }
 
 # ─── 组织类型（organization 用）──
@@ -166,12 +182,6 @@ location-type:
       功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。
       场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。
 
-# ─── 大纲架构框架（outline 用 · 由 scripts/generate-framework-options.cjs 从 configs/frameworks/*.md 生成）──
-outline-framework:
-  - value: 三幕剧结构
-  - value: 斯奈德节拍表
-  - value: 英雄之旅
-  - value: 起承转合
 inner-motivation:
   - { value: 天真者, icon: Heart, description: 追求安全与简单，赤子之心，相信世界本善。 }
   - { value: 孤儿, icon: Home, description: 追求归属与连接，学会在残酷现实中依靠同伴。 }

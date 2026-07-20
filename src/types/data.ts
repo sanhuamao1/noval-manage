@@ -168,14 +168,6 @@ export interface RelationsData {
 /** 更改类型 */
 export type ChangeType = "add" | "update" | "delete";
 
-/** 允许的操作 API 白名单 */
-export const ENRICH_API_WHITELIST = [
-  "/api/characters",
-  "/api/organizations",
-  "/api/locations",
-  "/api/relations/link",
-] as const;
-
 /** AI 生成的单个操作 */
 export interface EnrichOperation {
   /** 更改类型 */
