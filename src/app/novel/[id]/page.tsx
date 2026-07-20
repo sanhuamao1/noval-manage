@@ -8,7 +8,7 @@ import { PageLayout } from "@/components/ui/page-layout";
 import { Edit3 } from "lucide-react";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
-import type { NovelConfig, NovelData } from "@/types";
+import type { NovelData } from "@/types";
 import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
 import { NovelOverviewPreview } from "./NovelOverviewPreview";
@@ -21,13 +21,13 @@ export default function NovelOverview() {
   const novel = useNovelStore((s) => s.novel);
   const mutate = useNovelStore((s) => s.mutate);
   const { fields, sections, defaults } = getEntry(ConfigEntity.NOVEL);
-  const [editorConfig, setEditorConfig] = useState<NovelConfig>(defaults);
+  const [editorConfig, setEditorConfig] = useState<Record<string, unknown>>(defaults);
 
   const drawer = useDrawer();
 
   useEffect(() => {
     if (novel) {
-      setEditorConfig(fillConfig<NovelData, NovelConfig>(novel, defaults, fields));
+      setEditorConfig(fillConfig<NovelData, Record<string, unknown>>(novel, defaults, fields));
     }
   }, [novel]);
 

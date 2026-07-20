@@ -1,10 +1,9 @@
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
 import { buildConfigInstructions } from "@/lib/configs/config-registry";
-import type { PolishRuleConfig } from "@/types/entityConfig";
 
 /** 润色规则构建 Prompt */
-export function buildPolishPrompt(rule: PolishRuleConfig, text: string): string {
+export function buildPolishPrompt(rule: Record<string, unknown>, text: string): string {
   const parts: string[] = [];
   parts.push(`请按照以下要求对文本进行润色（结果需要缩进，每段不需要换行）：`);
 

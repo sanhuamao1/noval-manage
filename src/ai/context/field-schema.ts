@@ -1,97 +1,73 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
-import { load } from "js-yaml";
+import { CONFIGS } from "@/lib/configs/generated";
+import type { ConfigFieldDef } from "@/types/configs";
+import { ConfigEntity } from "@/types/entity";
 
-interface FieldMeta {
-  type?: string;
-  label?: string;
-  placeholder?: string;
-  options?: string;
-  max?: number;
-  subFields?: unknown[];
-}
-
-interface EntityConfig {
-  file: string;
-  name: string;
-}
-
-const ENTITIES: EntityConfig[] = [
-  { file: "character.yml", name: "角色 (Character)" },
-  { file: "organization.yml", name: "组织/势力 (Organization)" },
-  { file: "location.yml", name: "地点 (Location)" },
+const ENTITIES: { configKey: ConfigEntity; name: string }[] = [
+  { configKey: ConfigEntity.CHARACTER, name: "角色 (Character)" },
+  { configKey: ConfigEntity.ORGANIZATION, name: "组织/势力 (Organization)" },
+  { configKey: ConfigEntity.LOCATION, name: "地点 (Location)" },
 ];
 
-/** 读取 configs 目录下的字段定义，生成字段表 + 类型示例 */
+/** 从 CONFIGS 生成字段定义表 + 类型示例 */
 export function buildFieldSchema(novelId: string): string {
-  const configDir = resolve(process.cwd(), "configs");
   const parts: string[] = [];
 
   parts.push(
     `\n> **重要**：如下是所有实体的可用字段定义。生成的 operations 必须严格使用下面列出的字段名，不要自创字段。\n如果你需要表达一个不在列表中的信息，请在已有字段的 placeholder 方向去发挥，而不是新增字段。`,
   );
 
-  for (const entity of ENTITIES) {
-    const path = resolve(configDir, entity.file);
-    let raw: Record<string, unknown> = {};
-    try {
-      raw = load(readFileSync(path, "utf-8")) as Record<string, unknown>;
-    } catch {
-      continue;
-    }
+  for (const { configKey, name } of ENTITIES) {
+    const entityConfig = CONFIGS[configKey];
+    if (!entityConfig) continue;
 
-    const fields = raw.fields as Record<string, FieldMeta> | undefined;
-    if (!fields) continue;
+    const fields = entityConfig.fields;
+    if (!fields || fields.length === 0) continue;
 
-    parts.push(`\n## ${entity.name} 可用字段`);
+    parts.push(`\n## ${name} 可用字段`);
     parts.push(`\n| 字段名 | 标签 | 类型 | 说明 |`);
     parts.push(`|--------|------|------|------|`);
 
-    for (const [key, meta] of Object.entries(fields)) {
-      const label = meta.label || "";
-      const type = meta.type || "";
+    for (const field of fields) {
+      const label = field.label || "";
+      const type = field.type || "";
 
       const descParts: string[] = [];
-      if (meta.options) descParts.push(`可选值参考: \`${meta.options}\``);
-      if (meta.max) descParts.push(`最多选 ${meta.max} 项`);
-      if (meta.placeholder) descParts.push(`${meta.placeholder}`);
-      if (meta.subFields) {
-        const subLabels = meta.subFields
-          .map((s: unknown) => (s as Record<string, string>)?.placeholder || "")
+      if (field.options && field.options.length > 0) {
+        const values = field.options.map((o) => o.value).join(" / ");
+        descParts.push(`可选值: ${values}`);
+      }
+      if (field.max) descParts.push(`最多选 ${field.max} 项`);
+      if (field.placeholder) descParts.push(`${field.placeholder}`);
+      if (field.subFields) {
+        const subLabels = field.subFields
+          .map((s) => s.placeholder || "")
           .filter(Boolean);
         if (subLabels.length) descParts.push(`子字段: [${subLabels.join(", ")}]`);
       }
       const desc = descParts.join("；");
 
-      parts.push(`| \`${key}\` | ${label} | ${type} | ${desc} |`);
+      parts.push(`| \`${field.key}\` | ${label} | ${type} | ${desc} |`);
     }
     parts.push("");
 
-    // ── 字段类型示例 ──
     buildFieldTypeExample(parts, fields);
   }
 
-  // ── 关系 API 模板 ──
   buildRelationsParamsTemplate(parts, novelId);
 
-  parts.push(...buildSharedOptionsSection(configDir));
   return parts.join("\n");
 }
 
 /** 根据字段类型生成一个填充示例，展示各类型在 params 中的格式 */
-function buildFieldTypeExample(
-  parts: string[],
-  fields: Record<string, FieldMeta>,
-): void {
-  // 每种类型取一个典型字段
+function buildFieldTypeExample(parts: string[], fields: ConfigFieldDef[]): void {
   const typeFields: Record<string, { key: string; subFields?: string[] }> = {};
-  for (const [key, meta] of Object.entries(fields)) {
-    const t = meta.type || "";
+  for (const field of fields) {
+    const t = field.type || "";
     if (!typeFields[t]) {
       typeFields[t] = {
-        key,
-        subFields: meta.subFields
-          ?.map((s: unknown) => (s as Record<string, string>)?.placeholder || "")
+        key: field.key,
+        subFields: field.subFields
+          ?.map((s) => s.placeholder || "")
           .filter(Boolean),
       };
     }
@@ -179,36 +155,4 @@ function buildRelationsParamsTemplate(parts: string[], novelId: string): void {
   parts.push(`  }`);
   parts.push(`}`);
   parts.push(f);
-}
-
-function buildSharedOptionsSection(configDir: string): string[] {
-  const parts: string[] = [];
-  const sharedPath = resolve(configDir, "shared-options.yml");
-
-  const optionRefs: Record<string, string> = {
-    gender: "性别选项",
-    role: "角色类型选项",
-    "emotion-expression": "情感表达方式选项",
-    "narrative-function": "叙事功能原型选项",
-    "inner-motivation": "内在动机原型选项",
-    "org-type": "组织类型选项",
-    "org-status": "组织状态选项",
-    "location-type": "地点类型选项",
-  };
-
-  try {
-    const shared = load(readFileSync(sharedPath, "utf-8")) as Record<string, unknown>;
-    parts.push(`\n## 字段可选值参考（shared-options）`);
-    for (const [key, label] of Object.entries(optionRefs)) {
-      const values = shared[key];
-      if (Array.isArray(values)) {
-        parts.push(
-          `- **${key}**（${label}）：${values.map((v: Record<string, unknown>) => v.value || v).join(" / ")}`,
-        );
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return parts;
 }

@@ -1,31 +1,24 @@
 # 页面编写
 
-## 四种页面类型速查
+## 四种页面类型
 
 | 类型 | 核心 Hook | 参考页面 |
 |------|-----------|----------|
 | **CRUD 单实体** | `useEntityCrud` | `characters/`、`locations/`、`organizations/` |
 | **CRUD 多实体** | `useEntityCrud` + `switchEntity` | `polish/` |
-| **单数据编辑** | `useAppStore` + `api()` | novel 概览页 `novel/[id]/page.tsx` |
-| **AI 工作流（梦工厂）** | `useFactory` | `factory/` |
+| **单数据编辑** | `useAppStore` + `api()` | `novel/[id]/page.tsx` |
+| **AI 工作流（梦工厂）** | `useFactory` | [factory-page.md](factory-page.md) |
 
 ---
 
-## CRUD 单实体（最常用）
+## CRUD 单实体
 
-### 核心步骤
+### 步骤
 
-**① 创建路由**：`src/app/novel/[id]/<feature>/page.tsx`
+1. 在 `src/lib/configs/crud-config.ts` 注册实体映射
+2. 复制模板，改 `ConfigEntity.XXX`
 
-**② 注册实体 CRUD**：在 `src/lib/configs/crud-config.ts` 加一行：
-
-```ts
-[ConfigEntity.CHARACTER]: { storeKey: "characters", deleteLabel: "人物" },
-```
-
-**③ 写页面**（模板见下方）
-
-### 页面模板
+### 模板
 
 ```tsx
 "use client"
@@ -64,34 +57,26 @@ export default function MyEntityPage() {
 }
 ```
 
-### 数据流
+### 卡片内容渲染
 
-```
-useEntityCrud(entity)
-  ├── getEntry(entity) → sections, defaults, fields, fieldsMap
-  ├── getCrudMeta(entity) → storeKey, deleteLabel
-  ├── useAppStore(storeKey) → items（响应式）
-  ├── editorRef → EditorForm（自管状态）
-  │     ├── openEdit → ref.setData(item)
-  │     ├── openAdd → ref.reset()
-  │     ├── createItem → ref.getData() → api POST → mutate
-  │     └── updateItem → ref.getData() → api PUT → mutate
-  └── mode / editingId（drawer 状态）
-```
+```tsx
+// 选项类字段（角色、状态等）
+{renderOptions(fieldsMap["role"]?.options, item.role)}
 
-> 完整的 `useEntityCrud` 返回值表、`EditorForm` Props 说明见本文件附录。卡片信息渲染（`renderOptions`、`ConfigBadges`）见 [UI_COMPONENTS.md](UI_COMPONENTS.md)。
+// 文本类字段
+<ConfigBadges config={item} items={[["性别", "gender"], ["身份", "identity"]]} />
+```
 
 ---
 
 ## CRUD 多实体（Tab 切换）
 
-一个页面管理多种实体类型，通过 Tab 切换。
+### 步骤
 
-### 核心步骤
+1. 同上，先注册所有实体到 `crud-config.ts`
+2. 定义 tabs 配置，用 `switchEntity` 切换
 
-**① 同单实体 ①、②**，在 `crud-config.ts` 中注册所有实体
-
-**② 定义 tabs 配置 + 使用 `switchEntity`**：
+### 模板
 
 ```tsx
 const TABS = [
@@ -99,29 +84,31 @@ const TABS = [
   { key: ConfigEntity.POLISH_SAMPLE, label: "风格样本" },
 ];
 
-// 在 useEntityCrud 中解构 switchEntity
-const { currentEntity, switchEntity, ...rest } = useEntityCrud(ConfigEntity.POLISH_RULE);
+export default function MultiEntityPage() {
+  const { currentEntity, switchEntity, ...rest } = useEntityCrud(ConfigEntity.POLISH_RULE);
+  return (
+    <>
+      <SimpleTabs tabs={TABS} value={currentEntity}
+        onChange={(k) => switchEntity(k as ConfigEntity)} />
+      {/* 渲染方式同单实体模板 */}
+    </>
+  );
+}
 ```
 
-**③ 渲染 SimpleTabs + 根据 `currentEntity` 条件渲染卡片内容**：
-
-```tsx
-<SimpleTabs tabs={TABS} value={currentEntity} onChange={(k) => switchEntity(k as ConfigEntity)} />
-```
-
-> 完整示例见 [src/app/novel/[id]/polish/page.tsx](../../../src/app/novel/[id]/polish/page.tsx)。
+> 完整示例：[src/app/novel/[id]/polish/page.tsx](../../../src/app/novel/[id]/polish/page.tsx)
 
 ---
 
 ## 单数据编辑（无列表）
 
-只有一个数据对象（如 novel 概览），不涉及列表 CRUD。
+### 步骤
 
-### 核心步骤
+1. 从 store 读取数据
+2. `fillConfig` 填充表单
+3. `api()` + `mutate` 保存
 
-**① 读取数据**：`const novel = useAppStore(s => s.novel)`
-
-**② fillConfig 填充表单**：
+### 模板
 
 ```tsx
 const { fields, sections, defaults } = getEntry(ConfigEntity.NOVEL);
@@ -130,66 +117,25 @@ const [editorConfig, setEditorConfig] = useState(defaults);
 useEffect(() => {
   if (novel) setEditorConfig(fillConfig(novel, defaults, fields));
 }, [novel]);
+
+const handleSave = async () => {
+  await api({ url: `/api/novels/${id}`, method: "PATCH", data: editorConfig });
+};
 ```
 
-**③ mutate 保存**：
-
-```tsx
-const mutate = useAppStore(s => s.mutate);
-await mutate(id, "novel", () =>
-  api({ url: `/api/novels/${id}`, method: "PATCH", data: editorConfig })
-);
-```
-
-> 完整示例见 [src/app/novel/[id]/page.tsx](../../../src/app/novel/[id]/page.tsx)。
+> 完整示例：[src/app/novel/[id]/page.tsx](../../../src/app/novel/[id]/page.tsx)
 
 ---
 
 ## AI 工作流（梦工厂）
 
-基于 `useFactory` 的 Tab 维度缓存机制，核心为生成 → 预览 → 应用/舍弃。
+基于 `useFactory` 的 Tab 维度缓存机制，核心流程：生成 → 预览 → 应用/舍弃。
 
-> 详细架构、新增 Tab 流程、`useFactory()` 完整返回值见 [factory-page.md](factory-page.md)。
+> 详细架构、`useFactory()` 完整返回值见 [factory-page.md](factory-page.md)
 
 ---
 
-## 附录
-
-### useEntityCrud 关键返回值
-
-| 字段 | 说明 |
-|------|------|
-| `items` | 实体列表数据（来自 store） |
-| `mode` | `"create"` / `"edit"` / `null` |
-| `sections` / `defaults` | 传给 EditorForm |
-| `fieldsMap` | 字段定义映射（卡片渲染用） |
-| `currentEntity` | 当前实体类型（用于 EditorForm `key`） |
-| `editorRef` | 传给 `<EditorForm ref={...}>` |
-| `openEdit(item)` / `openAdd()` | 切换 drawer 模式 |
-| `createItem()` / `updateItem()` / `deleteItem(id)` | CRUD 操作 |
-| `close()` | 关闭 drawer |
-| `switchEntity(next)` | 切换到另一实体（多实体页面用） |
-
-### EditorForm Props
-
-| Prop | 说明 |
-|------|------|
-| `ref` | 必传，父组件通过 `ref.getData()` / `ref.setData()` / `ref.reset()` 操作 |
-| `sections` | 表单分区定义 |
-| `defaults` | 默认值对象 |
-| `key` | **必传** `String(currentEntity)`，切换实体时重挂载 |
-
-### 卡片内容渲染速查
-
-```tsx
-// 选项类字段（如角色、状态）
-{renderOptions(fieldsMap["role"]?.options, item.role)}
-
-// 文本类字段
-<ConfigBadges config={item} items={[["性别", "gender"], ["身份", "identity"]]} />
-```
-
-### 常见反模式
+## 常见反模式
 
 | ❌ | ✅ |
 |----|-----|

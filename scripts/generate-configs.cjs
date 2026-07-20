@@ -125,25 +125,6 @@ for (const name of entities) {
 
 // ── 辅助 ──
 
-function typeToTsType(type) {
-  switch (type) {
-    case "toggle": return "boolean";
-    case "multi":
-    case "list":
-    case "tagselect":
-    case "tags": return "string[]";
-    case "single":
-    case "text":
-    case "longtext": return "string | undefined";
-    default: return "string | undefined";
-  }
-}
-
-/** "polish-rule" → "PolishRule" */
-function toPascalCase(kebab) {
-  return kebab.split("-").map(p => p.charAt(0).toUpperCase() + p.slice(1)).join("");
-}
-
 /** "polish-rule" → "POLISH_RULE" */
 function toScreamingSnake(kebab) {
   return kebab.replace(/-/g, "_").toUpperCase();
@@ -152,15 +133,12 @@ function toScreamingSnake(kebab) {
 // ── 生成 src/types/entity.ts ──
 
 function generateEntityFile() {
-  const configTypeNames = entities.map(name => `${toPascalCase(name)}Config`);
-
   let code = `// 自动生成于 ${new Date().toISOString()}，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 export * from "./configs";
 
 import type { ConfigSection, ConfigFieldDef } from "./configs";
-import type { ${configTypeNames.join(", ")} } from "./entityConfig";
 
 export interface EntityConfig {
   entity: string;
@@ -170,15 +148,6 @@ export interface EntityConfig {
 
 `;
 
-  // EntityConfigMap
-  code += `/** 实体 Key → 配置类型 映射表 */\n`;
-  code += `export interface EntityConfigMap {\n`;
-  for (const entityName of entities) {
-    const typeName = `${toPascalCase(entityName)}Config`;
-    code += `  [ConfigEntity.${toScreamingSnake(entityName)}]: ${typeName};\n`;
-  }
-  code += `}\n\n`;
-
   // ConfigEntity enum
   code += `/** 配置实体枚举（与 YAML 实体列表同源，由构建脚本自动生成） */\n`;
   code += `export enum ConfigEntity {\n`;
@@ -187,40 +156,6 @@ export interface EntityConfig {
 
   return code;
 }
-
-// ── 生成 src/types/entityConfig.ts ──
-
-function generateEntityConfigFile() {
-  let code = `// 自动生成于 ${new Date().toISOString()}，勿手动编辑
-// 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
-
-// ── 配置类型接口（由 YAML 字段定义自动推导）──
-
-`;
-  for (const [entityName, cfg] of Object.entries(configs)) {
-    const typeName = `${toPascalCase(entityName)}Config`;
-    code += `/** ${cfg.entity} 配置类型 */\n`;
-    code += `export interface ${typeName} {\n`;
-    for (const field of cfg.fields) {
-      code += `  ${field.key}?: ${typeToTsType(field.type)};\n`;
-    }
-    code += `}\n\n`;
-  }
-  return code;
-}
-
-// ── 扫描大纲框架选项 ──
-
-const frameworksDir = resolve(ROOT, "configs/frameworks");
-let outlineFrameworks = [];
-if (existsSync(frameworksDir)) {
-  outlineFrameworks = readdirSync(frameworksDir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => ({ value: basename(f, ".md") }))
-    .sort();
-}
-
-// ── 生成 src/lib/configs/generated.ts ──
 
 // ── 写出文件 ──
 
@@ -232,14 +167,6 @@ const entityOutPath = resolve(ROOT, "src/types/entity.ts");
 writeFileSync(entityOutPath, entityContent, "utf-8");
 console.log(`Generated ${entityOutPath}`);
 
-// 生成 entityConfig.ts
-const entityConfigContent = generateEntityConfigFile();
-const entityConfigOutPath = resolve(ROOT, "src/types/entityConfig.ts");
-writeFileSync(entityConfigOutPath, entityConfigContent, "utf-8");
-console.log(`Generated ${entityConfigOutPath}`);
-
-const frameworksJson = JSON.stringify(outlineFrameworks);
-
 // 生成 generated.ts
 const generatedContent = `${"// "}自动生成于 ${new Date().toISOString()}，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
@@ -247,9 +174,6 @@ const generatedContent = `${"// "}自动生成于 ${new Date().toISOString()}，
 import { ConfigEntity, EntityConfig } from "@/types/entity";
 
 export const CONFIGS: Record<ConfigEntity, EntityConfig> = ${configsJson};
-
-/** 大纲框架选项（由 scripts/generate-configs.cjs 扫描 configs/frameworks/*.md 生成） */
-export const OUTLINE_FRAMEWORKS: { value: string }[] = ${frameworksJson};
 `;
 
 const generatedOutPath = resolve(ROOT, "src/lib/configs/generated.ts");

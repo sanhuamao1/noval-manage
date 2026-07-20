@@ -41,14 +41,14 @@ export function createRoute(entity: string, cfg?: RouteConfig): CrudHandlers {
 
     // 单条
     if (id) {
-      const record = get(entity, id, config.global ? undefined : (novelId ?? undefined))
+      const record = await get(entity, id, config.global ? undefined : (novelId ?? undefined))
       if (!record) return error("未找到", 404)
       return NextResponse.json(record)
     }
 
     // 列表
     if (!config.global && !novelId) return error("缺少 novelId", 400)
-    return NextResponse.json(list(entity, config.global ? undefined : (novelId ?? undefined)))
+    return NextResponse.json(await list(entity, config.global ? undefined : (novelId ?? undefined)))
   }
 
   async function POST(req: NextRequest): Promise<NextResponse> {
@@ -76,11 +76,11 @@ export function createRoute(entity: string, cfg?: RouteConfig): CrudHandlers {
     data.id = itemId
     if (!config.global) data.novelId = novelId
     if (config.useSortOrder) {
-      data.sortOrder = nextSortOrder(entity, novelId as string | undefined)
+      data.sortOrder = await nextSortOrder(entity, novelId as string | undefined)
     }
 
-    put(entity, itemId, data, config.global ? undefined : (novelId as string | undefined))
-    const record = get(entity, itemId, config.global ? undefined : (novelId as string | undefined))
+    await put(entity, itemId, data, config.global ? undefined : (novelId as string | undefined))
+    const record = await get(entity, itemId, config.global ? undefined : (novelId as string | undefined))
     return NextResponse.json(record)
   }
 
@@ -96,8 +96,8 @@ export function createRoute(entity: string, cfg?: RouteConfig): CrudHandlers {
     }
     if (!id) return error("缺少 ID", 400)
 
-    put(entity, id, data, config.global ? undefined : novelId)
-    const record = get(entity, id, config.global ? undefined : novelId)
+    await put(entity, id, data, config.global ? undefined : novelId)
+    const record = await get(entity, id, config.global ? undefined : novelId)
     return NextResponse.json(record)
   }
 
@@ -107,7 +107,7 @@ export function createRoute(entity: string, cfg?: RouteConfig): CrudHandlers {
     const novelId = searchParams.get("novelId")
     if (!id) return error("缺少 ID", 400)
 
-    remove(entity, id, config.global ? undefined : (novelId ?? undefined))
+    await remove(entity, id, config.global ? undefined : (novelId ?? undefined))
     return NextResponse.json({ success: true })
   }
 

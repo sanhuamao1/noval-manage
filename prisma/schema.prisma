@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── 小说 ──
+model Novel {
+  id            String   @id
+  title         String
+  description   String?
+  status        String   @default("连载中")
+  genre         String?  // JSON: string[]
+  primaryTone   String?
+  secondaryTones String? // JSON: string[]
+  worldShape    String?
+  presetStyle   String?
+  oneLineSummary String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  chapters         Chapter[]
+  characters       Character[]
+  outlines         Outline[]
+  locations        Location[]
+  organizations    Organization[]
+  foreshadowings   Foreshadowing[]
+  keyEvents        KeyEvent[]
+  characterEmotions CharacterEmotion[]
+  relations        Relation[]
+  nodePositions    NodePosition[]
+  conversations    FactoryConversation[]
+}
+
+// ── 角色 ──
+model Character {
+  id                String   @id
+  novelId           String
+  name              String   @default("")
+  gender            String?
+  role              String?
+  age               String?
+  identity          String?
+  item              String?
+  coreConflict      String?
+  surfaceGoal       String?
+  deepNeed          String?
+  emotionExpression String?
+  abilities         String?  // JSON: string[]
+  growthArcs        String?  // JSON: array of {缺陷, 表现, 成长方向}
+  notes             String?  // JSON: array of {标签, 内容}
+  experience        String?  // JSON: array of {经历描述}
+  narrativeFunction String?  // JSON: string[]
+  innerMotivation   String?  // JSON: string[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+// ── 大纲 ──
+model Outline {
+  id              String   @id
+  novelId         String
+  name            String   @default("")
+  contentBrief    String?
+  contentDetail   String?
+  status          String   @default("已规划")
+  timeline        String?
+  tone            String?
+  characterIds    String?  // JSON: string[]
+  locationIds     String?  // JSON: string[]
+  foreshadowingIds String? // JSON: string[]
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  novel            Novel              @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  keyEvents        KeyEvent[]
+  characterEmotions CharacterEmotion[]
+}
+
+// ── 章节 ──
+model Chapter {
+  id                String   @id
+  novelId           String
+  title             String   @default("")
+  content           String   @default("")
+  status            String   @default("draft")
+  sortOrder         Int      @default(0)
+  relatedCharacters String?  // JSON: string[] 或 null
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+// ── 地点 ──
+model Location {
+  id           String   @id
+  novelId      String
+  name         String   @default("")
+  description  String?
+  locationType String?  // JSON: string[]
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+// ── 组织 ──
+model Organization {
+  id                String   @id
+  novelId           String
+  name              String   @default("")
+  description       String?
+  type              String?  // JSON: string[]
+  status            String?
+  foundingBackground String?
+  founder           String?
+  currentLeader     String?
+  operationLogic    String?
+  structure         String?  // JSON: array of {等级, 作用/职责}
+  headquarters      String?  // JSON: string[]
+  members           String?  // JSON: array of {代号, 等级, 备注}
+  opponents         String?  // JSON: string[]
+  mortalEnemies     String?  // JSON: string[]
+  allies            String?  // JSON: string[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+// ── 伏笔 ──
+model Foreshadowing {
+  id        String   @id
+  novelId   String
+  name      String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+}
+
+// ── 关键事件 ──
+model KeyEvent {
+  id        String   @id
+  novelId   String
+  outlineId String
+  title     String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+}
+
+// ── 角色情感 ──
+model CharacterEmotion {
+  id        String   @id
+  novelId   String
+  outlineId String
+  // 其他字段由具体业务决定，当前 YML 结构未知，保留为 JSON
+  data      String?  // JSON: 灵活存储未知字段
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+}
+
+// ── 角色关系（从 relations.yml 拆分） ──
+model Relation {
+  id          String   @id
+  novelId     String
+  source      String
+  target      String
+  description String   @default("")
+  createdAt   DateTime @default(now())
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@index([novelId])
+  @@index([source])
+  @@index([target])
+}
+
+// ── 节点位置（从 relations.yml 拆分） ──
+model NodePosition {
+  id        String   @id
+  novelId   String
+  charId    String
+  x         Float    @default(0)
+  y         Float    @default(0)
+  createdAt DateTime @default(now())
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([novelId, charId])
+  @@index([novelId])
+}
+
+// ── 润色规则（全局实体） ──
+model PolishRule {
+  id                String   @id
+  name              String   @default("")
+  description       String?
+  prompt            String?
+  pace              String?
+  mood              String?  // JSON: string[]
+  narrative         String?
+  senses            String?  // JSON: string[]
+  character         String?  // JSON: string[]
+  environment       String?  // JSON: string[]
+  rhetoric          String?
+  timeVariation     Boolean  @default(false)
+  contrastInsertion Boolean  @default(false)
+  useCount          Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ── 风格样本（全局实体） ──
+model PolishSample {
+  id         String   @id
+  name       String   @default("")
+  prompt     String?
+  sceneType  String?
+  text       String?
+  isNegative Boolean  @default(false)
+  useCount   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ── 大纲框架（全局实体） ──
+model Framework {
+  id        String   @id
+  name      String   @default("")
+  content   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── 梦工厂对话会话 ──
+model FactoryConversation {
+  id        String   @id
+  novelId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  novel    Novel            @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  messages FactoryMessage[]
+
+  @@index([novelId])
+}
+
+// ── 梦工厂对话消息 ──
+model FactoryMessage {
+  id             String   @id
+  conversationId String
+  role           String
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation FactoryConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}

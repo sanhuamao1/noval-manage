@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getNovel, list, getRelations } from "@/lib/store";
-import { callAIChat } from "@/lib/ai";
-import { buildGenOutlinePrompt } from "@/lib/ai/prompt/gen-outline";
+import { callAIChat } from "@/ai";
+import { buildGenOutlinePrompt } from "@/ai/prompt/gen-outline";
 
 /** 从 AI 原始输出中提取纯 markdown（兼容 JSON/代码块等格式） */
 function extractMarkdown(raw: string): string {
@@ -36,10 +36,11 @@ function extractMarkdown(raw: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { novelId, prompt: userPrompt, framework } = (await req.json()) as {
+    const { novelId, prompt: userPrompt, framework, frameworkContent } = (await req.json()) as {
       novelId: string;
       prompt?: string;
       framework?: string;
+      frameworkContent?: string;
     };
 
     if (!novelId) {
@@ -50,18 +51,18 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "请选择大纲框架" }, { status: 400 });
     }
 
-    const novel = getNovel(novelId);
+    const novel = await getNovel(novelId);
     if (!novel) {
       return Response.json({ error: "未找到该小说" }, { status: 404 });
     }
 
-    const characters = list("character", novelId) as Record<string, unknown>[];
-    const organizations = list("organization", novelId) as Record<string, unknown>[];
-    const locations = list("location", novelId) as Record<string, unknown>[];
-    const { links: relations } = getRelations(novelId);
+    const characters = await list("character", novelId) as Record<string, unknown>[];
+    const organizations = await list("organization", novelId) as Record<string, unknown>[];
+    const locations = await list("location", novelId) as Record<string, unknown>[];
+    const { links: relations } = await getRelations(novelId);
 
     const fullPrompt = buildGenOutlinePrompt(
-      novelId, novel, characters, organizations, locations, relations, framework, userPrompt,
+      novelId, novel, characters, organizations, locations, relations, framework, frameworkContent, userPrompt,
     );
 
     const rawText = await callAIChat([{ role: "user", content: fullPrompt }], {

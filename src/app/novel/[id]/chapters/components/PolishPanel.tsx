@@ -11,7 +11,6 @@ import { useMenuStore } from "@/stores/useMenuStore";
 import { fillConfig } from "@/lib/configs/config-utils";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 import { api } from "@/lib/api";
-import type { PolishRuleConfig } from "@/types";
 
 const TABS = [{ id: "polish", label: "润色", icon: Sparkles }];
 
@@ -160,7 +159,7 @@ export function PolishPanel() {
                       selected={selectedRuleId === rule.id && !polishing}
                       onClick={polishing ? undefined : () => setSelectedRuleId(rule.id)}
                     >
-                      <ConfigBadges<PolishRuleConfig>
+                      <ConfigBadges<Record<string, unknown>>
                         config={cfg}
                         items={[
                           ["情绪/氛围", "mood"],

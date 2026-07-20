@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import type { NovelData, CharacterData, OutlineData, ChapterSummary, PolishRuleData, PolishSampleData, OrganizationData, LocationData, RelationData, RelationsData } from "@/types/data";
+import type { NovelData, CharacterData, OutlineData, ChapterSummary, PolishRuleData, PolishSampleData, OrganizationData, LocationData, RelationData, RelationsData, FrameworkData } from "@/types/data";
 import { api } from "@/lib/api";
 import { useEntityStore } from "./useEntityStore";
 import { usePolishStore } from "./usePolishStore";
 
-export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations";
+export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations" | "frameworks";
 
 const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   novel: (id) => `/api/novels?id=${id}`,
@@ -17,6 +17,7 @@ const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   polishRules: () => "/api/polish/rules",
   polishSamples: () => "/api/polish/samples",
   relations: (id) => `/api/relations?novelId=${id}`,
+  frameworks: () => `/api/frameworks`,
 };
 
 interface NovelStore {
@@ -30,7 +31,7 @@ export const useNovelStore = create<NovelStore>((set) => ({
   novel: null,
 
   init: async (novelId) => {
-    const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations] = await Promise.all([
+    const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations, frameworks] = await Promise.all([
       api<NovelData>({ url: `/api/novels?id=${novelId}` }),
       api<{ id: string; name: string }[]>({ url: `/api/characters?novelId=${novelId}` }),
       api<OrganizationData[]>({ url: `/api/organizations?novelId=${novelId}` }),
@@ -41,11 +42,12 @@ export const useNovelStore = create<NovelStore>((set) => ({
       api<PolishRuleData[]>({ url: "/api/polish/rules" }),
       api<PolishSampleData[]>({ url: "/api/polish/samples" }),
       api<RelationsData>({ url: `/api/relations?novelId=${novelId}` }),
+      api<FrameworkData[]>({ url: `/api/frameworks` }),
     ]);
     set({ novel });
     useEntityStore.getState().setAll({
       characters, organizations, locations, foreshadowings,
-      outlines, chapters, relations,
+      outlines, chapters, relations, frameworks,
     });
     usePolishStore.getState().setMeta({ polishRules, polishSamples });
   },

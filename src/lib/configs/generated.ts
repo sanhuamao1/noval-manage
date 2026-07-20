@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-20T07:35:30.109Z，勿手动编辑
+// 自动生成于 2026-07-20T10:05:50.118Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -2740,6 +2740,3 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
     ]
   }
 };
-
-/** 大纲框架选项（由 scripts/generate-configs.cjs 扫描 configs/frameworks/*.md 生成） */
-export const OUTLINE_FRAMEWORKS: { value: string }[] = [{"value":"三幕剧结构"},{"value":"斯奈德节拍表"},{"value":"英雄之旅"},{"value":"起承转合"}];

@@ -16,13 +16,13 @@ async function customGet(req: NextRequest, _entity: string) {
 
   // 单条（含 content）
   if (id) {
-    const chapter = get("chapter", id, novelId)
+    const chapter = await get("chapter", id, novelId)
     if (!chapter) return NextResponse.json({ error: "章节不存在" }, { status: 404 })
     return NextResponse.json(chapter)
   }
 
   // 列表（不含 content）
-  const chapters = list("chapter", novelId)
+  const chapters = await list("chapter", novelId)
   return NextResponse.json(chapters)
 }
 

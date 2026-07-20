@@ -10,7 +10,7 @@ async function customGet(req: NextRequest, _entity: string) {
 
   if (!outlineId) return NextResponse.json({ error: "缺少 outlineId" }, { status: 400 })
 
-  const emotions = list("character-emotion", novelId ?? undefined).filter(
+  const emotions = (await list("character-emotion", novelId ?? undefined)).filter(
     (ce) => (ce as Record<string, unknown>).outlineId === outlineId,
   )
   return NextResponse.json(emotions)

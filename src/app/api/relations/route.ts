@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   if (!novelId) {
     return NextResponse.json({ error: "缺少 novelId 参数" }, { status: 400 });
   }
-  const { links, positions } = getRelations(novelId);
+  const { links, positions } = await getRelations(novelId);
   return NextResponse.json({ links, positions });
 }
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     };
   });
 
-  saveRelations(novelId, normalized);
+  await saveRelations(novelId, normalized);
   return NextResponse.json({ success: true });
 }
 
@@ -64,6 +64,6 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "缺少 novelId 或 positions 参数" }, { status: 400 });
   }
 
-  savePositions(novelId, positions);
+  await savePositions(novelId, positions);
   return NextResponse.json({ success: true });
 }

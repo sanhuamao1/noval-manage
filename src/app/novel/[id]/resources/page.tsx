@@ -14,7 +14,7 @@ import { renderOptions } from "@/lib/configs/render-utils";
 import { ConfigEntity } from "@/lib/configs/config-registry";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import { Users, Building2, MapPin, List, GitBranch } from "lucide-react";
-import type { CharacterConfig, OrganizationConfig } from "@/types";
+import type { CharacterData, OrganizationData } from "@/types";
 import RelationCanvas from "./relation-canvas";
 
 type ViewMode = "list" | "canvas";
@@ -125,7 +125,7 @@ export default function ResourcesPage() {
               <div className="space-x-1">
                 {renderOptions(fieldsMap["role"]?.options, char.role)}
               </div>
-              <ConfigBadges<CharacterConfig>
+              <ConfigBadges<CharacterData>
                 config={char}
                 items={[
                   ["身份", "identity"],
@@ -152,7 +152,7 @@ export default function ResourcesPage() {
                 {renderOptions(fieldsMap["type"]?.options, org.type)}
                 {renderOptions(fieldsMap["status"]?.options, org.status)}
               </div>
-              <ConfigBadges<OrganizationConfig>
+              <ConfigBadges<OrganizationData>
                 config={org}
                 items={[
                   ["创始人", "founder"],

@@ -1,4 +1,10 @@
-import { api } from "./api";
+import { api } from "../lib/api";
+
+// ---- 模块级配置（只读一次，避免每次调用重复读取 process.env） ----
+
+const AI_API_KEY = process.env.AI_API_KEY;
+const AI_MODEL = process.env.AI_MODEL ?? "";
+const AI_CHAT_URL = buildChatUrl();
 
 function buildChatUrl(): string {
   const base = process.env.AI_BASE_URL || "";
@@ -6,10 +12,33 @@ function buildChatUrl(): string {
   return base + "/chat/completions";
 }
 
+if (!AI_MODEL) {
+  throw new Error("请配置 AI_MODEL 环境变量");
+}
+
+// ---- 辅助函数 ----
+
+function getKey(overrideKey?: string): string {
+  const key = overrideKey ?? AI_API_KEY;
+  if (!key) throw new Error("请配置 AI_API_KEY 环境变量");
+  return key;
+}
+
+// ---- 类型定义 ----
+
 export interface ChatMessage {
   role: string;
   content: string;
 }
+
+export interface ChatOptions {
+  systemPrompt?: string;
+  temperature?: number;
+  max_tokens?: number;
+  apiKey?: string;
+}
+
+// ---- 非流式多轮对话 ----
 
 /**
  * 非流式多轮对话调用 AI，返回完整文本
@@ -17,68 +46,41 @@ export interface ChatMessage {
  */
 export async function callAIChat(
   messages: ChatMessage[],
-  options?: {
-    systemPrompt?: string;
-    temperature?: number;
-    max_tokens?: number;
-    apiKey?: string;
-  },
+  options?: ChatOptions,
 ): Promise<string> {
-  const url = buildChatUrl();
-  const model = process.env.AI_MODEL;
-  const key = options?.apiKey ?? process.env.AI_API_KEY;
-
-  if (!key) {
-    throw new Error("请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）");
-  }
-
+  const key = getKey(options?.apiKey);
   const { systemPrompt, temperature = 0.7, max_tokens = 4096 } = options ?? {};
 
-  const requestData: Record<string, unknown> = {
-    model,
-    messages: systemPrompt
-      ? [{ role: "system", content: systemPrompt }, ...messages]
-      : messages,
-    temperature,
-    max_tokens,
-  };
-
   const res = await api<{ choices: Array<{ message: { content: string } }> }>({
-    url,
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}` },
-    data: requestData as Record<string, unknown>,
-  });
-
-  return res.choices[0].message.content;
-}
-
-export async function callAI(prompt: string, apiKey?: string, baseUrl?: string) {
-  const url = buildChatUrl();
-  const model = process.env.AI_MODEL;
-  const key = apiKey ?? process.env.AI_API_KEY;
-
-  if (!key) {
-    throw new Error("请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）");
-  }
-
-  const res = await api<{ choices: Array<{ message: { content: string } }> }>({
-    url,
+    url: AI_CHAT_URL,
     method: "POST",
     headers: { Authorization: `Bearer ${key}` },
     data: {
-      model,
-      messages: [
-        { role: "system", content: "你是一个专业的小说创作助手。请根据用户的要求进行文本润色。" },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 4096,
+      model: AI_MODEL,
+      messages: systemPrompt
+        ? [{ role: "system", content: systemPrompt }, ...messages]
+        : messages,
+      temperature,
+      max_tokens,
     },
   });
 
   return res.choices[0].message.content;
 }
+
+// ---- 简化单轮调用（委托给 callAIChat） ----
+
+/**
+ * 单轮对话调用 AI（简版），内部委托给 callAIChat
+ */
+export async function callAI(prompt: string, apiKey?: string) {
+  return callAIChat([{ role: "user", content: prompt }], {
+    systemPrompt: "你是一个专业的小说创作助手。请根据用户的要求进行文本润色。",
+    apiKey,
+  });
+}
+
+// ---- 流式调用 ----
 
 export interface AIStreamOptions {
   prompt: string;
@@ -102,22 +104,16 @@ export async function* callAIStream(options: AIStreamOptions): AsyncGenerator<st
     apiKey: overrideKey,
   } = options;
 
-  const url = buildChatUrl();
-  const model = process.env.AI_MODEL;
-  const key = overrideKey ?? process.env.AI_API_KEY;
+  const key = getKey(overrideKey);
 
-  if (!key) {
-    throw new Error("请配置 AI API Key（在 .env.local 中设置 AI_API_KEY）");
-  }
-
-  const res = await fetch(url, {
+  const res = await fetch(AI_CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${key}`,
     },
     body: JSON.stringify({
-      model,
+      model: AI_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt },

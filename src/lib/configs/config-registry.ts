@@ -1,23 +1,22 @@
 import { CONFIGS } from "./generated";
 import { ConfigEntity } from "@/types";
 export { ConfigEntity } from "@/types";
-import type { EntityConfigMap } from "@/types";
 import { buildDefaultValues } from "./config-utils";
 import type { ConfigFieldDef, ConfigSection } from "@/types";
 
 // ── 注册表 ──
 
 /** 实体配置缓存项 */
-interface ConfigEntry<T> {
+interface ConfigEntry {
   fields: ConfigFieldDef[];
   fieldsMap: Record<string, ConfigFieldDef>;
   sections: ConfigSection[];
-  defaults: T;
+  defaults: Record<string, unknown>;
 }
 
-const registry = new Map<ConfigEntity, ConfigEntry<any>>();
+const registry = new Map<ConfigEntity, ConfigEntry>();
 
-function buildEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap[K]> {
+function buildEntry(key: ConfigEntity): ConfigEntry {
   const config = CONFIGS[key];
   if (!config) throw new Error(`Unknown config entity: "${String(key)}"`);
   return {
@@ -32,7 +31,7 @@ function buildEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap
 }
 
 /** 获取实体完整配置（字段定义 + sections + 默认值） */
-export function getEntry<K extends ConfigEntity>(key: K): ConfigEntry<EntityConfigMap[K]> {
+export function getEntry(key: ConfigEntity): ConfigEntry {
   if (!registry.has(key)) registry.set(key, buildEntry(key));
   return registry.get(key)!;
 }

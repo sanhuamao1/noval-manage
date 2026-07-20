@@ -1,20 +1,17 @@
-import type {
-  NovelConfig,
-  CharacterConfig,
-  OutlineConfig,
-  PolishRuleConfig,
-  PolishSampleConfig,
-  OrganizationConfig,
-  LocationConfig,
-} from "@/types/entityConfig";
-
 /** API 返回的小说数据 = 可编辑配置 + 系统字段 */
-export interface NovelData extends Omit<NovelConfig, "description"> {
+export interface NovelData {
   id: string;
   /** API 保证 title 必返 */
   title: string;
+  oneLineSummary?: string | null;
   /** API 中 description 为 null（数据库层面），编辑器中为 undefined */
   description: string | null;
+  status?: string | null;
+  genre?: string[];
+  presetStyle?: string | null;
+  primaryTone?: string | null;
+  secondaryTones?: string[];
+  worldShape?: string | null;
   wordCount?: number;
   _count?: { chapters: number; characters: number };
   createdAt: string;
@@ -22,58 +19,108 @@ export interface NovelData extends Omit<NovelConfig, "description"> {
 }
 
 /** API 返回的角色数据 = 可编辑配置 + 系统字段 */
-export interface CharacterData extends Omit<CharacterConfig, "name"> {
+export interface CharacterData {
   id: string;
   /** API 保证 name 必返 */
   name: string;
+  gender?: string | null;
+  role?: string | null;
+  age?: string | null;
+  identity?: string | null;
+  item?: string | null;
+  coreConflict?: string | null;
+  surfaceGoal?: string | null;
+  deepNeed?: string | null;
+  emotionExpression?: string | null;
+  abilities?: string[];
+  growthArcs?: string[];
+  notes?: string[];
+  experience?: string[];
+  narrativeFunction?: string[];
+  innerMotivation?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 /** API 返回的提纲数据 = 可编辑配置 + 系统字段 */
-export interface OutlineData extends Omit<OutlineConfig, "name"> {
+export interface OutlineData {
   id: string;
   /** API 保证 name 必返 */
   name: string;
+  contentBrief?: string | null;
+  contentDetail?: string | null;
+  status?: string | null;
+  timeline?: string | null;
+  tone?: string | null;
+  characterIds?: string[];
+  locationIds?: string[];
+  foreshadowingIds?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 /** API 返回的润色规则数据 = 可编辑配置 + 系统字段 */
-export interface PolishRuleData extends Omit<PolishRuleConfig, "description"> {
+export interface PolishRuleData {
   id: string;
   name: string;
   description: string | null;
   prompt: string;
+  pace?: string | null;
+  mood?: string[];
+  narrative?: string | null;
+  senses?: string[];
+  character?: string[];
+  environment?: string[];
+  rhetoric?: string | null;
+  timeVariation?: boolean;
+  contrastInsertion?: boolean;
   useCount: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
 /** API 返回的润色样本数据 = 可编辑配置 + 系统字段 */
-export interface PolishSampleData extends Omit<PolishSampleConfig, "prompt"> {
+export interface PolishSampleData {
   id: string;
   name: string;
   prompt: string;
+  sceneType?: string | null;
+  text?: string | null;
+  isNegative?: boolean;
   useCount: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
 /** API 返回的组织数据 = 可编辑配置 + 系统字段 */
-export interface OrganizationData extends Omit<OrganizationConfig, "name"> {
+export interface OrganizationData {
   id: string;
   /** API 保证 name 必返 */
   name: string;
+  description?: string | null;
+  type?: string[];
+  status?: string | null;
+  foundingBackground?: string | null;
+  founder?: string | null;
+  currentLeader?: string | null;
+  operationLogic?: string | null;
+  structure?: string[];
+  headquarters?: string[];
+  members?: string[];
+  opponents?: string[];
+  mortalEnemies?: string[];
+  allies?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 /** API 返回的地点数据 = 可编辑配置 + 系统字段 */
-export interface LocationData extends Omit<LocationConfig, "name"> {
+export interface LocationData {
   id: string;
   /** API 保证 name 必返 */
   name: string;
+  description?: string | null;
+  locationType?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -149,4 +196,10 @@ export interface EnrichOperation {
 export interface EnrichResult {
   operations: EnrichOperation[];
   analysis: string;
+}
+
+export interface FrameworkData {
+  id: string;
+  name: string;
+  content: string;
 }

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { get, list, put } from "@/lib/store";
-import { callAI } from "@/lib/ai";
-import { buildPolishPrompt } from "@/lib/ai/prompt/polish";
-import { buildStylePrompt } from "@/lib/ai/prompt/style";
+import { callAI } from "@/ai";
+import { buildPolishPrompt } from "@/ai/prompt/polish";
+import { buildStylePrompt } from "@/ai/prompt/style";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     // 规则模式
     if (type === "rule") {
-      const rule = get<Record<string, unknown>>("polish-rule", ruleId);
+      const rule = await get<Record<string, unknown>>("polish-rule", ruleId);
       if (!rule) {
         return NextResponse.json({ error: "未找到润色规则" }, { status: 400 });
       }
@@ -22,13 +22,13 @@ export async function POST(req: NextRequest) {
       const prompt = buildPolishPrompt(rule, text);
       const polishedText = await callAI(prompt);
 
-      put('polish-rule', ruleId, { ...rule, useCount: ((rule.useCount as number) ?? 0) + 1 })
+      await put('polish-rule', ruleId, { ...rule, useCount: ((rule.useCount as number) ?? 0) + 1 })
       return NextResponse.json({ originalText: text, polishedText })
     }
 
     // 样本模式
     if (type === "sample") {
-      const allSamples = list<Record<string, unknown>>("polish-sample");
+      const allSamples = await list<Record<string, unknown>>("polish-sample");
       const samples = sampleIds?.length ? allSamples.filter((r) => sampleIds.includes(r.id)) : [];
 
       const styleSamples = samples.map((s) => ({
@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
       // increment useCount for each sample
       if (sampleIds?.length > 0) {
         for (const sid of sampleIds) {
-          const s = get<Record<string, unknown>>("polish-sample", sid);
-          if (s) put("polish-sample", sid, { ...s, useCount: ((s.useCount as number) ?? 0) + 1 });
+          const s = await get<Record<string, unknown>>("polish-sample", sid);
+          if (s) await put("polish-sample", sid, { ...s, useCount: ((s.useCount as number) ?? 0) + 1 });
         }
       }
 

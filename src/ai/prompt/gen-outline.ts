@@ -1,5 +1,3 @@
-import { readFileSync } from "fs";
-import { resolve } from "path";
 import { formatNovelSection } from "../context/novel";
 import {
   formatCharactersSection,
@@ -7,16 +5,6 @@ import {
   formatLocationsSection,
 } from "../context/entities";
 import { formatRelationsSection } from "../context/relations";
-
-/** 读取指定名称的大纲框架模板 */
-function readFrameworkTemplate(framework: string): string {
-  const path = resolve(process.cwd(), "configs", "frameworks", `${framework}.md`);
-  try {
-    return readFileSync(path, "utf-8");
-  } catch {
-    return `（无法读取框架模板：${framework}）`;
-  }
-}
 
 /** 中段情节生成规则 — 五维随机变量抽取 */
 function buildRandomizationRules(): string {
@@ -97,6 +85,7 @@ export function buildGenOutlinePrompt(
   locations: Record<string, unknown>[],
   relations: { source: string; target: string; description: string }[],
   framework: string,
+  frameworkContent?: string,
   userPrompt?: string,
 ): string {
   const parts: string[] = [];
@@ -109,7 +98,7 @@ export function buildGenOutlinePrompt(
   parts.push(`\n> **选中的大纲框架**：${framework}`);
 
   // ── 大纲架构模板 ──
-  const template = readFrameworkTemplate(framework);
+  const template = frameworkContent ?? `（框架模板内容为空）`;
   parts.push(`\n---`);
   parts.push(`\n## 大纲框架模板`);
   parts.push(`\n${template}`);

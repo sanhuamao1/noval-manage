@@ -10,9 +10,9 @@ async function customGet(req: NextRequest, _entity: string) {
 
   // 单条 → 附带关联 keyEvents
   if (id) {
-    const outline = get("outline", id, novelId ?? undefined)
+    const outline = await get("outline", id, novelId ?? undefined)
     if (!outline) return NextResponse.json({ error: "未找到" }, { status: 404 })
-    const keyEvents = list("key-event", novelId ?? undefined).filter(
+    const keyEvents = (await list("key-event", novelId ?? undefined)).filter(
       (ke) => (ke as Record<string, unknown>).outlineId === id,
     )
     return NextResponse.json({ ...outline, chapter: null, keyEvents })
@@ -20,7 +20,7 @@ async function customGet(req: NextRequest, _entity: string) {
 
   // 列表
   if (!novelId) return NextResponse.json({ error: "缺少 novelId" }, { status: 400 })
-  return NextResponse.json(list("outline", novelId))
+  return NextResponse.json(await list("outline", novelId))
 }
 
 const { GET, POST, PUT, DELETE } = createRoute("outline", {

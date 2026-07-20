@@ -9,13 +9,13 @@ async function customGet(req: NextRequest, _entity: string) {
   const outlineId = searchParams.get("outlineId")
 
   if (outlineId) {
-    const events = list("key-event", novelId ?? undefined).filter(
+    const events = (await list("key-event", novelId ?? undefined)).filter(
       (ke) => (ke as Record<string, unknown>).outlineId === outlineId,
     )
     return NextResponse.json(events)
   }
 
-  if (novelId) return NextResponse.json(list("key-event", novelId))
+  if (novelId) return NextResponse.json(await list("key-event", novelId))
   return NextResponse.json({ error: "缺少 novelId 或 outlineId" }, { status: 400 })
 }
 

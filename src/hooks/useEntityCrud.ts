@@ -9,7 +9,6 @@ import { api } from "@/lib/api";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { getCrudMeta } from "@/lib/configs/crud-config";
 import { fillConfig } from "@/lib/configs/config-utils";
-import type { EntityConfigMap } from "@/types";
 import type { EditorFormHandle } from "@/components/ui/editor-form";
 
 /**
@@ -35,8 +34,8 @@ import type { EditorFormHandle } from "@/components/ui/editor-form";
  * // 切换到组织：switchEntity(ConfigEntity.ORGANIZATION) → 自动关闭 drawer + 重置表单
  * ```
  */
-export function useEntityCrud<K extends keyof EntityConfigMap>(
-  entity: K,
+export function useEntityCrud(
+  entity: ConfigEntity,
 ) {
   const params = useParams();
   const novelId = params.id as string;

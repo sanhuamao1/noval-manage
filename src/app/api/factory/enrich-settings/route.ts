@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { getNovel, list, genId, getFactoryConversation, saveFactoryConversation } from "@/lib/store";
-import { callAIChat, type ChatMessage } from "@/lib/ai";
-import { extractJSON } from "@/lib/ai/json-parser";
-import { buildEnrichSettingPrompt } from "@/lib/ai/prompt/enrich-settings";
-import { validateOperation } from "@/lib/ai/validators";
+import { callAIChat, type ChatMessage } from "@/ai";
+import { extractJSON } from "@/ai/json-parser";
+import { buildEnrichSettingPrompt } from "@/ai/prompt/enrich-settings";
+import { validateOperation } from "@/ai/validators";
 import type { EnrichOperation } from "@/types/data";
 
 export async function POST(req: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "请提供 novelId" }, { status: 400 });
     }
 
-    const novel = getNovel(novelId);
+    const novel = await getNovel(novelId);
     if (!novel) {
       return Response.json({ error: "未找到该小说" }, { status: 404 });
     }
@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
 
     if (convId) {
       // 已有会话 → 读取历史
-      context = getFactoryConversation(novelId, convId);
+      context = await getFactoryConversation(novelId, convId);
 
       // 历史丢失 → 回退为首轮模式重建完整上下文
       if (context.length === 0) {
-        const characters = list("character", novelId) as Record<string, unknown>[];
-        const organizations = list("organization", novelId) as Record<string, unknown>[];
-        const locations = list("location", novelId) as Record<string, unknown>[];
+        const characters = await list("character", novelId) as Record<string, unknown>[];
+        const organizations = await list("organization", novelId) as Record<string, unknown>[];
+        const locations = await list("location", novelId) as Record<string, unknown>[];
 
         const fullPrompt = buildEnrichSettingPrompt(
           novelId,
@@ -63,9 +63,9 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // 首轮 → 构建完整上下文
-      const characters = list("character", novelId) as Record<string, unknown>[];
-      const organizations = list("organization", novelId) as Record<string, unknown>[];
-      const locations = list("location", novelId) as Record<string, unknown>[];
+      const characters = await list("character", novelId) as Record<string, unknown>[];
+      const organizations = await list("organization", novelId) as Record<string, unknown>[];
+      const locations = await list("location", novelId) as Record<string, unknown>[];
 
       const fullPrompt = buildEnrichSettingPrompt(
         novelId,
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
 
     // 追加 AI 回复并持久化
     context.push({ role: "assistant", content: rawText });
-    saveFactoryConversation(novelId, id, context);
+    await saveFactoryConversation(novelId, id, context);
 
     return Response.json({
       operations: validOps,

@@ -12,7 +12,7 @@ import { ConfigBadges } from "@/components/ui/config-badges";
 import { ConfigEntity } from "@/lib/configs/config-registry";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import {  EyeOff } from "lucide-react";
-import type { PolishRuleConfig } from "@/types";
+import type { PolishRuleData } from "@/types";
 
 const TABS = [
   { key: ConfigEntity.POLISH_RULE, label: "润色规则" },
@@ -79,7 +79,7 @@ export default function PolishPage() {
               onClick={() => openEdit(rule)}
               onDelete={() => deleteItem(rule.id)}
             >
-              <ConfigBadges<PolishRuleConfig>
+              <ConfigBadges<PolishRuleData>
                 config={rule}
                 items={[
                   ["情绪/氛围", "mood"],

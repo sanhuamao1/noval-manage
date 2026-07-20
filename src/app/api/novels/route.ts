@@ -6,31 +6,31 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get('id')
 
   if (id) {
-    const novel = getNovel(id)
+    const novel = await getNovel(id)
     if (!novel) return NextResponse.json(null, { status: 404 })
     return NextResponse.json({
       ...novel,
-      wordCount: getNovelWordCount(id),
-      _count: { chapters: count('chapter', id), characters: count('character', id) },
+      wordCount: await getNovelWordCount(id),
+      _count: { chapters: await count('chapter', id), characters: await count('character', id) },
     })
   }
 
-  const novels = listNovels()
-  const result = novels.map(n => ({
+  const novels = await listNovels()
+  const result = await Promise.all(novels.map(async (n) => ({
     ...n,
-    wordCount: getNovelWordCount((n as Record<string, string>).id),
+    wordCount: await getNovelWordCount((n as Record<string, string>).id),
     _count: {
-      chapters: count('chapter', (n as Record<string, string>).id),
-      characters: count('character', (n as Record<string, string>).id),
+      chapters: await count('chapter', (n as Record<string, string>).id),
+      characters: await count('character', (n as Record<string, string>).id),
     },
-  }))
+  })))
   return NextResponse.json(result)
 }
 
 export async function POST(req: NextRequest) {
   const { title, description } = await req.json()
   if (!title) return NextResponse.json({ error: '缺少 title' }, { status: 400 })
-  const novel = createNovel(title, description)
+  const novel = await createNovel(title, description)
   return NextResponse.json(novel)
 }
 
@@ -38,6 +38,6 @@ export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
-  removeNovel(id)
+  await removeNovel(id)
   return NextResponse.json({ success: true })
 }

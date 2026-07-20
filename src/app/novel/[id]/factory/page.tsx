@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Popover,
@@ -14,7 +14,7 @@ import { SimpleTabs } from "@/components/ui/tabs";
 import { EditorSkeleton } from "@/components/skeleton";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useFactory } from "@/stores/useFactoryStore";
-import { OUTLINE_FRAMEWORKS } from "@/lib/configs/generated";
+import { useEntityStore } from "@/stores/useEntityStore";
 
 const EnrichSettings = lazy(() => import("./enrich-settings"));
 const GenOutline = lazy(() => import("./gen-outline"));
@@ -37,10 +37,14 @@ export default function FactoryPage() {
   const params = useParams();
   const novelId = params?.id as string;
   const { prompt, setPrompt, loading, activeTab, tabs, handleGenerate, changeTab } = useFactory();
+  const frameworks = useEntityStore((s) => s.frameworks);
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [draftPrompt, setDraftPrompt] = useState("");
-  const [selectedFramework, setSelectedFramework] = useState(OUTLINE_FRAMEWORKS[0]?.value ?? "");
+  const [selectedFramework, setSelectedFramework] = useState(frameworks[0]?.name ?? "");
+
+  console.log(frameworks)
+
 
   const handleOpenPopover = () => {
     setDraftPrompt(prompt);
@@ -54,6 +58,8 @@ export default function FactoryPage() {
     // 大纲 tab 需要传 framework 参数
     if (activeTab === "gen-outline") {
       body.framework = selectedFramework;
+      const fw = frameworks.find((f) => f.name === selectedFramework);
+      if (fw?.content) body.frameworkContent = fw.content;
     }
     handleGenerate(body);
   };
@@ -84,15 +90,15 @@ export default function FactoryPage() {
                   <div>
                     <p className="mb-2 text-sm font-medium">选择大纲框架</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {OUTLINE_FRAMEWORKS.map((fw) => (
+                      {frameworks.map((fw) => (
                         <Button
-                          key={fw.value}
-                          variant={selectedFramework === fw.value ? "default" : "outline"}
+                          key={fw.id}
+                          variant={selectedFramework === fw.name ? "default" : "outline"}
                           size="sm"
-                          onClick={() => setSelectedFramework(fw.value)}
+                          onClick={() => setSelectedFramework(fw.name)}
                           className="justify-start text-xs"
                         >
-                          {fw.value}
+                          {fw.name}
                         </Button>
                       ))}
                     </div>
