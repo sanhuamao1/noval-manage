@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { usePolishStore } from "./usePolishStore";
 
 interface SelectionRange {
   start: number;
@@ -25,7 +24,6 @@ interface MenuStore {
   resetMenu: () => void;
   /** 将当前选中范围替换为 replacement */
   replaceSelection: (editContent: string, replacement: string, setEditContent: (v: string) => void) => void;
-  confirmPolish: (editContent: string, setEditContent: (v: string) => void) => void;
 }
 
 export const useMenuStore = create<MenuStore>((set, get) => ({
@@ -93,12 +91,5 @@ export const useMenuStore = create<MenuStore>((set, get) => ({
         editContent.substring(selectionRange.end),
       );
     }
-  },
-
-  confirmPolish: (editContent, setEditContent) => {
-    const { polishResult } = usePolishStore.getState();
-    get().replaceSelection(editContent, polishResult, setEditContent);
-    usePolishStore.setState({ showResultPopover: false });
-    get().resetMenu();
   },
 }));

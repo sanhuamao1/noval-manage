@@ -1,11 +1,11 @@
 "use client"
 
 import { useRef, useEffect } from "react"
-import { Textarea, Button } from "@/components/ui"
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button"
 import { X, Check } from "lucide-react"
 import { usePolishStore } from "@/stores/usePolishStore"
 import { useMenuStore } from "@/stores/useMenuStore"
-import { useAppStore } from "@/stores/useAppStore"
 
 interface PolishResultPopoverProps {
   editContent: string;
@@ -18,11 +18,20 @@ export function PolishResultPopover({ editContent, setEditContent }: PolishResul
   const setPolishResult = usePolishStore((s) => s.setPolishResult);
   const selectedRuleId = usePolishStore((s) => s.selectedRuleId);
   const cancelPolish = usePolishStore((s) => s.cancelPolish);
-  const confirmPolish = useMenuStore((s) => s.confirmPolish);
   const selectedText = useMenuStore((s) => s.selectedText);
-  const rules = useAppStore((s) => s.polishRules);
+  const rules = usePolishStore((s) => s.polishRules);
+  const replaceSelection = useMenuStore((s) => s.replaceSelection);
+  const resetMenu = useMenuStore((s) => s.resetMenu);
 
   const ruleName = selectedRuleId && rules.find((r) => r.id === selectedRuleId)?.name
+
+  function handleConfirm() {
+    if (polishResult) {
+      replaceSelection(editContent, polishResult, setEditContent);
+    }
+    usePolishStore.setState({ showResultPopover: false });
+    resetMenu();
+  }
   const resultRef = useRef<HTMLTextAreaElement>(null)
 
   /** 自动撑高 textarea 以匹配内容 */
@@ -108,7 +117,7 @@ export function PolishResultPopover({ editContent, setEditContent }: PolishResul
         <Button variant="outline" size="sm" onClick={cancelPolish}>
           取消
         </Button>
-        <Button size="sm" onClick={() => confirmPolish(editContent, setEditContent)} className="gap-1">
+        <Button size="sm" onClick={handleConfirm} className="gap-1">
           <Check className="w-4 h-4" />
           确认
         </Button>

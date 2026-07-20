@@ -5,7 +5,8 @@ import { useParams, useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { BookOpen, FileText, Sparkles, ScrollText, ChevronLeft, Package, Wand2 } from "lucide-react"
 import Link from "next/link"
-import { useAppStore } from "@/stores/useAppStore"
+import { useNovelStore } from "@/stores/useNovelStore"
+import { useEntityStore } from "@/stores/useEntityStore"
 
 const navItems = [
   { href: "", label: "概览", icon: BookOpen },
@@ -25,9 +26,9 @@ export default function NovelLayout({
   const pathname = usePathname()
   const router = useRouter()
   const id = params.id as string
-  const novel = useAppStore((s) => s.novel)
-  const chapters = useAppStore((s) => s.chapters)
-  const init = useAppStore((s) => s.init)
+  const novel = useNovelStore((s) => s.novel)
+  const chapters = useEntityStore((s) => s.chapters)
+  const init = useNovelStore((s) => s.init)
 
   useEffect(() => {
     if (novel?.id === id) return;

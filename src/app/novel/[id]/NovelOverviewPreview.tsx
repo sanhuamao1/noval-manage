@@ -1,14 +1,14 @@
 "use client";
 
-import { Card, CardHeader, CardContent } from "@/components/ui";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { BookOpen, Calendar, Hash, Tags, Clock } from "lucide-react";
 import { renderOptions } from "@/lib/configs/render-utils";
 import { formatDateStr, formatWordCount } from "@/lib/utils";
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 
 export function NovelOverviewPreview() {
-  const { novel } = useAppStore();
+  const novel = useNovelStore((s) => s.novel);
   const { fieldsMap } = getEntry(ConfigEntity.NOVEL);
 
   if (novel === null) {

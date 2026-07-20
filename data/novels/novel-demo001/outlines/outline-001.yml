@@ -3,12 +3,14 @@ novelId: novel-demo001
 chapterId: null
 name: 第一章·风起
 contentBrief: 主角接到任务，故事开端
-contentDetail: >
-  林远在酒馆中接到一封密信，信中提及一件他寻找多年的东西。
-  他决定踏上旅程，却不知这是一个精心布置的陷阱。
-status: completed
+contentDetail: |
+  林远在酒馆中接到一封密信，信中提及一件他寻找多年的东西。 他决定踏上旅程，却不知这是一个精心布置的陷阱。
+status: 已规划
 timeline: 初春·黄昏
 tone: 悬疑紧张
 sortOrder: 0
 createdAt: '2026-07-02T14:00:00.000Z'
-updatedAt: '2026-07-05T18:00:00.000Z'
+updatedAt: '2026-07-20T07:36:31.751Z'
+characterIds: []
+locationIds: []
+foreshadowingIds: []

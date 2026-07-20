@@ -1,26 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
-import { AddButton, SlidingDrawer, PageLayout, CardList, SimpleCard, EditorForm } from "@/components/ui";
+import { AddButton } from "@/components/ui/button";
+import { SlidingDrawer } from "@/components/ui/drawer";
+import { PageLayout } from "@/components/ui/page-layout";
+import { CardList } from "@/components/ui/card-list";
+import { SimpleCard } from "@/components/ui/card";
+import { EditorForm } from "@/components/ui/editor-form";
 import { renderOptions } from "@/lib/configs/render-utils";
 import { ConfigBadges } from "@/components/ui/config-badges";
 import { ConfigEntity } from "@/lib/configs/config-registry";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
-import { useAppStore } from "@/stores/useAppStore";
-import type { OutlineData } from "@/types/data";
-import { api } from "@/lib/api";
 
 export default function OutlinesPage() {
-  const params = useParams();
-  const novelId = params.id as string;
-  const setOutlines = useAppStore((s) => s.setOutlines);
-
-  // ── 初始加载 outlines（store.init 不包含 outlines）──
-  useEffect(() => {
-    api<OutlineData[]>({ url: `/api/outlines?novelId=${novelId}` }).then(setOutlines);
-  }, [novelId, setOutlines]);
-
   const {
     items: outlines,
     mode,

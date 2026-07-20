@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Plus, X } from "lucide-react";
-import { Tag } from "@/components/ui";
+import { Tag } from "@/components/ui/tag";
 
 interface TagsProps {
   value: string[];

@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button, Input, Popover, PopoverContent, PopoverTrigger, CardList, SimpleCard, PageLayout } from "@/components/ui"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CardList } from "@/components/ui/card-list";
+import { SimpleCard } from "@/components/ui/card";
+import { PageLayout } from "@/components/ui/page-layout";
 import { Plus, BookOpen } from "lucide-react"
 import { api } from "@/lib/api"
 

@@ -3,13 +3,14 @@ novelId: novel-demo001
 chapterId: null
 name: 第二章·暗流
 contentBrief: 主角潜入敌营探查情报
-contentDetail: >
-  夜色中，林远翻越围墙潜入敌营。巡逻的火把光影交错，
-  他在暗处屏息等待时机。一个意外的声响差点暴露行踪，
-  千钧一发之际，一个神秘身影替他引开了守卫。
-status: in_progress
+contentDetail: |
+  夜色中，林远翻越围墙潜入敌营。巡逻的火把光影交错， 他在暗处屏息等待时机。一个意外的声响差点暴露行踪， 千钧一发之际，一个神秘身影替他引开了守卫。
+status: 已规划
 timeline: 深秋·子时
 tone: 悬疑紧张
 sortOrder: 1
 createdAt: '2026-07-05T16:00:00.000Z'
-updatedAt: '2026-07-12T22:00:00.000Z'
+updatedAt: '2026-07-20T07:36:34.370Z'
+characterIds: []
+locationIds: []
+foreshadowingIds: []

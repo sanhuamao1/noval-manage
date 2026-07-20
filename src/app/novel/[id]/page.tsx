@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button, SlidingDrawer, PageLayout } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import { SlidingDrawer } from "@/components/ui/drawer";
+import { PageLayout } from "@/components/ui/page-layout";
 import { Edit3 } from "lucide-react";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
@@ -10,14 +12,14 @@ import type { NovelConfig, NovelData } from "@/types";
 import { renderSections } from "@/lib/configs/render-utils";
 import { useDrawer } from "@/hooks/useDrawer";
 import { NovelOverviewPreview } from "./NovelOverviewPreview";
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
 import { api } from "@/lib/api";
 
 export default function NovelOverview() {
   const params = useParams();
   const id = params.id as string;
-  const novel = useAppStore((s) => s.novel);
-  const mutate = useAppStore((s) => s.mutate);
+  const novel = useNovelStore((s) => s.novel);
+  const mutate = useNovelStore((s) => s.mutate);
   const { fields, sections, defaults } = getEntry(ConfigEntity.NOVEL);
   const [editorConfig, setEditorConfig] = useState<NovelConfig>(defaults);
 

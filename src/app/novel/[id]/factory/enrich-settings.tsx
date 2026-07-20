@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button, CardSlider, Input } from "@/components/ui";
-import { Sparkles, Check, Ban, Play, Loader2, X, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CardSlider } from "@/components/ui/card-slider";
+import { Input } from "@/components/ui/input";
+import { Check, Ban, Play, Loader2, X, Send } from "lucide-react";
 import { useFactory } from "@/stores/useFactoryStore";
 import { ErrorState } from "./components/error-state";
 import { EmptyState } from "./components/empty-state";

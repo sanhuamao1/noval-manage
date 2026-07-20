@@ -1,5 +1,5 @@
 import { ConfigEntity } from "@/types";
-import type { RefreshKey } from "@/stores/useAppStore";
+import type { RefreshKey } from "@/stores/useNovelStore";
 
 /**
  * 单个实体的 CRUD 元数据

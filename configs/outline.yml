@@ -19,9 +19,9 @@ fields:
     type: single
     label: 状态
     options:
-      - { value: planned, label: 已规划, icon: Calendar, color: neutral }
-      - { value: in_progress, label: 进行中, icon: Pen, color: primary }
-      - { value: completed, label: 已完成, icon: CheckCircle, color: success }
+      - { value: 已规划,  icon: Calendar, color: neutral }
+      - { value: 进行中, icon: Pen, color: primary }
+      - { value: 已完成,  icon: CheckCircle, color: success }
     display: flex
   timeline:
     type: text

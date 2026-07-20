@@ -1,8 +1,10 @@
 "use client";
 
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
+import { useEntityStore } from "@/stores/useEntityStore";
+import { usePolishStore } from "@/stores/usePolishStore";
 import { api } from "@/lib/api";
-import type { RefreshKey } from "@/stores/useAppStore";
+import type { RefreshKey } from "@/stores/useNovelStore";
 
 /** 实体条目基础类型 */
 export interface EntityItemBase {
@@ -20,8 +22,12 @@ export interface EntityItemBase {
  * ```
  */
 export function useEntityItems<T extends EntityItemBase = EntityItemBase>(entity: string) {
-  const items = (useAppStore((s) => (s as any)[entity] ?? []) ?? []) as T[];
-  const mutate = useAppStore((s) => s.mutate);
+  const isPolish = entity === "polishRules" || entity === "polishSamples";
+  const items = (isPolish
+    ? usePolishStore((s) => (s as any)[entity] ?? [])
+    : useEntityStore((s) => (s as any)[entity] ?? [])
+  ) as T[];
+  const mutate = useNovelStore((s) => s.mutate);
 
   const createFn = async (novelId: string, name: string): Promise<T> => {
     return mutate<T>(novelId, entity as RefreshKey, () =>

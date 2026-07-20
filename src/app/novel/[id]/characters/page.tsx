@@ -1,6 +1,11 @@
 "use client";
 
-import { AddButton, SlidingDrawer, PageLayout, CardList, SimpleCard, EditorForm } from "@/components/ui";
+import { AddButton } from "@/components/ui/button";
+import { SlidingDrawer } from "@/components/ui/drawer";
+import { PageLayout } from "@/components/ui/page-layout";
+import { CardList } from "@/components/ui/card-list";
+import { SimpleCard } from "@/components/ui/card";
+import { EditorForm } from "@/components/ui/editor-form";
 import { renderOptions } from "@/lib/configs/render-utils";
 import { ConfigBadges } from "@/components/ui/config-badges";
 import { ConfigEntity } from "@/lib/configs/config-registry";

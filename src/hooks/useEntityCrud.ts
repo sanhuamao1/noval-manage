@@ -2,7 +2,9 @@
 
 import { useState, useMemo, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
+import { useEntityStore } from "@/stores/useEntityStore";
+import { usePolishStore } from "@/stores/usePolishStore";
 import { api } from "@/lib/api";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { getCrudMeta } from "@/lib/configs/crud-config";
@@ -48,18 +50,21 @@ export function useEntityCrud<K extends keyof EntityConfigMap>(
   const entry = useMemo(() => getEntry(currentEntity), [currentEntity]);
   const { fields, sections, defaults, fieldsMap } = entry;
 
-  // ── 全局数据 ──
-  const items = useAppStore((s) => (s as any)[storeKey] ?? []) as any[];
-  const mutate = useAppStore((s) => s.mutate);
+  // ── 全局数据：根据 storeKey 从对应 store 读取 ──
+  const isPolish = storeKey === "polishRules" || storeKey === "polishSamples";
+  const items = (isPolish
+    ? usePolishStore((s) => (s as any)[storeKey] ?? [])
+    : useEntityStore((s) => (s as any)[storeKey] ?? [])
+  ) as any[];
+  const mutate = useNovelStore((s) => s.mutate);
 
   // ── 编辑状态（模式 + 当前编辑 ID）──
   const [mode, setMode] = useState<"create" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // ── 编辑器 ref（表单内部自管状态，createItem / updateItem 时通过 ref 取数据）──
+  // ── 编辑器 ref ──
   const editorRef = useRef<EditorFormHandle>(null);
 
-  /** 切换到另一个实体类型 */
   function switchEntity(next: ConfigEntity) {
     if(next === currentEntity) return;
     setMode(null);
@@ -67,12 +72,10 @@ export function useEntityCrud<K extends keyof EntityConfigMap>(
     setCurrentEntity(next);
   }
 
-  /** 点击卡片 → 打开编辑 */
   const openEdit = useCallback(
     (item: { id: string; name: string; [k: string]: any }) => {
       setMode("edit");
       setEditingId(item.id);
-      // 把已有数据推入编辑器
       queueMicrotask(() => {
         editorRef.current?.setData(
           fillConfig(item, defaults, fields as readonly { key: string; type: string }[]),
@@ -82,35 +85,28 @@ export function useEntityCrud<K extends keyof EntityConfigMap>(
     [defaults, fields],
   );
 
-  /** 新建按钮 → 打开创建 */
   const openAdd = useCallback(() => {
     setMode("create");
     setEditingId(null);
-    // 重置编辑器到默认值
     queueMicrotask(() => {
       editorRef.current?.reset();
     });
   }, []);
 
-  /** 关闭 drawer */
   function close() {
     setMode(null);
     setEditingId(null);
   }
 
-  // ── API 路径派生 ──
   const apiPath = meta.apiPath ?? `/api/${storeKey}`;
   const needsNovelId = meta.needsNovelId !== false;
 
-  /** 创建（POST）— 通过 ref 从编辑器取值 */
   async function createItem() {
     const data = editorRef.current?.getData();
     if (!data) return;
-
     const name = String(data.name ?? "").trim();
     if (!name) return;
-
-    await mutate(novelId, storeKey, async () => {
+    await mutate(novelId, storeKey as any, async () => {
       await api({
         url: apiPath,
         method: "POST",
@@ -120,16 +116,13 @@ export function useEntityCrud<K extends keyof EntityConfigMap>(
     close();
   }
 
-  /** 更新（PUT）— 通过 ref 从编辑器取值 */
   async function updateItem() {
     if (!editingId) return;
     const data = editorRef.current?.getData();
     if (!data) return;
-
     const name = String(data.name ?? "").trim();
     if (!name) return;
-
-    await mutate(novelId, storeKey, async () => {
+    await mutate(novelId, storeKey as any, async () => {
       await api({
         url: apiPath,
         method: "PUT",
@@ -139,11 +132,10 @@ export function useEntityCrud<K extends keyof EntityConfigMap>(
     close();
   }
 
-  /** 删除 */
   async function deleteItem(itemId: string) {
     const { deleteLabel } = getCrudMeta(currentEntity);
     if (!confirm(`确定要删除这个${deleteLabel}吗？`)) return;
-    await mutate(novelId, storeKey, async () => {
+    await mutate(novelId, storeKey as any, async () => {
       const query = needsNovelId
         ? `?id=${itemId}&novelId=${novelId}`
         : `?id=${itemId}`;
@@ -156,36 +148,20 @@ export function useEntityCrud<K extends keyof EntityConfigMap>(
   }
 
   return {
-    /** 当前选中的实体类型 */
     currentEntity,
-    /** 切换到另一个实体类型（关闭 drawer、切换数据源、EditorForm 用 key 重挂载） */
     switchEntity,
-    /** drawer 模式：create | edit | null（关闭） */
     mode,
-    /** 当前编辑条目的 ID（仅 edit 模式有值） */
     editingId,
-    /** 实体列表数据（来自 store） */
     items,
-    /** 编辑器 ref — 页面需传给 <EditorForm ref={editorRef} /> */
     editorRef,
-    /** section 分组定义 */
     sections,
-    /** 字段默认值（EditorForm 初始化用） */
     defaults,
-    /** 字段定义映射表（key → ConfigFieldDef） */
     fieldsMap,
-    /** 打开编辑 drawer（需先调用 setData 填充已有数据） */
     openEdit,
-    /** 打开创建 drawer（编辑器重置为默认值） */
     openAdd,
-    /** 提交创建（POST） */
     createItem,
-    /** 提交更新（PUT） */
     updateItem,
-    /** 删除条目 */
     deleteItem,
-    /** 关闭 drawer */
     close,
   } as const;
 }
-

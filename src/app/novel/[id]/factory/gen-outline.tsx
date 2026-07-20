@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui";
+import { Button } from "@/components/ui/button";
 import { Save, Loader2, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useFactory } from "@/stores/useFactoryStore";
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
 import { ErrorState } from "./components/error-state";
 import { EmptyState } from "./components/empty-state";
 
 export default function GenOutline() {
   const { error, loading, content, handleGenerate } = useFactory();
-  const novelId = useAppStore((s) => s.novel?.id);
+  const novelId = useNovelStore((s) => s.novel?.id);
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);

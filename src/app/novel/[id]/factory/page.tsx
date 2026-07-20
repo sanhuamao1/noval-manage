@@ -1,26 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  Button,
-  Textarea,
-  PageLayout,
-  SimpleTabs,
-} from "@/components/ui";
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { PageLayout } from "@/components/ui/page-layout";
+import { SimpleTabs } from "@/components/ui/tabs";
+import { EditorSkeleton } from "@/components/skeleton";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useFactory } from "@/stores/useFactoryStore";
 import { OUTLINE_FRAMEWORKS } from "@/lib/configs/generated";
-import EnrichSettings from "./enrich-settings";
-import GenOutline from "./gen-outline";
 
-/** 各 tab 的组件映射 */
+const EnrichSettings = lazy(() => import("./enrich-settings"));
+const GenOutline = lazy(() => import("./gen-outline"));
+
+/** 各 tab 的组件映射（Suspense 包裹实现按需加载） */
 const TAB_COMPONENTS: Record<string, React.ReactNode> = {
-  "enrich-settings": <EnrichSettings />,
-  "gen-outline": <GenOutline />,
+  "enrich-settings": (
+    <Suspense fallback={<EditorSkeleton />}>
+      <EnrichSettings />
+    </Suspense>
+  ),
+  "gen-outline": (
+    <Suspense fallback={<EditorSkeleton />}>
+      <GenOutline />
+    </Suspense>
+  ),
 };
 
 export default function FactoryPage() {

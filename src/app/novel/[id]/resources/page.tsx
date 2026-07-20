@@ -2,16 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import {
-  AddButton,
-  SlidingDrawer,
-  CardList,
-  SimpleCard,
-  EditorForm,
-  SimpleTabs,
-  ConfigBadges,
-  PageLayout,
-} from "@/components/ui";
+import { AddButton } from "@/components/ui/button";
+import { SlidingDrawer } from "@/components/ui/drawer";
+import { CardList } from "@/components/ui/card-list";
+import { SimpleCard } from "@/components/ui/card";
+import { EditorForm } from "@/components/ui/editor-form";
+import { SimpleTabs } from "@/components/ui/tabs";
+import { ConfigBadges } from "@/components/ui/config-badges";
+import { PageLayout } from "@/components/ui/page-layout";
 import { renderOptions } from "@/lib/configs/render-utils";
 import { ConfigEntity } from "@/lib/configs/config-registry";
 import { useEntityCrud } from "@/hooks/useEntityCrud";

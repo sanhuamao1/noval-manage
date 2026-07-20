@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { Sparkles, Check } from "lucide-react";
-import { SimpleCard, Button, SimpleTabs, SlidingDrawer } from "@/components/ui";
+import { SimpleCard } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { SimpleTabs } from "@/components/ui/tabs";
+import { SlidingDrawer } from "@/components/ui/drawer";
 import { ConfigBadges } from "@/components/ui/config-badges";
 import { usePolishStore } from "@/stores/usePolishStore";
 import { usePanelStore } from "@/stores/usePanelStore";
 import { useMenuStore } from "@/stores/useMenuStore";
-import { useAppStore } from "@/stores/useAppStore";
 import { fillConfig } from "@/lib/configs/config-utils";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 import { api } from "@/lib/api";
@@ -22,8 +24,8 @@ export function PolishPanel() {
   const toggleSampleId = usePolishStore((s) => s.toggleSampleId);
   const refreshPolishData = usePolishStore((s) => s.refreshPolishData);
   const selectedText = useMenuStore((s) => s.selectedText);
-  const rules = useAppStore((s) => s.polishRules);
-  const samples = useAppStore((s) => s.polishSamples);
+  const rules = usePolishStore((s) => s.polishRules);
+  const samples = usePolishStore((s) => s.polishSamples);
 
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [itemTab, setItemTab] = useState<"rules" | "samples">("rules");

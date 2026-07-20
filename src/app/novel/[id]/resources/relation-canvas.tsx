@@ -16,7 +16,8 @@ import ReactFlow, {
   type Connection,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
+import { useEntityStore } from "@/stores/useEntityStore";
 import { api } from "@/lib/api";
 import type { RelationData, NodePosition } from "@/types/data";
 import { debounce } from "lodash-es";
@@ -156,7 +157,7 @@ function useDebouncedSavePositions(
         for (const n of currentNodes) {
           newPositions[n.id] = { x: n.position.x, y: n.position.y };
         }
-        useAppStore
+        useNovelStore
           .getState()
           .mutate(novelIdRef.current, "relations", () =>
             api({
@@ -192,9 +193,9 @@ export default function RelationCanvas({ onEditCharacter }: RelationCanvasProps)
   const novelId = params.id as string;
 
   // 从 store 获取数据
-  const characters = useAppStore((s) => s.characters);
-  const relationsFromStore = useAppStore((s) => s.relations); // RelationsData: { links, positions }
-  const mutate = useAppStore((s) => s.mutate);
+  const characters = useEntityStore((s) => s.characters);
+  const relationsFromStore = useEntityStore((s) => s.relations); // RelationsData: { links, positions }
+  const mutate = useNovelStore((s) => s.mutate);
 
   const links = relationsFromStore.links;
   const positions = relationsFromStore.positions;

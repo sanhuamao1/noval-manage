@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import type { NovelData, CharacterData, OutlineData, ChapterSummary, PolishRuleData, PolishSampleData, OrganizationData, LocationData, RelationData, RelationsData } from "@/types/data";
 import { api } from "@/lib/api";
+import { useEntityStore } from "./useEntityStore";
+import { usePolishStore } from "./usePolishStore";
 
 export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations";
 
@@ -17,44 +19,15 @@ const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   relations: (id) => `/api/relations?novelId=${id}`,
 };
 
-interface AppStore {
+interface NovelStore {
   novel: NovelData | null;
-
-  characters: CharacterData[];
-  organizations: OrganizationData[];
-  locations: LocationData[];
-  foreshadowings: { id: string; name: string }[];
-  outlines: OutlineData[];
-  chapters: ChapterSummary[];
-  polishRules: PolishRuleData[];
-  polishSamples: PolishSampleData[];
-  relations: RelationsData;
-
-  // 初始化：并行加载 novel + 实体列表
   init: (novelId: string) => Promise<void>;
-  setOutlines: (os: OutlineData[]) => void;
-
-  // 通用 mutate：执行 apiCall + 自动刷新对应 key(s) 的数据
   mutate: <T>(novelId: string, refreshKey: RefreshKey | RefreshKey[], apiCall: () => Promise<T>) => Promise<T>;
-
   reset: () => void;
 }
 
-const initial = {
-  novel: null as NovelData | null,
-  characters: [] as CharacterData[],
-  organizations: [] as OrganizationData[],
-  locations: [] as LocationData[],
-  foreshadowings: [] as { id: string; name: string }[],
-  outlines: [] as OutlineData[],
-  chapters: [] as ChapterSummary[],
-  polishRules: [] as PolishRuleData[],
-  polishSamples: [] as PolishSampleData[],
-  relations: { links: [] as RelationData[], positions: {} as Record<string, { x: number; y: number }> },
-};
-
-export const useAppStore = create<AppStore>((set) => ({
-  ...initial,
+export const useNovelStore = create<NovelStore>((set) => ({
+  novel: null,
 
   init: async (novelId) => {
     const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations] = await Promise.all([
@@ -69,26 +42,43 @@ export const useAppStore = create<AppStore>((set) => ({
       api<PolishSampleData[]>({ url: "/api/polish/samples" }),
       api<RelationsData>({ url: `/api/relations?novelId=${novelId}` }),
     ]);
-    set({ novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations });
+    set({ novel });
+    useEntityStore.getState().setAll({
+      characters, organizations, locations, foreshadowings,
+      outlines, chapters, relations,
+    });
+    usePolishStore.getState().setMeta({ polishRules, polishSamples });
   },
 
-  setOutlines: (outlines) => set({ outlines }),
-
-  mutate: async <T>(
-    novelId: string,
-    refreshKey: RefreshKey | RefreshKey[],
-    apiCall: () => Promise<T>,
-  ): Promise<T> => {
+  mutate: async <T>(novelId: string, refreshKey: RefreshKey | RefreshKey[], apiCall: () => Promise<T>): Promise<T> => {
     const result = await apiCall();
-    const keys = Array.isArray(refreshKey) ? refreshKey : [refreshKey];
+    const keys: RefreshKey[] = Array.isArray(refreshKey) ? refreshKey : [refreshKey];
     const updates = await Promise.all(
       keys.map((k) => api<unknown>({ url: KEY_API[k](novelId) })),
     );
-    const patch: Record<string, unknown> = {};
-    keys.forEach((k, i) => { patch[k] = updates[i]; });
-    set(patch as Partial<AppStore>);
+    const entityPatch: Record<string, unknown> = {};
+    const polishPatch: Record<string, unknown> = {};
+    keys.forEach((k, i) => {
+      if (k === "novel") {
+        set({ novel: updates[i] as NovelData });
+      } else if (k === "polishRules" || k === "polishSamples") {
+        polishPatch[k] = updates[i];
+      } else {
+        entityPatch[k] = updates[i];
+      }
+    });
+    if (Object.keys(entityPatch).length) {
+      useEntityStore.getState().updateAll(entityPatch);
+    }
+    if (Object.keys(polishPatch).length) {
+      usePolishStore.getState().updateMeta(polishPatch);
+    }
     return result;
   },
 
-  reset: () => set(initial),
+  reset: () => {
+    set({ novel: null });
+    useEntityStore.getState().resetAll();
+    usePolishStore.getState().resetMeta();
+  },
 }));

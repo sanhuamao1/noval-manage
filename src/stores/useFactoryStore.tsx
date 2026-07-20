@@ -9,7 +9,7 @@ import type { SimpleTab } from "@/components/ui/tabs";
 import { Wand2, BookOpen } from "lucide-react";
 import { api } from "@/lib/api";
 import type { HttpMethod } from "@/lib/api";
-import { useAppStore } from "@/stores/useAppStore";
+import { useNovelStore } from "@/stores/useNovelStore";
 
 // ── Types ──────────────────────────────────────────────
 
@@ -119,6 +119,9 @@ export interface FactoryStore {
   handleDiscard: (index: number) => void;
 }
 
+/** 当前持久化数据的 schema 版本号 */
+const STORAGE_VERSION = 1;
+
 export const useFactoryStore = create<FactoryStore>()(
   persist(
     (set, get) => {
@@ -191,7 +194,7 @@ export const useFactoryStore = create<FactoryStore>()(
           if (!url) return;
 
           const cur = get().cache[tab];
-          const novelId = useAppStore.getState().novel?.id;
+          const novelId = useNovelStore.getState().novel?.id;
           const finalBody: Record<string, unknown> = {
             novelId,
             prompt: cur?.prompt ?? "",
@@ -283,7 +286,7 @@ export const useFactoryStore = create<FactoryStore>()(
           try {
             const novelId = String(op.params.novelId ?? "");
 
-            await useAppStore.getState().mutate(
+            await useNovelStore.getState().mutate(
               novelId,
               ["characters", "relations"],
               () =>
@@ -319,6 +322,12 @@ export const useFactoryStore = create<FactoryStore>()(
     },
     {
       name: "factory-store",
+      version: STORAGE_VERSION,
+      migrate: (persistedState, version) => {
+        // schema v0 → v1: no breaking change, just acknowledging version
+        // Future migrations: switch(version) { case 0: /* migrate v0→v1 */ }
+        return persistedState as unknown as FactoryStore;
+      },
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => {
         const cleanCache: Record<string, TabCache> = {};

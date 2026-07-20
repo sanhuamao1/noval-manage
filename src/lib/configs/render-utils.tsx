@@ -3,37 +3,55 @@ import {
     type ConfigOption,
     type ConfigSection,
 } from "@/types";
+import { RadioGroup } from "@/components/ui/radio-group";
+import { Toggle } from "@/components/ui/toggle";
+import { ListField } from "@/components/ui/list";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NoBorderInput } from "@/components/ui/no-border-input";
+import { FormItem } from "@/components/ui/form-item";
+import { LongTextField } from "@/components/ui/long-text-field";
+import { Tag } from "@/components/ui/tag";
+import { Tags } from "@/components/ui/tags";
+import { TagSelect } from "@/components/ui/tag-select";
 import {
-    RadioGroup,
-    Toggle,
-    ListField,
-    Input,
-    Button,
-    Card,
-    CardHeader,
-    CardContent,
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-    NoBorderInput,
-    FormItem,
-    LongTextField,
-    Tag,
-    Tags,
-    TagSelect
-} from "@/components/ui";
-import { CheckCheck, Plus } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+    CheckCheck, Plus,
+    Activity, AlertTriangle, ArrowBigLeftDash, Book, BookMarked, BookOpen,
+    Brain, Building2, Calendar, CheckCircle, Church, CircleCheck, CircleDot,
+    CircleOff, Clock, CloudRain, Compass, Crown, DoorOpen, Eye, EyeOff,
+    Feather, FileText, Flag, Flame, FlaskConical, Gamepad2, Ghost,
+    GitFork, Globe, GraduationCap, Hand, Heart, Home, Info,
+    Landmark, Laugh, Layers, Library, Link, Lock, Mail, Map, MapPin, Mars,
+    MessageSquare, Moon, Orbit, Palette, PartyPopper, Pen, Rocket, Scissors,
+    ScrollText, Search, SearchX, Shield, ShieldCheck, ShoppingBag, Skull,
+    Snowflake, Sparkles, Star, Sun, Sword, Swords, Tag as TagIcon, Theater, Trees,
+    TriangleAlert, UserRound, Users, Venus, Wand2, Waves, Wind, Zap,
+    type LucideIcon,
+} from "lucide-react";
 import type { ReactNode } from "react";
-import { useAppStore } from "@/stores/useAppStore";
+import { useEntityStore } from "@/stores/useEntityStore";
+import { usePolishStore } from "@/stores/usePolishStore";
 
-/** 将 icon 名称字符串映射到 LucideIcon */
+/** 图标名称 → LucideIcon 的静态映射表（避免动态导入破坏 tree-shaking） */
+const ICON_MAP: Record<string, LucideIcon | undefined> = {
+    Activity, AlertTriangle, ArrowBigLeftDash, Book, BookMarked, BookOpen,
+    Brain, Building2, Calendar, CheckCircle, Church, CircleCheck, CircleDot,
+    CircleOff, Clock, CloudRain, Compass, Crown, DoorOpen, Eye, EyeOff,
+    Feather, FileText, Flag, Flame, FlaskConical, Gamepad2, Ghost,
+    GitFork, Globe, GraduationCap, Hand, Heart, Home, Info,
+    Landmark, Laugh, Layers, Library, Link, Lock, Mail, Map, MapPin, Mars,
+    MessageSquare, Moon, Orbit, Palette, PartyPopper, Pen, Rocket, Scissors,
+    ScrollText, Search, SearchX, Shield, ShieldCheck, ShoppingBag, Skull,
+    Snowflake, Sparkles, Star, Sun, Sword, Swords, Tag: TagIcon, Theater, Trees,
+    TriangleAlert, UserRound, Users, Venus, Wand2, Waves, Wind, Zap,
+};
+
+/** 将 icon 名称字符串映射到 LucideIcon（使用静态映射，确保 tree-shaking 生效） */
 export function resolveIcon(name: string | undefined): LucideIcon | undefined {
     if (!name) return undefined;
-    const icon = LucideIcons[name as keyof typeof LucideIcons];
-    return (icon as LucideIcon) ?? undefined;
+    return ICON_MAP[name] ?? undefined;
 }
 
 
@@ -228,9 +246,10 @@ export function renderField<T extends Record<string, any>>(
                                     .filter(Boolean);
                             }
                         } else if (sf.entity) {
-                            // 从全局 store 获取对应 entity 的 name 列表
-                            const storeState = useAppStore.getState();
-                            const entities = (storeState as any)[sf.entity];
+                            // 从对应 store 获取 entity 的 name 列表
+                            const entityStore = useEntityStore.getState();
+                            const polishStore = usePolishStore.getState();
+                            const entities = (entityStore as any)[sf.entity] ?? (polishStore as any)[sf.entity];
                             if (Array.isArray(entities)) {
                                 resolvedOpts[fi] = entities
                                     .map((item: any) => item.name as string)
