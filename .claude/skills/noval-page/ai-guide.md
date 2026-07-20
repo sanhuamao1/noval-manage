@@ -1,119 +1,83 @@
 # AI 调用与 Prompt 组装
 
-## 目录结构
+## 快速入口
+
+| 你想… | 用 |
+|--------|-----|
+| 调用 AI（非流式） | `callAI(prompt)` or `callAIChat(messages, opts)` from `@/ai` |
+| 调用 AI（流式） | `callAIStream({ prompt, ... })` from `@/ai` |
+| 组装"生成大纲" Prompt | `buildGenOutlinePrompt(novel, characters, orgs, locations, relations, framework, content?, userPrompt?)` from `@/ai/prompt` |
+| 组装"完善设定" Prompt | `buildEnrichSettingPrompt(novelId, novel, characters, orgs, locations, userPrompt?)` from `@/ai/prompt` |
+| 组装"润色规则" Prompt | `buildPolishPrompt(rule, text)` from `@/ai/prompt` |
+| 组装"风格样本" Prompt | `buildStylePrompt(samples)` from `@/ai/prompt` |
+| 生成字段定义表 | `buildFieldSchema(novelId, entities?)` — 可选 `[ConfigEntity.CHARACTER, ...]` 筛选 |
+| 格式化小说信息 | `formatNovelSection(novel)` from `@/ai/context/novel` |
+| 格式化角色/组织/地点 | `formatCharactersSection` / `formatOrganizationsSection` / `formatLocationsSection` from `@/ai/context/entities` |
+| 格式化关系网络 | `formatRelationsSection(links)` from `@/ai/context/relations` — links 含 sourceName/targetName |
+| 解析 AI 返回的 JSON | `extractJSON(rawText)` from `@/ai/json-parser` |
+| 校验 operation | `validateOperation(op, novelId)` from `@/ai/validators` |
+
+## 核心概念
+
+### 目录结构
 
 ```
-src/lib/ai/
-├── ai.ts                         # 底层调用：callAI / callAIStream
-├── json-parser.ts                # 通用 JSON 解析：extractJSON / closePartialJSON
-├── operations-schema.ts          # Operations 共享配置 + Prompt 片段
-├── validators.ts                 # 操作校验：validateOperation
-├── context/                      # 数据→Prompt 片段（按需取用）
-│   ├── field-schema.ts           # buildFieldSchema — YAML 字段手册
-│   ├── novel.ts                  # formatNovelSection — 小说基本信息
-│   ├── entities.ts               # formatEntitySection / Characters / Orgs / Locations
-│   └── relations.ts              # formatRelationsSection — 角色关系网络
-└── prompt/                       # 组装完整 Prompt
-    ├── enrich-settings.ts        # buildEnrichSettingPrompt（operations 工作流）
-    ├── polish.ts                 # buildPolishPrompt（润色规则）
-    └── style.ts                  # buildStylePrompt（风格样本）
+src/ai/
+├── index.ts              # callAI / callAIChat / callAIStream
+├── json-parser.ts        # extractJSON / closePartialJSON
+├── validators.ts         # OPERATION_ENTITIES / validateOperation
+├── context/              # 数据 → Prompt 片段
+│   ├── novel.ts           #   formatNovelSection
+│   ├── entities.ts        #   formatCharactersSection / Organizations / Locations
+│   ├── relations.ts       #   formatRelationsSection
+│   └── field-schema.ts    #   buildFieldSchema
+└── prompt/
+    ├── index.ts           # buildGenOutlinePrompt / buildEnrichSettingPrompt / buildPolishPrompt / buildStylePrompt
+    ├── buildOperationOutputSection.ts  # 完善设定输出格式（JSON 模板 + API 表 + 规则）
+    ├── buildRandomizationRules.ts      # 大纲随机化规则
+    └── templates/         # Prompt 模板（编译时内联，{{变量}} 运行时替换）
+        ├── operations-output.ts
+        ├── gen-outline-output.ts
+        └── relations-params.ts
 ```
 
-## 底层调用 (`ai.ts`)
+### 两条工作流
 
-```ts
-import { callAI } from "@/lib/ai";           // 非流式，返回完整结果
-import { callAIStream } from "@/lib/ai";      // 流式，AsyncGenerator<chunk>
-```
+**Operations 工作流**（完善设定）：输出 JSON `{ analysis, operations: Operation[] }` → 前端批量调 API 执行。核心函数 `buildEnrichSettingPrompt` 组合 context 模块 + `buildOperationOutputSection` + 特有规则。
 
-## JSON 解析 (`json-parser.ts`)
-
-从 AI 流式响应的 raw text 中提取合法 JSON，处理 markdown 围栏包裹和截断场景：
-
-```ts
-import { extractJSON } from "@/lib/ai/json-parser";
-
-const jsonStr = extractJSON(rawText);
-const parsed = JSON.parse(jsonStr);
-```
-
-## Operations 工作流
-
-### 共享配置 (`operations-schema.ts`)
-
-所有 operations-based AI workflow 共用：
-
-| 导出 | 用途 |
-|------|------|
-| `OPERATION_ENTITIES` | API→标签+方法的唯一数据源 |
-| `buildOperationOutputSection(novelId)` | JSON 格式模板 + changeType 表 + novelId 说明 |
-| `buildOperationApiTable()` | API 路径对照 Markdown 表（从 OPERATION_ENTITIES 自动生成） |
-| `buildOperationRulesSection()` | 通用规则 1-5（有序号） |
-
-### 操作校验 (`validators.ts`)
-
-```ts
-import { validateOperation } from "@/lib/ai/validators";
-
-// 校验 AI 返回的 operation 是否合法（API 白名单 + method 匹配 + 必需参数）
-if (validateOperation(op, novelId)) { ... }
-```
+**文本输出工作流**（生成大纲 / 润色）：输出纯 markdown 或文本，直接返回给用户。
 
 ### 新增 Operations 工作流
 
-在 `ai/prompt/` 下新建文件，组合 context 模块 + operations-schema：
-
 ```ts
-// prompt/new-workflow.ts
-import { formatNovelSection } from "../context/novel";
-import { formatCharactersSection, formatOrganizationsSection } from "../context/entities";
-import { formatRelationsSection } from "../context/relations";
-import {
-  buildOperationOutputSection,
-  buildOperationApiTable,
-  buildOperationRulesSection,
-} from "../operations-schema";
+import { formatNovelSection } from "@/ai/context/novel";
+import { formatCharactersSection } from "@/ai/context/entities";
+import { formatRelationsSection } from "@/ai/context/relations";
+import { buildFieldSchema } from "@/ai/context/field-schema";
+import buildOperationOutputSection from "@/ai/prompt/buildOperationOutputSection";
 
-export function buildNewWorkflowPrompt(novelId, novel, characters, ...) {
+export function buildNewWorkflowPrompt(novelId, novel, characters, relations, ...) {
   return [
     "# 任务：...",
+    buildFieldSchema(novelId, [ConfigEntity.CHARACTER]),   // 按需筛选实体
     formatNovelSection(novel),
     formatCharactersSection(characters),
-    formatOrganizationsSection(organizations),
-    formatRelationsSection(relations.links, characters),
-    buildOperationOutputSection(novelId),   // 共享
-    buildOperationApiTable(),                // 共享
-    buildOperationRulesSection(),            // 共享
-    "**特有规则**：...",                      // 不加序号
+    formatRelationsSection(relations),                     // 不再需要传 characters
+    buildOperationOutputSection(novelId),
+    "**特有规则**：...",
   ].filter(Boolean).join("\n");
 }
 ```
 
-## Context 模块
+### 新增 Prompt 模板
 
-Context 模块将运行时数据格式化为 Prompt 片段，各 workflow 按需引入：
-
-```ts
-import { formatNovelSection } from "@/lib/ai/context/novel";
-import { formatCharactersSection } from "@/lib/ai/context/entities";
-import { formatRelationsSection } from "@/lib/ai/context/relations";
-import { buildFieldSchema } from "@/lib/ai/context/field-schema";
-```
-
-**特点**：每个模块独立，未来 AI tab（如"故事分析"）可以只取 `formatCharactersSection` + `formatRelationsSection`，无需拉入 locations。
-
-## 非 Operations 工作流
-
-润色等不涉及 operations 的流程，有自己的 Prompt 构建函数：
-
-```ts
-import { buildPolishPrompt } from "@/lib/ai/prompt/polish";
-import { buildStylePrompt } from "@/lib/ai/prompt/style";
-```
+在 `src/ai/prompt/templates/` 下新建 `.ts` 文件导出模板常量。需要变量时用 `{{name}}` 占位符，调用方 `.replace / .replaceAll` 注入。
 
 ## 参考文件
 
-- [src/lib/ai.ts](../../../src/lib/ai.ts)
-- [src/lib/ai/operations-schema.ts](../../../src/lib/ai/operations-schema.ts)
-- [src/lib/ai/prompt/enrich-settings.ts](../../../src/lib/ai/prompt/enrich-settings.ts)
-- [src/app/api/factory/enrich-settings/route.ts](../../../src/app/api/factory/enrich-settings/route.ts)
+| 位置 | 内容 |
+|------|------|
+| [src/ai/](../../src/ai/) | AI 调用、JSON 解析、校验 |
+| [src/ai/context/](../../src/ai/context/) | 数据 → Prompt 片段（novel / entities / relations / field-schema） |
+| [src/ai/prompt/](../../src/ai/prompt/) | 完整 Prompt 组装 + templates |
+| 测试：[scripts/test-gen-outline-prompt.ts](../../scripts/test-gen-outline-prompt.ts)、[scripts/test-enrich-prompt.ts](../../scripts/test-enrich-prompt.ts) | 从 DB 读取数据生成 Prompt 并输出到文件 |

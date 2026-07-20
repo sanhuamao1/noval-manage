@@ -2,11 +2,7 @@
 
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -42,9 +38,6 @@ export default function FactoryPage() {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [draftPrompt, setDraftPrompt] = useState("");
   const [selectedFramework, setSelectedFramework] = useState(frameworks[0]?.name ?? "");
-
-  console.log(frameworks)
-
 
   const handleOpenPopover = () => {
     setDraftPrompt(prompt);

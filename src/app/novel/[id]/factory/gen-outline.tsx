@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Save, Loader2, RefreshCw } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { api } from "@/lib/api";
 import remarkGfm from "remark-gfm";
 import { useFactory } from "@/stores/useFactoryStore";
 import { useNovelStore } from "@/stores/useNovelStore";
@@ -23,12 +24,9 @@ export default function GenOutline() {
   useEffect(() => {
     if (!novelId) return;
     setLoadedExisting(false);
-    fetch(`/api/factory/gen-outline/load?novelId=${novelId}`)
-      .then((r) => r.json())
+    api<{ content?: string }>({ url: "/api/factory/gen-outline/load", params: { novelId } })
       .then((d) => {
-        if (d.content) {
-          setExistingContent(d.content);
-        }
+        if (d.content) setExistingContent(d.content);
       })
       .catch(() => {})
       .finally(() => setLoadedExisting(true));
@@ -41,12 +39,11 @@ export default function GenOutline() {
     setSaving(true);
     setSaved(false);
     try {
-      const res = await fetch("/api/factory/gen-outline/save", {
+      const data = await api<{ error?: string }>({
+        url: "/api/factory/gen-outline/save",
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ novelId, content: displayContent }),
+        data: { novelId, content: displayContent },
       });
-      const data = await res.json();
       if (!data.error) {
         setSaved(true);
         setExistingContent(displayContent);
