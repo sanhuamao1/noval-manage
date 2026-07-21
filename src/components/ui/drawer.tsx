@@ -19,7 +19,7 @@ interface SlidingDrawerProps {
   className?: string
 }
 
-function SlidingDrawer({ open, onClose, width = 620, title, onCreate, onUpdate, rightHandler, children, className }: SlidingDrawerProps) {
+function SlidingDrawer({ open, onClose, width = 660, title, onCreate, onUpdate, rightHandler, children, className }: SlidingDrawerProps) {
   const bookmarkBtnClass =
     "w-8 h-8 flex items-center justify-center rounded-l-lg shadow-md transition-opacity"
 

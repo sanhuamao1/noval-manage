@@ -102,10 +102,10 @@ export function renderField<T extends Record<string, any>>(
     const value = (config as any)[field.key];
 
     const sharedProps = {
-        display: field.display || "default",
-        flexCols: field.cols,
-        className: field.className,
-        rootClassName: field.rootClassName,
+        display: field.display,
+        innerDisplay: field.innerDisplay,
+        mergeCells: field.mergeCells,
+        type: field.type
     };
 
 
@@ -195,7 +195,6 @@ export function renderField<T extends Record<string, any>>(
                     maxLength={maxLength}
                     placeholder={field.placeholder}
                     onChange={(v) => set(field.key as keyof T, v as any)}
-                    rootClassName={field.rootClassName}
                 />
             );
             break;

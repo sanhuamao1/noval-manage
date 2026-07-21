@@ -60,8 +60,8 @@ export default function FactoryPage() {
   const isOutlineTab = activeTab === "gen-outline";
 
   return (
-    <PageLayout title="梦工厂">
-      <div className="flex items-center justify-between">
+    <PageLayout header={
+      <div className="flex justify-between  items-center ">
         <SimpleTabs tabs={tabs} value={activeTab} onChange={changeTab} variant="segment" />
 
         <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export default function FactoryPage() {
           </Popover>
         </div>
       </div>
-
+    }>
       <div className="mt-4">{TAB_COMPONENTS[activeTab]}</div>
     </PageLayout>
   );

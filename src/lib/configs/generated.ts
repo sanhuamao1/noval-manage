@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-20T16:59:42.982Z，勿手动编辑
+// 自动生成于 2026-07-21T03:32:08.070Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -11,7 +11,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "card",
         "title": "基本信息",
         "icon": "BookOpen",
-        "class": "grid grid-cols-2 gap-4",
+        "class": "grid grid-cols-2 gap-2",
         "children": [
           {
             "key": "title",
@@ -40,9 +40,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "color": "warn"
               }
             ],
-            "display": "flex",
             "icon": "Activity",
-            "className": "grid grid-cols-3 gap-1"
+            "noLabel": true
           },
           {
             "key": "oneLineSummary",
@@ -50,7 +49,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "type": "longtext",
             "placeholder": "用一句话概括你的作品...",
             "maxLength": 100,
-            "rootClassName": "col-span-full"
+            "mergeCells": true
           },
           {
             "key": "description",
@@ -58,7 +57,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "type": "longtext",
             "placeholder": "用一段话描述你的作品...",
             "maxLength": 800,
-            "rootClassName": "col-span-full"
+            "mergeCells": true
           }
         ]
       },
@@ -132,9 +131,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "description": "对话密集，吐槽与内心戏穿插。短段落为主，常用括号补足心理活动。角色声口鲜明，节奏轻快，二次元梗自然嵌入。"
               }
             ],
-            "display": "flex",
-            "noLabel": true,
-            "className": "grid grid-cols-3 gap-2"
+            "innerDisplay": "grid-4",
+            "noLabel": true
           },
           {
             "key": "genre",
@@ -191,9 +189,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
               }
             ],
             "max": 2,
-            "display": "flex",
-            "noLabel": true,
-            "className": "gap-2"
+            "innerDisplay": "grid-5",
+            "noLabel": true
           },
           {
             "key": "worldShape",
@@ -221,8 +218,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "icon": "Layers"
               }
             ],
-            "noLabel": true,
-            "className": "grid grid-cols-4 gap-2"
+            "noLabel": true
           },
           {
             "key": "primaryTone",
@@ -290,9 +286,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "description": "讽刺、调侃、社会批判，适合讽刺小说/王朔体"
               }
             ],
-            "display": "flex",
-            "noLabel": true,
-            "className": "grid grid-cols-4 gap-2"
+            "innerDisplay": "grid-4",
+            "noLabel": true
           },
           {
             "key": "secondaryTones",
@@ -361,9 +356,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
               }
             ],
             "max": 2,
-            "display": "flex",
-            "noLabel": true,
-            "className": "grid grid-cols-4 gap-2"
+            "innerDisplay": "grid-4",
+            "noLabel": true
           }
         ]
       }
@@ -381,7 +375,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "longtext",
         "placeholder": "用一句话概括你的作品...",
         "maxLength": 100,
-        "rootClassName": "col-span-full"
+        "mergeCells": true
       },
       {
         "key": "description",
@@ -389,7 +383,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "longtext",
         "placeholder": "用一段话描述你的作品...",
         "maxLength": 800,
-        "rootClassName": "col-span-full"
+        "mergeCells": true
       },
       {
         "key": "status",
@@ -412,9 +406,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "color": "warn"
           }
         ],
-        "display": "flex",
         "icon": "Activity",
-        "className": "grid grid-cols-3 gap-1"
+        "noLabel": true
       },
       {
         "key": "genre",
@@ -471,9 +464,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "max": 2,
-        "display": "flex",
-        "noLabel": true,
-        "className": "gap-2"
+        "innerDisplay": "grid-5",
+        "noLabel": true
       },
       {
         "key": "presetStyle",
@@ -541,9 +533,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "description": "对话密集，吐槽与内心戏穿插。短段落为主，常用括号补足心理活动。角色声口鲜明，节奏轻快，二次元梗自然嵌入。"
           }
         ],
-        "display": "flex",
-        "noLabel": true,
-        "className": "grid grid-cols-3 gap-2"
+        "innerDisplay": "grid-4",
+        "noLabel": true
       },
       {
         "key": "primaryTone",
@@ -611,9 +602,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "description": "讽刺、调侃、社会批判，适合讽刺小说/王朔体"
           }
         ],
-        "display": "flex",
-        "noLabel": true,
-        "className": "grid grid-cols-4 gap-2"
+        "innerDisplay": "grid-4",
+        "noLabel": true
       },
       {
         "key": "secondaryTones",
@@ -682,9 +672,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "max": 2,
-        "display": "flex",
-        "noLabel": true,
-        "className": "grid grid-cols-4 gap-2"
+        "innerDisplay": "grid-4",
+        "noLabel": true
       },
       {
         "key": "worldShape",
@@ -712,8 +701,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "Layers"
           }
         ],
-        "noLabel": true,
-        "className": "grid grid-cols-4 gap-2"
+        "noLabel": true
       }
     ]
   },
@@ -724,7 +712,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "card",
         "title": "角色名称",
         "icon": "UserRound",
-        "class": "grid grid-cols-2 gap-4",
+        "class": "grid grid-cols-2 gap-2",
         "titleKey": "name",
         "titleEditable": true,
         "children": [
@@ -749,32 +737,34 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "color": "danger"
               }
             ],
-            "display": "flex",
-            "noLabel": true,
-            "rootClassName": "col-span-full"
+            "noLabel": true
+          },
+          {
+            "key": "gender",
+            "label": "性别",
+            "type": "single",
+            "options": [
+              {
+                "value": "男",
+                "icon": "Mars"
+              },
+              {
+                "value": "女",
+                "icon": "Venus"
+              }
+            ],
+            "noLabel": true
           },
           {
             "key": "coreConflict",
             "label": "核心矛盾",
             "type": "text",
             "placeholder": "一句话概括",
-            "rootClassName": "col-span-full"
-          },
-          {
-            "key": "surfaceGoal",
-            "label": "表层目标",
-            "type": "text",
-            "placeholder": "角色表面追求的目标..."
-          },
-          {
-            "key": "deepNeed",
-            "label": "深层需求",
-            "type": "text",
-            "placeholder": "角色内心真正渴望的..."
+            "mergeCells": true
           },
           {
             "key": "emotionExpression",
-            "label": "情感表达方式",
+            "label": "情感表达",
             "type": "single",
             "options": [
               {
@@ -798,8 +788,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "icon": "ArrowBigLeftDash"
               }
             ],
-            "display": "flex",
-            "rootClassName": "col-span-full"
+            "mergeCells": true
           }
         ]
       },
@@ -813,22 +802,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "Info",
             "children": [
               {
-                "key": "gender",
-                "label": "性别",
-                "type": "single",
-                "options": [
-                  {
-                    "value": "男",
-                    "icon": "Mars"
-                  },
-                  {
-                    "value": "女",
-                    "icon": "Venus"
-                  }
-                ],
-                "display": "flex"
-              },
-              {
                 "key": "age",
                 "label": "年龄",
                 "type": "text",
@@ -841,8 +814,20 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "placeholder": "身份/职业/组织归属"
               },
               {
+                "key": "surfaceGoal",
+                "label": "表层目标",
+                "type": "text",
+                "placeholder": "角色表面追求的目标..."
+              },
+              {
+                "key": "deepNeed",
+                "label": "深层需求",
+                "type": "text",
+                "placeholder": "角色内心真正渴望的..."
+              },
+              {
                 "key": "item",
-                "label": "标志性物件",
+                "label": "物件",
                 "type": "text",
                 "placeholder": "一件有故事的随身物品"
               }
@@ -899,7 +884,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                   }
                 ],
                 "max": 3,
-                "display": "grid",
                 "noLabel": true,
                 "variant": "box"
               },
@@ -970,7 +954,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                   }
                 ],
                 "max": 3,
-                "display": "grid",
                 "noLabel": true,
                 "variant": "box"
               }
@@ -1048,8 +1031,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "key": "name",
         "label": "角色名称",
         "type": "text",
-        "placeholder": "角色名称",
-        "defaultValue": ""
+        "placeholder": "角色名称"
       },
       {
         "key": "gender",
@@ -1065,7 +1047,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "Venus"
           }
         ],
-        "display": "flex"
+        "noLabel": true
       },
       {
         "key": "role",
@@ -1088,9 +1070,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "color": "danger"
           }
         ],
-        "display": "flex",
-        "noLabel": true,
-        "rootClassName": "col-span-full"
+        "noLabel": true
       },
       {
         "key": "age",
@@ -1106,7 +1086,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
       },
       {
         "key": "item",
-        "label": "标志性物件",
+        "label": "物件",
         "type": "text",
         "placeholder": "一件有故事的随身物品"
       },
@@ -1115,7 +1095,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "label": "核心矛盾",
         "type": "text",
         "placeholder": "一句话概括",
-        "rootClassName": "col-span-full"
+        "mergeCells": true
       },
       {
         "key": "surfaceGoal",
@@ -1131,7 +1111,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
       },
       {
         "key": "emotionExpression",
-        "label": "情感表达方式",
+        "label": "情感表达",
         "type": "single",
         "options": [
           {
@@ -1155,8 +1135,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "ArrowBigLeftDash"
           }
         ],
-        "display": "flex",
-        "rootClassName": "col-span-full"
+        "mergeCells": true
       },
       {
         "key": "abilities",
@@ -1263,7 +1242,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "max": 3,
-        "display": "grid",
         "noLabel": true,
         "variant": "box"
       },
@@ -1334,7 +1312,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "max": 3,
-        "display": "grid",
         "noLabel": true,
         "variant": "box"
       }
@@ -1344,184 +1321,158 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
     "entity": "Outline",
     "sections": [
       {
-        "type": "grid",
-        "cols": 2,
-        "sections": [
+        "type": "card",
+        "title": "基本信息",
+        "icon": "FileText",
+        "class": "space-y-3",
+        "children": [
           {
-            "type": "grid",
-            "cols": 1,
-            "colspan": 1,
-            "sections": [
-              {
-                "type": "card",
-                "title": "基本信息",
-                "icon": "FileText",
-                "class": "space-y-3",
-                "children": [
-                  {
-                    "key": "name",
-                    "label": "章纲标题",
-                    "type": "text",
-                    "placeholder": "章纲标题"
-                  },
-                  {
-                    "key": "contentBrief",
-                    "label": "概要",
-                    "type": "text",
-                    "placeholder": "一句话概括本章（最多80字）",
-                    "maxLength": 80
-                  },
-                  {
-                    "key": "contentDetail",
-                    "label": "详细内容",
-                    "type": "longtext",
-                    "placeholder": "详细描述本章情节发展和关键节点...",
-                    "maxLength": 400
-                  },
-                  {
-                    "key": "status",
-                    "label": "状态",
-                    "type": "single",
-                    "options": [
-                      {
-                        "value": "已规划",
-                        "icon": "Calendar",
-                        "color": "neutral"
-                      },
-                      {
-                        "value": "进行中",
-                        "icon": "Pen",
-                        "color": "primary"
-                      },
-                      {
-                        "value": "已完成",
-                        "icon": "CheckCircle",
-                        "color": "success"
-                      }
-                    ],
-                    "display": "flex"
-                  }
-                ]
-              }
-            ]
+            "key": "name",
+            "label": "章纲标题",
+            "type": "text",
+            "placeholder": "章纲标题"
           },
           {
-            "type": "grid",
-            "cols": 1,
-            "colspan": 1,
-            "sections": [
+            "key": "contentBrief",
+            "label": "概要",
+            "type": "text",
+            "placeholder": "一句话概括本章（最多80字）",
+            "maxLength": 80
+          },
+          {
+            "key": "contentDetail",
+            "label": "详细内容",
+            "type": "longtext",
+            "placeholder": "详细描述本章情节发展和关键节点...",
+            "maxLength": 400
+          },
+          {
+            "key": "status",
+            "label": "状态",
+            "type": "single",
+            "options": [
               {
-                "type": "card",
-                "title": "时空基调",
-                "icon": "MapPin",
-                "children": [
-                  {
-                    "key": "timeline",
-                    "label": "时间",
-                    "type": "text",
-                    "placeholder": "如：春·清晨 / 天元历127年三月廿·深夜",
-                    "icon": "Clock"
-                  },
-                  {
-                    "key": "tone",
-                    "label": "基调",
-                    "type": "single",
-                    "options": [
-                      {
-                        "value": "沉郁黑暗",
-                        "icon": "Moon",
-                        "description": "压抑、阴郁、道德灰色，适合末世/克苏鲁/暗黑奇幻"
-                      },
-                      {
-                        "value": "轻松幽默",
-                        "icon": "Laugh",
-                        "description": "调侃、戏谑、反差萌，适合都市/轻小说/吐槽向"
-                      },
-                      {
-                        "value": "悬疑紧张",
-                        "icon": "SearchX",
-                        "description": "节奏紧、伏笔多、信息差，适合推理/惊悚/谍战"
-                      },
-                      {
-                        "value": "史诗宏大",
-                        "icon": "Crown",
-                        "description": "苍凉、厚重、格局感，适合史诗奇幻/历史/战争"
-                      },
-                      {
-                        "value": "温馨治愈",
-                        "icon": "Sun",
-                        "description": "温暖、治愈、日常感，适合治愈/日常/言情甜文"
-                      },
-                      {
-                        "value": "热血激昂",
-                        "icon": "Flame",
-                        "description": "高燃、爆发、爽感，适合玄幻/竞技/少年漫"
-                      },
-                      {
-                        "value": "哀伤悲剧",
-                        "icon": "HeartBroken",
-                        "description": "宿命感、悲剧美学，适合虐文/古风悲剧"
-                      },
-                      {
-                        "value": "荒诞戏谑",
-                        "icon": "CircleDot",
-                        "description": "黑色幽默、解构、反套路，适合后现代/讽刺"
-                      },
-                      {
-                        "value": "唯美浪漫",
-                        "icon": "Heart",
-                        "description": "唯美、抒情、氛围感，适合言情/古风/青春"
-                      },
-                      {
-                        "value": "冷峻克制",
-                        "icon": "Scissors",
-                        "description": "零度叙事、白描、克制，适合严肃文学/悬疑"
-                      },
-                      {
-                        "value": "诡谲神秘",
-                        "icon": "Ghost",
-                        "description": "诡异、神秘、不安感，适合克苏鲁/民俗恐怖"
-                      },
-                      {
-                        "value": "诙谐反讽",
-                        "icon": "Face",
-                        "description": "讽刺、调侃、社会批判，适合讽刺小说/王朔体"
-                      }
-                    ],
-                    "display": "flex",
-                    "className": "grid grid-cols-2 gap-2"
-                  }
-                ]
+                "value": "已规划",
+                "icon": "Calendar",
+                "color": "neutral"
               },
               {
-                "type": "card",
-                "title": "关联实体",
-                "icon": "Link",
-                "children": [
-                  {
-                    "key": "characterIds",
-                    "label": "出场人物",
-                    "type": "tagselect",
-                    "rootClassName": "flex items-center gap-1",
-                    "entity": "characters"
-                  },
-                  {
-                    "key": "locationIds",
-                    "label": "地点",
-                    "type": "tagselect",
-                    "rootClassName": "flex items-center gap-1",
-                    "entity": "locations"
-                  },
-                  {
-                    "key": "foreshadowingIds",
-                    "label": "伏笔",
-                    "type": "tagselect",
-                    "rootClassName": "flex items-center gap-1",
-                    "entity": "foreshadowings"
-                  }
-                ]
+                "value": "进行中",
+                "icon": "Pen",
+                "color": "primary"
+              },
+              {
+                "value": "已完成",
+                "icon": "CheckCircle",
+                "color": "success"
               }
             ]
+          }
+        ]
+      },
+      {
+        "type": "card",
+        "title": "时空基调",
+        "icon": "MapPin",
+        "children": [
+          {
+            "key": "timeline",
+            "label": "时间",
+            "type": "text",
+            "placeholder": "如：春·清晨 / 天元历127年三月廿·深夜",
+            "icon": "Clock"
+          },
+          {
+            "key": "tone",
+            "label": "基调",
+            "type": "single",
+            "options": [
+              {
+                "value": "沉郁黑暗",
+                "icon": "Moon",
+                "description": "压抑、阴郁、道德灰色，适合末世/克苏鲁/暗黑奇幻"
+              },
+              {
+                "value": "轻松幽默",
+                "icon": "Laugh",
+                "description": "调侃、戏谑、反差萌，适合都市/轻小说/吐槽向"
+              },
+              {
+                "value": "悬疑紧张",
+                "icon": "SearchX",
+                "description": "节奏紧、伏笔多、信息差，适合推理/惊悚/谍战"
+              },
+              {
+                "value": "史诗宏大",
+                "icon": "Crown",
+                "description": "苍凉、厚重、格局感，适合史诗奇幻/历史/战争"
+              },
+              {
+                "value": "温馨治愈",
+                "icon": "Sun",
+                "description": "温暖、治愈、日常感，适合治愈/日常/言情甜文"
+              },
+              {
+                "value": "热血激昂",
+                "icon": "Flame",
+                "description": "高燃、爆发、爽感，适合玄幻/竞技/少年漫"
+              },
+              {
+                "value": "哀伤悲剧",
+                "icon": "HeartBroken",
+                "description": "宿命感、悲剧美学，适合虐文/古风悲剧"
+              },
+              {
+                "value": "荒诞戏谑",
+                "icon": "CircleDot",
+                "description": "黑色幽默、解构、反套路，适合后现代/讽刺"
+              },
+              {
+                "value": "唯美浪漫",
+                "icon": "Heart",
+                "description": "唯美、抒情、氛围感，适合言情/古风/青春"
+              },
+              {
+                "value": "冷峻克制",
+                "icon": "Scissors",
+                "description": "零度叙事、白描、克制，适合严肃文学/悬疑"
+              },
+              {
+                "value": "诡谲神秘",
+                "icon": "Ghost",
+                "description": "诡异、神秘、不安感，适合克苏鲁/民俗恐怖"
+              },
+              {
+                "value": "诙谐反讽",
+                "icon": "Face",
+                "description": "讽刺、调侃、社会批判，适合讽刺小说/王朔体"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "card",
+        "title": "关联实体",
+        "icon": "Link",
+        "children": [
+          {
+            "key": "characterIds",
+            "label": "出场人物",
+            "type": "tagselect",
+            "entity": "characters"
+          },
+          {
+            "key": "locationIds",
+            "label": "地点",
+            "type": "tagselect",
+            "entity": "locations"
+          },
+          {
+            "key": "foreshadowingIds",
+            "label": "伏笔",
+            "type": "tagselect",
+            "entity": "foreshadowings"
           }
         ]
       }
@@ -1567,8 +1518,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "CheckCircle",
             "color": "success"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "timeline",
@@ -1642,29 +1592,24 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "Face",
             "description": "讽刺、调侃、社会批判，适合讽刺小说/王朔体"
           }
-        ],
-        "display": "flex",
-        "className": "grid grid-cols-2 gap-2"
+        ]
       },
       {
         "key": "characterIds",
         "label": "出场人物",
         "type": "tagselect",
-        "rootClassName": "flex items-center gap-1",
         "entity": "characters"
       },
       {
         "key": "locationIds",
         "label": "地点",
         "type": "tagselect",
-        "rootClassName": "flex items-center gap-1",
         "entity": "locations"
       },
       {
         "key": "foreshadowingIds",
         "label": "伏笔",
         "type": "tagselect",
-        "rootClassName": "flex items-center gap-1",
         "entity": "foreshadowings"
       }
     ]
@@ -1676,7 +1621,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "card",
         "title": "基本信息",
         "icon": "BookOpen",
-        "class": "grid grid-cols-2 gap-4",
+        "class": "grid grid-cols-2 gap-2",
         "children": [
           {
             "key": "name",
@@ -1696,7 +1641,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "type": "longtext",
             "placeholder": "在此补充额外的润色要求...",
             "maxLength": 1000,
-            "className": "col-span-full"
+            "mergeCells": true
           }
         ]
       },
@@ -1723,8 +1668,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                   {
                     "value": "慢"
                   }
-                ],
-                "display": "flex"
+                ]
               },
               {
                 "key": "mood",
@@ -1756,8 +1700,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                     "value": "悲怆"
                   }
                 ],
-                "max": 2,
-                "display": "flex"
+                "max": 2
               },
               {
                 "key": "narrative",
@@ -1773,8 +1716,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                   {
                     "value": "混合"
                   }
-                ],
-                "display": "flex"
+                ]
               }
             ]
           },
@@ -1803,8 +1745,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                   {
                     "value": "触觉"
                   }
-                ],
-                "display": "flex"
+                ]
               },
               {
                 "key": "character",
@@ -1823,8 +1764,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                   {
                     "value": "语言/语气"
                   }
-                ],
-                "display": "flex"
+                ]
               },
               {
                 "key": "environment",
@@ -1843,8 +1783,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                     "value": "气味/声音",
                     "description": "利用环境中的气味与环境音增强场景真实感"
                   }
-                ],
-                "display": "flex"
+                ]
               }
             ]
           }
@@ -1869,20 +1808,17 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "value": "适度排比"
               }
             ],
-            "display": "flex",
             "noLabel": true
           },
           {
             "key": "timeVariation",
             "label": "时间感与节奏变奏",
-            "type": "toggle",
-            "display": "between"
+            "type": "toggle"
           },
           {
             "key": "contrastInsertion",
             "label": "对比/反差插入",
-            "type": "toggle",
-            "display": "between"
+            "type": "toggle"
           }
         ]
       }
@@ -1906,7 +1842,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "longtext",
         "placeholder": "在此补充额外的润色要求...",
         "maxLength": 1000,
-        "className": "col-span-full"
+        "mergeCells": true
       },
       {
         "key": "pace",
@@ -1922,8 +1858,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "value": "慢"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "mood",
@@ -1955,8 +1890,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "value": "悲怆"
           }
         ],
-        "max": 2,
-        "display": "flex"
+        "max": 2
       },
       {
         "key": "narrative",
@@ -1972,8 +1906,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "value": "混合"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "senses",
@@ -1995,8 +1928,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "value": "触觉"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "character",
@@ -2015,8 +1947,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "value": "语言/语气"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "environment",
@@ -2035,8 +1966,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "value": "气味/声音",
             "description": "利用环境中的气味与环境音增强场景真实感"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "rhetoric",
@@ -2053,20 +1983,17 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "value": "适度排比"
           }
         ],
-        "display": "flex",
         "noLabel": true
       },
       {
         "key": "timeVariation",
         "label": "时间感与节奏变奏",
-        "type": "toggle",
-        "display": "between"
+        "type": "toggle"
       },
       {
         "key": "contrastInsertion",
         "label": "对比/反差插入",
-        "type": "toggle",
-        "display": "between"
+        "type": "toggle"
       }
     ]
   },
@@ -2077,7 +2004,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "card",
         "title": "基本信息",
         "icon": "FileText",
-        "class": "grid grid-cols-2 gap-4",
+        "class": "grid grid-cols-2 gap-2",
         "children": [
           {
             "key": "name",
@@ -2128,8 +2055,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "icon": "Layers",
                 "color": "default"
               }
-            ],
-            "display": "flex"
+            ]
           },
           {
             "key": "text",
@@ -2141,8 +2067,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           {
             "key": "isNegative",
             "label": "设为反例（请避免的风格）",
-            "type": "toggle",
-            "display": "between"
+            "type": "toggle"
           }
         ]
       }
@@ -2190,8 +2115,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "icon": "Layers",
             "color": "default"
           }
-        ],
-        "display": "flex"
+        ]
       },
       {
         "key": "text",
@@ -2203,8 +2127,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
       {
         "key": "isNegative",
         "label": "设为反例（请避免的风格）",
-        "type": "toggle",
-        "display": "between"
+        "type": "toggle"
       }
     ]
   },
@@ -2219,18 +2142,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "titleKey": "name",
         "titleEditable": true,
         "children": [
-          {
-            "key": "founder",
-            "label": "创始人",
-            "type": "text",
-            "placeholder": "创始人姓名"
-          },
-          {
-            "key": "currentLeader",
-            "label": "当前负责人",
-            "type": "text",
-            "placeholder": "当前负责人姓名"
-          },
           {
             "key": "status",
             "label": "状态",
@@ -2252,9 +2163,20 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "color": "danger"
               }
             ],
-            "display": "flex",
-            "noLabel": true,
-            "rootClassName": "col-span-full"
+            "mergeCells": true,
+            "noLabel": true
+          },
+          {
+            "key": "founder",
+            "label": "创始人",
+            "type": "text",
+            "placeholder": "创始人姓名"
+          },
+          {
+            "key": "currentLeader",
+            "label": "当前负责人",
+            "type": "text",
+            "placeholder": "当前负责人姓名"
           }
         ]
       },
@@ -2284,6 +2206,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "type": "longtext",
             "placeholder": "组织的运作方式和逻辑",
             "maxLength": 300,
+            "mergeCells": true,
             "noLabel": true
           },
           {
@@ -2378,8 +2301,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
               }
             ],
             "max": 2,
-            "noLabel": true,
-            "className": "grid grid-cols-4 gap-1"
+            "innerDisplay": "grid-5",
+            "noLabel": true
           }
         ]
       },
@@ -2410,19 +2333,19 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "key": "opponents",
                 "label": "对手",
                 "type": "tags",
-                "rootClassName": "flex items-center gap-1"
+                "display": "inline"
               },
               {
                 "key": "mortalEnemies",
                 "label": "死敌",
                 "type": "tags",
-                "rootClassName": "flex items-center gap-1"
+                "display": "inline"
               },
               {
                 "key": "allies",
                 "label": "盟友",
                 "type": "tags",
-                "rootClassName": "flex items-center gap-1"
+                "display": "inline"
               }
             ]
           }
@@ -2491,8 +2414,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "max": 2,
-        "noLabel": true,
-        "className": "grid grid-cols-4 gap-1"
+        "innerDisplay": "grid-5",
+        "noLabel": true
       },
       {
         "key": "status",
@@ -2515,9 +2438,8 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "color": "danger"
           }
         ],
-        "display": "flex",
-        "noLabel": true,
-        "rootClassName": "col-span-full"
+        "mergeCells": true,
+        "noLabel": true
       },
       {
         "key": "foundingBackground",
@@ -2545,6 +2467,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "type": "longtext",
         "placeholder": "组织的运作方式和逻辑",
         "maxLength": 300,
+        "mergeCells": true,
         "noLabel": true
       },
       {
@@ -2595,19 +2518,19 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "key": "opponents",
         "label": "对手",
         "type": "tags",
-        "rootClassName": "flex items-center gap-1"
+        "display": "inline"
       },
       {
         "key": "mortalEnemies",
         "label": "死敌",
         "type": "tags",
-        "rootClassName": "flex items-center gap-1"
+        "display": "inline"
       },
       {
         "key": "allies",
         "label": "盟友",
         "type": "tags",
-        "rootClassName": "flex items-center gap-1"
+        "display": "inline"
       }
     ]
   },
@@ -2662,9 +2585,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "description": "功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。\n场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。\n"
               }
             ],
-            "display": "flex",
-            "noLabel": true,
-            "rootClassName": "col-span-full"
+            "noLabel": true
           },
           {
             "key": "description",
@@ -2733,9 +2654,7 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "description": "功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。\n场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。\n"
           }
         ],
-        "display": "flex",
-        "noLabel": true,
-        "rootClassName": "col-span-full"
+        "noLabel": true
       }
     ]
   }

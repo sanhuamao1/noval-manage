@@ -5,19 +5,16 @@ fields:
     type: text
     label: 角色名称
     placeholder: 角色名称
-    defaultValue: ""
   gender:
     type: single
     label: 性别
     options: gender
-    display: flex
+    noLabel: true
   role:
     type: single
     label: 角色类型
     noLabel: true
     options: role
-    display: flex
-    rootClassName: col-span-full
   age:
     type: text
     label: 年龄
@@ -28,13 +25,13 @@ fields:
     placeholder: 身份/职业/组织归属
   item:
     type: text
-    label: 标志性物件
+    label: 物件
     placeholder: 一件有故事的随身物品
   coreConflict:
     type: text
     label: 核心矛盾
     placeholder: 一句话概括
-    rootClassName: col-span-full
+    mergeCells: true
   surfaceGoal:
     type: text
     label: 表层目标
@@ -45,10 +42,9 @@ fields:
     placeholder: 角色内心真正渴望的...
   emotionExpression:
     type: single
-    label: 情感表达方式
+    label: 情感表达
     options: emotion-expression
-    display: flex
-    rootClassName: col-span-full
+    mergeCells: true
   abilities:
     type: tags
     label: 能力
@@ -83,7 +79,6 @@ fields:
     label: 叙事功能原型
     max: 3
     options: narrative-function
-    display: grid
     noLabel: true
     variant: box
   innerMotivation:
@@ -91,7 +86,6 @@ fields:
     label: 内在动机原型
     max: 3
     options: inner-motivation
-    display: grid
     noLabel: true
     variant: box
 
@@ -101,15 +95,15 @@ sections:
     icon: UserRound
     titleKey: name
     titleEditable: true
-    class: grid grid-cols-2 gap-4
-    fields: [role,coreConflict, surfaceGoal, deepNeed, emotionExpression]
+    class: grid grid-cols-2 gap-2
+    fields: [role, gender, coreConflict, emotionExpression]
   - type: grid
     cols: 2
     sections:
       - type: card
         title: 基础信息
         icon: Info
-        fields: [gender, age, identity, item ]
+        fields: [age, identity, surfaceGoal, deepNeed, item ]
       - type: tabs
         title: 角色原型
         children:

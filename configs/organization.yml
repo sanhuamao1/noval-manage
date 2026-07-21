@@ -17,14 +17,13 @@ fields:
     label: 组织类型
     noLabel: true
     options: org-type
-    className: grid grid-cols-4 gap-1
+    innerDisplay: grid-5
   status:
     type: single
     label: 状态
     noLabel: true
     options: org-status
-    display: flex
-    rootClassName: col-span-full
+    mergeCells: true
   foundingBackground:
     type: longtext
     label: 成立背景
@@ -45,6 +44,7 @@ fields:
     noLabel: true
     placeholder: 组织的运作方式和逻辑
     maxLength: 300
+    mergeCells: true
   structure:
     type: list
     label: 结构
@@ -67,15 +67,15 @@ fields:
   opponents:
     type: tags
     label: 对手
-    rootClassName: flex items-center gap-1
+    display: inline
   mortalEnemies:
     type: tags
     label: 死敌
-    rootClassName: flex items-center gap-1
+    display: inline
   allies:
     type: tags
     label: 盟友
-    rootClassName: flex items-center gap-1
+    display: inline
 
 sections:
 - type: card
@@ -84,7 +84,7 @@ sections:
   titleKey: name
   titleEditable: true
   class: grid grid-cols-2 gap-3
-  fields: [founder, currentLeader, status]
+  fields: [status, founder, currentLeader, ]
 - type: tabs
   title: 组织详情
   children:

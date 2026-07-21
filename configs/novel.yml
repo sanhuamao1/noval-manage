@@ -10,62 +10,56 @@ fields:
     label: 一句话梗概
     placeholder: 用一句话概括你的作品...
     maxLength: 100
-    rootClassName: col-span-full
+    mergeCells: true
   description:
     type: longtext
     label: 简介
     placeholder: 用一段话描述你的作品...
     maxLength: 800
-    rootClassName: col-span-full
+    mergeCells: true
   status:
     type: single
     label: 状态
     options: novel-status
     icon: Activity
-    display: flex
-    className: grid grid-cols-3 gap-1
+    noLabel: true
   genre:
     type: multi
     label: 题材
     max: 2
     options: genre
-    display: flex
     noLabel: true
-    className: gap-2
+    innerDisplay: grid-5
   presetStyle:
     type: single
     label: 文风
     options: preset-style
-    display: flex
+    innerDisplay: grid-4
     noLabel: true
-    className: grid grid-cols-3 gap-2
   primaryTone:
     type: single
     label: 主基调
     options: tone
-    display: flex
+    innerDisplay: grid-4
     noLabel: true
-    className: grid grid-cols-4 gap-2
   secondaryTones:
     type: multi
     label: 副基调
     max: 2
     options: tone
-    display: flex
+    innerDisplay: grid-4
     noLabel: true
-    className: grid grid-cols-4 gap-2
   worldShape:
     type: single
     label: 世界形态
     options: world-shape
     noLabel: true
-    className: grid grid-cols-4 gap-2
 
 sections:
   - type: card
     title: 基本信息
     icon: BookOpen
-    class: grid grid-cols-2 gap-4
+    class: grid grid-cols-2 gap-2
     fields: [title, status, oneLineSummary, description]
 
   - type: tabs

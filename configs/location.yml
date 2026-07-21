@@ -16,8 +16,6 @@ fields:
     label: 地点类型
     noLabel: true
     options: location-type
-    display: flex
-    rootClassName: col-span-full
 
 sections:
   - type: card

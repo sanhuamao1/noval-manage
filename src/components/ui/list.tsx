@@ -83,7 +83,7 @@ function SortableItem({
   const parts = splitSubFields(item, subFields.length)
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-2 py-1">
+    <div ref={setNodeRef} style={style} className="flex items-center gap-2">
       <span
         {...attributes}
         {...listeners}

@@ -18,7 +18,6 @@ fields:
       - { value: 环境, icon: Trees, color: emerald }
       - { value: 心理, icon: Brain, color: violet }
       - { value: 其他, icon: Layers, color: default }
-    display: flex
   text:
     type: longtext
     label: 样本正文
@@ -27,13 +26,12 @@ fields:
   isNegative:
     type: toggle
     label: 设为反例（请避免的风格）
-    display: between
 
 sections:
   - type: card
     title: 基本信息
     icon: FileText
-    class: grid grid-cols-2 gap-4
+    class: grid grid-cols-2 gap-2
     fields: [name, prompt]
 
   - type: card

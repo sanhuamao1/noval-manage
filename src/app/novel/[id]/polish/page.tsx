@@ -11,7 +11,7 @@ import { renderOptions } from "@/lib/configs/render-utils";
 import { ConfigBadges } from "@/components/ui/config-badges";
 import { ConfigEntity } from "@/lib/configs/config-registry";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
-import {  EyeOff } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import type { PolishRuleData } from "@/types";
 
 const TABS = [
@@ -42,8 +42,18 @@ export default function PolishPage() {
 
   return (
     <PageLayout
-      title="润色设置"
-      handler={<AddButton onClick={openAdd} />}
+      header={
+        <div className="mb-4 flex items-center justify-between">
+          <SimpleTabs
+            tabs={TABS}
+            variant="segment"
+            value={currentEntity}
+            onChange={(key) => switchEntity(key as ConfigEntity)}
+          />
+
+          <AddButton onClick={openAdd} />
+        </div>
+      }
       drawer={
         <SlidingDrawer
           open={mode !== null}
@@ -60,13 +70,8 @@ export default function PolishPage() {
         </SlidingDrawer>
       }
     >
-      <div className="mb-6">
-        <SimpleTabs
-          tabs={TABS}
-          value={currentEntity}
-          onChange={(key) => switchEntity(key as ConfigEntity)}
-        />
-      </div>
+
+
 
       {isRule ? (
         <CardList emptyText="还没有润色规则，请先创建">

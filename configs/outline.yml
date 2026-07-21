@@ -22,7 +22,6 @@ fields:
       - { value: 已规划,  icon: Calendar, color: neutral }
       - { value: 进行中, icon: Pen, color: primary }
       - { value: 已完成,  icon: CheckCircle, color: success }
-    display: flex
   timeline:
     type: text
     label: 时间
@@ -32,46 +31,30 @@ fields:
     type: single
     label: 基调
     options: tone
-    display: flex
-    className: grid grid-cols-2 gap-2
   characterIds:
     type: tagselect
     label: 出场人物
     entity: characters
-    rootClassName: flex items-center gap-1
   locationIds:
     type: tagselect
     label: 地点
     entity: locations
-    rootClassName: flex items-center gap-1
   foreshadowingIds:
     type: tagselect
     label: 伏笔
     entity: foreshadowings
-    rootClassName: flex items-center gap-1
 
 sections:  
-  - type: grid
-    cols: 2
-    sections:
-      - type: grid
-        colspan: 1
-        cols: 1
-        sections:
-          - type: card
-            title: 基本信息
-            icon: FileText
-            class: space-y-3
-            fields: [name, contentBrief, contentDetail, status]
-      - type: grid
-        colspan: 1
-        cols: 1
-        sections:
-          - type: card
-            title: 时空基调
-            icon: MapPin
-            fields: [timeline, tone]
-          - type: card
-            title: 关联实体
-            icon: Link
-            fields: [characterIds, locationIds, foreshadowingIds]
+  - type: card
+    title: 基本信息
+    icon: FileText
+    class: space-y-3
+    fields: [name, contentBrief, contentDetail, status]
+  - type: card
+    title: 时空基调
+    icon: MapPin
+    fields: [timeline, tone]
+  - type: card
+    title: 关联实体
+    icon: Link
+    fields: [characterIds, locationIds, foreshadowingIds]

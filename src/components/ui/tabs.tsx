@@ -162,7 +162,7 @@ function SimpleTabs({ tabs, value, onChange, counts, className, expanded = true,
     <div
       className={cn(
         isSegment
-          ? "flex rounded-md border border-bg-600 bg-bg-800 p-0.5"
+          ? "flex rounded-md border border-bg-600 bg-bg-800 p-0.5 w-fit"
           : "flex gap-1 bg-muted rounded-lg p-1",
         className,
       )}

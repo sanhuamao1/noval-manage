@@ -43,3 +43,7 @@ export function wordCount(text: string): number {
     .filter(w => w.length > 0).length
   return chineseChars + englishWords
 }
+
+// 合并class
+export const joinClasses = (classes: (string | false | null | undefined | 0 | '')[]) =>
+    classes.filter(Boolean).join(' ');

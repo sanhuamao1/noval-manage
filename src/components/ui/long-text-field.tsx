@@ -2,7 +2,6 @@
 
 import { useRef, useEffect } from "react";
 import { Textarea } from "./textarea";
-import { FileText } from "lucide-react";
 
 /** 多行文本输入字段（带字数统计） */
 export function LongTextField({
@@ -10,7 +9,6 @@ export function LongTextField({
   maxLength,
   placeholder,
   onChange,
-  rootClassName = "",
 }: {
   value: string;
   maxLength: number;
@@ -29,7 +27,7 @@ export function LongTextField({
   }, [value]);
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <Textarea
         ref={textareaRef}
         value={value ?? ""}

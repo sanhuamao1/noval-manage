@@ -1,5 +1,8 @@
 import type { ColorName } from "@/lib/colors";
 
+export type FormItemInnerDispaly = "flex" | "grid-2" | "grid-3" | "grid-4" | "grid-5"
+export type FormItemDisplay = "row" | "col" | "inline"
+
 /** 配置项颜色，等价于 ColorName */
 export type OptionColor = ColorName;
 
@@ -35,33 +38,33 @@ export interface ConfigFieldDef<K extends string = string> {
   key: K;
   label: string;
   type: FieldType;
+  noLabel?: boolean;
+
+  // formitem 相关
+  display?: FormItemDisplay;
+  innerDisplay?: FormItemInnerDispaly;
+  mergeCells?: boolean;
+
+  icon?: string;
+
+  // text
+  placeholder?: string;
+
+  // single / multi
   options?: ConfigOption[];
   max?: number;
-  display?: "default" | "flex" | "grid" | "between";
-  /** display="grid" 时的列数，默认 3 */
-  cols?: number;
-  /** 字段图标（lucide 组件名），在 tabs 中显示在 tab trigger 上 */
-  icon?: string;
-  /** type="text"/"longtext" 时输入框的占位文本 */
-  placeholder?: string;
-  /** type="longtext" 时的文本最大长度 */
-  maxLength?: number;
-  /** type="list" 时的子字段定义 */
-  subFields?: ListSubField[];
-  /** 自定义 Tailwind 类名，会附加到 FormItem 的外层 div 上 */
-  className?: string;
-  /** 自定义 Tailwind 类名，会附加到 FormItem 的最外层容器上 */
-  rootClassName?: string;
-  /** 不显示 label，优先级高于 renderField 的 noLabel 参数 */
-  noLabel?: boolean;
-  /** 控件变体，如 "box"（multi/single 类型适用） */
   variant?: string;
-  /** type="tagselect" 时对应的实体 key，选项从 store 动态获取 */
+
+  // longtext
+  maxLength?: number;
+  // list
+  subFields?: ListSubField[];
+
+  // tagselect
   entity?: string;
-  /** type="tagselect" 时，选项对象中用作 value 的 key，默认 "id" */
   optionValue?: string;
-  /** type="tagselect" 时，选项对象中用作 label 的 key，默认 "name" */
   optionLabel?: string;
+
   /** 字段默认值，优先级高于根据 type 自动推导的默认值 */
   defaultValue?: unknown;
 }
@@ -79,10 +82,8 @@ export interface TabGroup<K extends string = string> {
 export interface SectionBase {
   title: string;
   icon?: string;
-  class?: string;
+  class?: string; // 内容自定义样式
   children: (ConfigFieldDef | TabGroup)[];
-  /** 在 grid 布局中跨越的列数，默认 1 */
-  colspan?: number;
   /** 从 config 中取值的 key，用于动态标题（如使用角色姓名作为卡片标题） */
   titleKey?: string;
   /** 标题是否可编辑（需配合 titleKey 使用） */
@@ -102,8 +103,6 @@ export interface GridSection {
   cols: number;
   class?: string;
   sections: ConfigSection[];
-  /** 在 grid 布局中跨越的列数，默认 1 */
-  colspan?: number;
 }
 
 export type ConfigSection = CardSection | TabsSection | GridSection;
