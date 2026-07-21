@@ -117,7 +117,7 @@ function loadEntityConfig(name) {
 
 // ── 加载所有实体 ──
 
-const entities = ["novel", "character", "outline", "polish-rule", "polish-sample", "organization", "location"];
+const entities = ["novel", "character", "outline", "polish-rule", "polish-sample", "organization", "location", "event-node"];
 const configs = {};
 for (const name of entities) {
   configs[name] = loadEntityConfig(name);

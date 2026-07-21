@@ -220,11 +220,11 @@ export function PolishPanel() {
                                 反例
                               </span>
                             )}
-                            {sceneType && (
+                            {typeof sceneType === 'string' && sceneType ? (
                               <span className="truncate text-[10px] text-muted-foreground">
                                 {sceneType}
                               </span>
-                            )}
+                            ) : null}
                           </div>
                           <div
                             className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${

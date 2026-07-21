@@ -7,6 +7,7 @@ import type {
   RelationsData,
   FrameworkData,
 } from "@/types/data";
+import type { EventNodeData, EventConnectionData } from "@/types/event-data";
 
 interface EntityState {
   characters: { id: string; name: string }[];
@@ -17,6 +18,9 @@ interface EntityState {
   chapters: ChapterSummary[];
   relations: RelationsData;
   frameworks: FrameworkData[];
+  eventNodes: EventNodeData[];
+  eventConnections: EventConnectionData[];
+  outlineEvents: { id: string; outlineId: string; eventId: string; sortOrder: number }[];
 }
 
 interface EntityActions {
@@ -38,6 +42,9 @@ const initial: EntityState = {
   chapters: [],
   relations: { links: [], positions: {} },
   frameworks: [],
+  eventNodes: [],
+  eventConnections: [],
+  outlineEvents: [],
 };
 
 export const useEntityStore = create<EntityState & EntityActions>((set) => ({

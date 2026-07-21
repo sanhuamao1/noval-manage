@@ -412,7 +412,7 @@ export function renderSections<T extends Record<string, any>>(
             return (
                 <div key={index} className="grid gap-4" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
                     {section.sections.map((subSection, subIndex) => {
-                        const span = subSection.colspan ?? 1;
+                        const span = (subSection as any).colspan ?? 1;
                         return (
                             <div key={subIndex} style={{ gridColumn: `span ${span}` }}>
                                 {renderSections([subSection], config, onChange, novelId)}

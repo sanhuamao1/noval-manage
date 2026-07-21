@@ -27,12 +27,15 @@ model Novel {
   outlines         Outline[]
   locations        Location[]
   organizations    Organization[]
-  foreshadowings   Foreshadowing[]
-  keyEvents        KeyEvent[]
-  characterEmotions CharacterEmotion[]
+  eventNodes        EventNode[]
+  eventConnections  EventConnection[]
+  outlineEvents     OutlineEvent[]
   relations        Relation[]
   nodePositions    NodePosition[]
   conversations    FactoryConversation[]
+  foreshadowings   Foreshadowing[]
+  keyEvents        KeyEvent[]
+  characterEmotions CharacterEmotion[]
 }
 
 // ── 角色 ──
@@ -73,22 +76,25 @@ model Outline {
   status          String   @default("已规划")
   timeline        String?
   tone            String?
-  characterIds    String?  // JSON: string[]
-  locationIds     String?  // JSON: string[]
-  foreshadowingIds String? // JSON: string[]
+  eventNodeIds    String?  // JSON: string[] — 关联的事件 ID 列表（冗余，保持与 OutlineEvent 一致）
   sortOrder       Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  novel            Novel              @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  keyEvents        KeyEvent[]
-  characterEmotions CharacterEmotion[]
+  novel      Novel          @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapters          Chapter[]
+  eventLinks        OutlineEvent[]
+  keyEvents         KeyEvent[]
+  characterEmotions  CharacterEmotion[]
+
+  @@index([novelId])
 }
 
 // ── 章节 ──
 model Chapter {
   id                String   @id
   novelId           String
+  outlineId         String?  // 关联大纲
   title             String   @default("")
   content           String   @default("")
   status            String   @default("draft")
@@ -97,7 +103,57 @@ model Chapter {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  novel   Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  outline Outline? @relation(fields: [outlineId], references: [id])
+
+  @@index([novelId])
+}
+
+// ── 伏笔 ──
+model Foreshadowing {
+  id        String   @id
+  novelId   String
+  name      String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@index([novelId])
+}
+
+// ── 关键事件（大纲下的关键情节点） ──
+model KeyEvent {
+  id        String   @id
+  novelId   String
+  outlineId String
+  title     String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+
+  @@index([novelId])
+  @@index([outlineId])
+}
+
+// ── 角色情绪（大纲下的情绪标注） ──
+model CharacterEmotion {
+  id        String   @id
+  novelId   String
+  outlineId String
+  data      String?  // JSON: 情绪数据
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+
+  @@index([novelId])
+  @@index([outlineId])
 }
 
 // ── 地点 ──
@@ -138,44 +194,79 @@ model Organization {
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
 }
 
-// ── 伏笔 ──
-model Foreshadowing {
-  id        String   @id
-  novelId   String
-  name      String   @default("")
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ── 事件节点（故事世界中的具体事件） ──
+model EventNode {
+  id          String   @id
+  novelId     String
+  title       String   @default("")
+  description String?  // 事件简述
+  content     String?  // 详细描写（富文本）
+
+  storyTime   String?  // 故事内时间
+
+  // 直接中文值，选项来自 shared-options.yml event-type
+  eventType   String?  // 关键剧情 / 日常 / 转折 / 战斗 / 感情 / 伏笔揭示
+  // 直接中文值，选项来自 shared-options.yml event-status
+  status      String   @default("已规划")
+  importance  Int      @default(1)  // 1-5
+
+  // 关联现有实体
+  characterIds      String?  // JSON: string[]
+  locationIds       String?  // JSON: string[]
+  foreshadowingIds  String?  // JSON: string[]
+
+  notes       String?  // JSON: 额外元数据
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  // 事件间关系链
+  outgoing EventConnection[] @relation("EventConnectionSource")
+  incoming EventConnection[] @relation("EventConnectionTarget")
+  // 大纲关联
+  outlineLinks OutlineEvent[]
+
+  @@index([novelId])
 }
 
-// ── 关键事件 ──
-model KeyEvent {
+// ── 事件间关系 ──
+model EventConnection {
   id        String   @id
   novelId   String
-  outlineId String
-  title     String   @default("")
-  sortOrder Int      @default(0)
+  sourceId  String
+  targetId  String
+  type      String   @default("导致")  // 导致 / 铺垫揭示 / 平行对照 / 对比
+  strength  Int      @default(1)       // 1-3
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+  novel  Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  source EventNode @relation("EventConnectionSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target EventNode @relation("EventConnectionTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId])
+  @@index([novelId])
+  @@index([sourceId])
+  @@index([targetId])
 }
 
-// ── 角色情感 ──
-model CharacterEmotion {
-  id        String   @id
-  novelId   String
-  outlineId String
-  // 其他字段由具体业务决定，当前 YML 结构未知，保留为 JSON
-  data      String?  // JSON: 灵活存储未知字段
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ── 大纲与事件的多对多关联（带排序） ──
+model OutlineEvent {
+  id         String @id
+  novelId    String
+  outlineId  String
+  eventId    String
+  sortOrder  Int    @default(0)  // 事件在大纲中的顺序
 
   novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+  outline Outline  @relation(fields: [outlineId], references: [id], onDelete: Cascade)
+  event   EventNode @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([outlineId, eventId])
+  @@index([novelId])
+  @@index([outlineId])
+  @@index([eventId])
 }
 
 // ── 角色关系（从 relations.yml 拆分） ──

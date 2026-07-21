@@ -26,10 +26,12 @@ export interface EntityCrudMeta {
  * ```
  */
 export const ENTITY_CRUD_CONFIG: Partial<Record<ConfigEntity, EntityCrudMeta>> = {
+  [ConfigEntity.NOVEL]: { storeKey: "novel", deleteLabel: "小说", needsNovelId: false, apiPath: "/api/novels" },
   [ConfigEntity.CHARACTER]: { storeKey: "characters", deleteLabel: "人物" },
   [ConfigEntity.ORGANIZATION]: { storeKey: "organizations", deleteLabel: "组织" },
   [ConfigEntity.LOCATION]: { storeKey: "locations", deleteLabel: "地点" },
   [ConfigEntity.OUTLINE]: { storeKey: "outlines", deleteLabel: "章节大纲" },
+  [ConfigEntity.EVENT_NODE]: { storeKey: "eventNodes", deleteLabel: "事件", apiPath: "/api/event-nodes" },
   [ConfigEntity.POLISH_RULE]: { storeKey: "polishRules", deleteLabel: "润色规则", apiPath: "/api/polish/rules", needsNovelId: false },
   [ConfigEntity.POLISH_SAMPLE]: { storeKey: "polishSamples", deleteLabel: "风格样本", apiPath: "/api/polish/samples", needsNovelId: false },
 };

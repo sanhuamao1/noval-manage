@@ -11,8 +11,11 @@ const JSON_FIELDS: Record<string, Set<string>> = {
     "abilities", "growthArcs", "notes", "experience",
     "narrativeFunction", "innerMotivation",
   ]),
+  "key-event": new Set([]),
+  "character-emotion": new Set(["data"]),
   novel: new Set(["genre", "secondaryTones"]),
-  outline: new Set(["characterIds", "locationIds", "foreshadowingIds"]),
+  outline: new Set(["eventNodeIds"]),
+  "event-node": new Set(["characterIds", "locationIds", "foreshadowingIds"]),
   location: new Set(["locationType"]),
   organization: new Set([
     "type", "structure", "headquarters", "members",
@@ -31,17 +34,20 @@ const ENTITY_MODELS: Record<string, string> = {
   foreshadowing: "foreshadowing",
   "key-event": "keyEvent",
   "character-emotion": "characterEmotion",
+  "event-node": "eventNode",
+  "event-connection": "eventConnection",
+  "outline-event": "outlineEvent",
   "polish-rule": "polishRule",
   "polish-sample": "polishSample",
 };
 
 // 全局实体（不需要 novelId）
-const GLOBAL_ENTITIES = new Set(["polish-rule", "polish-sample"]);
+const GLOBAL_ENTITIES = new Set(["polish-rule", "polish-sample", "framework"]);
 
 // ── 实体名 → Prisma delegate ──
 function delegate(entity: string) {
   const model = ENTITY_MODELS[entity] ?? entity;
-  return (db as Record<string, unknown>)[model] as {
+  return (db as unknown as Record<string, unknown>)[model] as {
     findUnique: (args: unknown) => Promise<Record<string, unknown> | null>;
     findMany: (args: unknown) => Promise<Record<string, unknown>[]>;
     create: (args: unknown) => Promise<Record<string, unknown>>;
@@ -59,11 +65,11 @@ function serializeJSON(entity: string, data: Record<string, unknown>): Record<st
   const fields = JSON_FIELDS[entity];
   if (!fields) return data;
   const result = { ...data };
-  for (const f of fields) {
+  Array.from(fields).forEach((f) => {
     if (result[f] !== undefined && result[f] !== null && typeof result[f] !== "string") {
       result[f] = JSON.stringify(result[f]);
     }
-  }
+  });
   return result;
 }
 
@@ -75,7 +81,7 @@ function deserializeRecord<T = Record<string, unknown>>(
   const r = record as Record<string, unknown>;
   const fields = JSON_FIELDS[entity];
   if (fields) {
-    for (const f of fields) {
+    Array.from(fields).forEach((f) => {
       if (typeof r[f] === "string") {
         try {
           r[f] = JSON.parse(r[f] as string);
@@ -83,15 +89,15 @@ function deserializeRecord<T = Record<string, unknown>>(
           /* 保持原值 */
         }
       }
-    }
+    });
   }
   return r as T;
 }
 
-function deserializeList<T = Record<string, unknown>>(
+function deserializeList(
   entity: string,
-  records: T[],
-): T[] {
+  records: Record<string, unknown>[],
+): Record<string, unknown>[] {
   return records.map((r) => deserializeRecord(entity, r) ?? r);
 }
 
@@ -138,14 +144,14 @@ export async function get<T = Record<string, unknown>>(
   // Novel 特殊处理
   if (entity === "novel") {
     const novel = await db.novel.findUnique({ where: { id } });
-    return deserializeRecord<T>("novel", datesToISO(novel as unknown as Record<string, unknown>));
+    return deserializeRecord("novel", datesToISO(novel as unknown as Record<string, unknown>)) as unknown as T | null;
   }
 
   const where: Record<string, unknown> = { id };
   if (!GLOBAL_ENTITIES.has(entity) && novelId) where.novelId = novelId;
 
   const record = await delegate(entity).findUnique({ where });
-  return deserializeRecord<T>(entity, datesToISO(record));
+  return deserializeRecord(entity, datesToISO(record)) as unknown as T | null;
 }
 
 export async function put(
@@ -211,17 +217,17 @@ export async function list<T = Record<string, unknown>>(
   // Novel 特殊处理
   if (entity === "novel") {
     const novels = await db.novel.findMany({ orderBy: { updatedAt: "desc" } });
-    return deserializeList<T>(
+    return deserializeList(
       "novel",
       datesToISOList(novels as unknown as Record<string, unknown>[]),
-    );
+    ) as unknown as T[];
   }
 
   const where: Record<string, unknown> = {};
   if (!GLOBAL_ENTITIES.has(entity) && novelId) where.novelId = novelId;
 
   const records = await delegate(entity).findMany({ where });
-  return deserializeList<T>(entity, datesToISOList(records));
+  return deserializeList(entity, datesToISOList(records)) as unknown as T[];
 }
 
 export async function listBy<T = Record<string, unknown>>(
@@ -234,7 +240,7 @@ export async function listBy<T = Record<string, unknown>>(
   if (!GLOBAL_ENTITIES.has(entity) && novelId) where.novelId = novelId;
 
   const records = await delegate(entity).findMany({ where });
-  return deserializeList<T>(entity, datesToISOList(records));
+  return deserializeList(entity, datesToISOList(records)) as unknown as T[];
 }
 
 export async function nextSortOrder(entity: string, novelId?: string): Promise<number> {
@@ -348,7 +354,7 @@ export async function getRelations(novelId: string): Promise<{
   const charMap: Record<string, string> = {};
   if (charIds.size > 0) {
     const chars = await db.character.findMany({
-      where: { id: { in: [...charIds] } },
+      where: { id: { in: Array.from(charIds) } },
       select: { id: true, name: true },
     });
     for (const c of chars) {
@@ -411,7 +417,7 @@ export async function savePositions(
   const incomingChars = new Set(Object.keys(positions));
 
   // 需要删除的旧位置
-  const toDelete = [...existingChars].filter((c) => !incomingChars.has(c));
+  const toDelete = Array.from(existingChars).filter((c) => !incomingChars.has(c));
 
   const ops: unknown[] = [];
 

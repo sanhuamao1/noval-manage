@@ -48,9 +48,9 @@ export function NovelOverviewPreview() {
             </div>
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              {renderOptions(fieldsMap["status"]?.options, novel.status)}
+              {renderOptions(fieldsMap["status"]?.options, novel.status ?? undefined)}
               {renderOptions(fieldsMap["genre"]?.options, novel.genre)}
-              {renderOptions(fieldsMap["primaryTone"]?.options, novel.primaryTone)}
+              {renderOptions(fieldsMap["primaryTone"]?.options, novel.primaryTone ?? undefined)}
               {renderOptions(fieldsMap["secondaryTone"]?.options, novel.secondaryTones)}
             </div>
             {novel.description && (

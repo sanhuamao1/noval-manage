@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-21T03:32:08.070Z，勿手动编辑
+// 自动生成于 2026-07-21T15:42:33.804Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -808,6 +808,12 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
                 "placeholder": "如：25岁"
               },
               {
+                "key": "appearance",
+                "label": "外貌描述",
+                "type": "text",
+                "placeholder": "外貌特征描述"
+              },
+              {
                 "key": "identity",
                 "label": "身份",
                 "type": "text",
@@ -1077,6 +1083,12 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "label": "年龄",
         "type": "text",
         "placeholder": "如：25岁"
+      },
+      {
+        "key": "appearance",
+        "label": "外貌描述",
+        "type": "text",
+        "placeholder": "外貌特征描述"
       },
       {
         "key": "identity",
@@ -1450,31 +1462,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             ]
           }
         ]
-      },
-      {
-        "type": "card",
-        "title": "关联实体",
-        "icon": "Link",
-        "children": [
-          {
-            "key": "characterIds",
-            "label": "出场人物",
-            "type": "tagselect",
-            "entity": "characters"
-          },
-          {
-            "key": "locationIds",
-            "label": "地点",
-            "type": "tagselect",
-            "entity": "locations"
-          },
-          {
-            "key": "foreshadowingIds",
-            "label": "伏笔",
-            "type": "tagselect",
-            "entity": "foreshadowings"
-          }
-        ]
       }
     ],
     "fields": [
@@ -1593,24 +1580,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "description": "讽刺、调侃、社会批判，适合讽刺小说/王朔体"
           }
         ]
-      },
-      {
-        "key": "characterIds",
-        "label": "出场人物",
-        "type": "tagselect",
-        "entity": "characters"
-      },
-      {
-        "key": "locationIds",
-        "label": "地点",
-        "type": "tagselect",
-        "entity": "locations"
-      },
-      {
-        "key": "foreshadowingIds",
-        "label": "伏笔",
-        "type": "tagselect",
-        "entity": "foreshadowings"
       }
     ]
   },
@@ -2655,6 +2624,315 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
           }
         ],
         "noLabel": true
+      }
+    ]
+  },
+  "event-node": {
+    "entity": "EventNode",
+    "sections": [
+      {
+        "type": "card",
+        "title": "基本信息",
+        "icon": "FileText",
+        "class": "space-y-3",
+        "children": [
+          {
+            "key": "title",
+            "label": "事件标题",
+            "type": "text",
+            "placeholder": "事件标题"
+          },
+          {
+            "key": "description",
+            "label": "简述",
+            "type": "text",
+            "placeholder": "一句话描述事件",
+            "maxLength": 200
+          },
+          {
+            "key": "content",
+            "label": "详细内容",
+            "type": "longtext",
+            "placeholder": "事件的具体描写..."
+          },
+          {
+            "key": "storyTime",
+            "label": "时间",
+            "type": "text",
+            "placeholder": "如：第三天傍晚 / 天元历127年秋",
+            "icon": "Clock"
+          }
+        ]
+      },
+      {
+        "type": "card",
+        "title": "属性",
+        "icon": "Tag",
+        "children": [
+          {
+            "key": "eventType",
+            "label": "事件类型",
+            "type": "single",
+            "options": [
+              {
+                "value": "关键剧情",
+                "icon": "Star",
+                "color": "danger"
+              },
+              {
+                "value": "日常",
+                "icon": "Sun",
+                "color": "yellow"
+              },
+              {
+                "value": "转折",
+                "icon": "GitFork",
+                "color": "violet"
+              },
+              {
+                "value": "战斗",
+                "icon": "Swords",
+                "color": "red"
+              },
+              {
+                "value": "感情",
+                "icon": "Heart",
+                "color": "pink"
+              },
+              {
+                "value": "伏笔揭示",
+                "icon": "Lightbulb",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "key": "status",
+            "label": "状态",
+            "type": "single",
+            "options": [
+              {
+                "value": "已规划",
+                "icon": "Clock",
+                "color": "neutral"
+              },
+              {
+                "value": "进行中",
+                "icon": "Pencil",
+                "color": "primary"
+              },
+              {
+                "value": "已完成",
+                "icon": "CircleCheck",
+                "color": "success"
+              },
+              {
+                "value": "已弃用",
+                "icon": "CircleOff",
+                "color": "danger"
+              }
+            ]
+          },
+          {
+            "key": "importance",
+            "label": "重要性",
+            "type": "single",
+            "options": [
+              {
+                "value": "1",
+                "icon": "Star",
+                "color": "default"
+              },
+              {
+                "value": "2",
+                "icon": "Star",
+                "color": "default"
+              },
+              {
+                "value": "3",
+                "icon": "Star",
+                "color": "primary"
+              },
+              {
+                "value": "4",
+                "icon": "Star",
+                "color": "warn"
+              },
+              {
+                "value": "5",
+                "icon": "Star",
+                "color": "danger"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "card",
+        "title": "关联实体",
+        "icon": "Link",
+        "children": [
+          {
+            "key": "characterIds",
+            "label": "出场角色",
+            "type": "tagselect",
+            "entity": "characters"
+          },
+          {
+            "key": "locationIds",
+            "label": "地点",
+            "type": "tagselect",
+            "entity": "locations"
+          },
+          {
+            "key": "foreshadowingIds",
+            "label": "伏笔",
+            "type": "tagselect",
+            "entity": "foreshadowings"
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "key": "title",
+        "label": "事件标题",
+        "type": "text",
+        "placeholder": "事件标题"
+      },
+      {
+        "key": "description",
+        "label": "简述",
+        "type": "text",
+        "placeholder": "一句话描述事件",
+        "maxLength": 200
+      },
+      {
+        "key": "content",
+        "label": "详细内容",
+        "type": "longtext",
+        "placeholder": "事件的具体描写..."
+      },
+      {
+        "key": "storyTime",
+        "label": "时间",
+        "type": "text",
+        "placeholder": "如：第三天傍晚 / 天元历127年秋",
+        "icon": "Clock"
+      },
+      {
+        "key": "eventType",
+        "label": "事件类型",
+        "type": "single",
+        "options": [
+          {
+            "value": "关键剧情",
+            "icon": "Star",
+            "color": "danger"
+          },
+          {
+            "value": "日常",
+            "icon": "Sun",
+            "color": "yellow"
+          },
+          {
+            "value": "转折",
+            "icon": "GitFork",
+            "color": "violet"
+          },
+          {
+            "value": "战斗",
+            "icon": "Swords",
+            "color": "red"
+          },
+          {
+            "value": "感情",
+            "icon": "Heart",
+            "color": "pink"
+          },
+          {
+            "value": "伏笔揭示",
+            "icon": "Lightbulb",
+            "color": "teal"
+          }
+        ]
+      },
+      {
+        "key": "status",
+        "label": "状态",
+        "type": "single",
+        "options": [
+          {
+            "value": "已规划",
+            "icon": "Clock",
+            "color": "neutral"
+          },
+          {
+            "value": "进行中",
+            "icon": "Pencil",
+            "color": "primary"
+          },
+          {
+            "value": "已完成",
+            "icon": "CircleCheck",
+            "color": "success"
+          },
+          {
+            "value": "已弃用",
+            "icon": "CircleOff",
+            "color": "danger"
+          }
+        ]
+      },
+      {
+        "key": "importance",
+        "label": "重要性",
+        "type": "single",
+        "options": [
+          {
+            "value": "1",
+            "icon": "Star",
+            "color": "default"
+          },
+          {
+            "value": "2",
+            "icon": "Star",
+            "color": "default"
+          },
+          {
+            "value": "3",
+            "icon": "Star",
+            "color": "primary"
+          },
+          {
+            "value": "4",
+            "icon": "Star",
+            "color": "warn"
+          },
+          {
+            "value": "5",
+            "icon": "Star",
+            "color": "danger"
+          }
+        ]
+      },
+      {
+        "key": "characterIds",
+        "label": "出场角色",
+        "type": "tagselect",
+        "entity": "characters"
+      },
+      {
+        "key": "locationIds",
+        "label": "地点",
+        "type": "tagselect",
+        "entity": "locations"
+      },
+      {
+        "key": "foreshadowingIds",
+        "label": "伏笔",
+        "type": "tagselect",
+        "entity": "foreshadowings"
       }
     ]
   }

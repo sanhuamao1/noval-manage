@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import type { NovelData, CharacterData, OutlineData, ChapterSummary, PolishRuleData, PolishSampleData, OrganizationData, LocationData, RelationData, RelationsData, FrameworkData } from "@/types/data";
+import type { EventNodeData, EventConnectionData } from "@/types/event-data";
 import { api } from "@/lib/api";
 import { useEntityStore } from "./useEntityStore";
 import { usePolishStore } from "./usePolishStore";
 
-export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations" | "frameworks";
+export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations" | "frameworks" | "eventNodes" | "eventConnections" | "outlineEvents";
 
 const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   novel: (id) => `/api/novels?id=${id}`,
@@ -18,7 +19,12 @@ const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   polishSamples: () => "/api/polish/samples",
   relations: (id) => `/api/relations?novelId=${id}`,
   frameworks: () => `/api/frameworks`,
+  eventNodes: (id) => `/api/event-nodes?novelId=${id}`,
+  eventConnections: (id) => `/api/event-connections?novelId=${id}`,
+  outlineEvents: (id) => `/api/outline-events?novelId=${id}`,
 };
+
+
 
 interface NovelStore {
   novel: NovelData | null;
@@ -31,7 +37,7 @@ export const useNovelStore = create<NovelStore>((set) => ({
   novel: null,
 
   init: async (novelId) => {
-    const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations, frameworks] = await Promise.all([
+    const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations, frameworks, eventNodes, eventConnections, outlineEvents] = await Promise.all([
       api<NovelData>({ url: `/api/novels?id=${novelId}` }),
       api<{ id: string; name: string }[]>({ url: `/api/characters?novelId=${novelId}` }),
       api<OrganizationData[]>({ url: `/api/organizations?novelId=${novelId}` }),
@@ -43,11 +49,15 @@ export const useNovelStore = create<NovelStore>((set) => ({
       api<PolishSampleData[]>({ url: "/api/polish/samples" }),
       api<RelationsData>({ url: `/api/relations?novelId=${novelId}` }),
       api<FrameworkData[]>({ url: `/api/frameworks` }),
+      api<EventNodeData[]>({ url: `/api/event-nodes?novelId=${novelId}` }),
+      api<EventConnectionData[]>({ url: `/api/event-connections?novelId=${novelId}` }),
+      api<{ id: string; outlineId: string; eventId: string; sortOrder: number }[]>({ url: `/api/outline-events?novelId=${novelId}` }),
     ]);
     set({ novel });
     useEntityStore.getState().setAll({
       characters, organizations, locations, foreshadowings,
       outlines, chapters, relations, frameworks,
+      eventNodes, eventConnections, outlineEvents,
     });
     usePolishStore.getState().setMeta({ polishRules, polishSamples });
   },

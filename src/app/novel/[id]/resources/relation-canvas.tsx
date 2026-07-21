@@ -193,7 +193,7 @@ export default function RelationCanvas({ onEditCharacter }: RelationCanvasProps)
   const novelId = params.id as string;
 
   // 从 store 获取数据
-  const characters = useEntityStore((s) => s.characters);
+  const characters: { id: string; name: string; role?: string }[] = useEntityStore((s) => s.characters) as any;
   const relationsFromStore = useEntityStore((s) => s.relations); // RelationsData: { links, positions }
   const mutate = useNovelStore((s) => s.mutate);
 

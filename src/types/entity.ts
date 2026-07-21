@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-21T03:32:08.061Z，勿手动编辑
+// 自动生成于 2026-07-21T15:42:33.799Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 export * from "./configs";
@@ -19,5 +19,6 @@ export enum ConfigEntity {
   POLISH_RULE = "polish-rule",
   POLISH_SAMPLE = "polish-sample",
   ORGANIZATION = "organization",
-  LOCATION = "location"
+  LOCATION = "location",
+  EVENT_NODE = "event-node"
 }
