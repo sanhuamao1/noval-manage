@@ -1,0 +1,65 @@
+entity: EventNode
+
+fields:
+  title:
+    type: text
+    label: 事件标题
+    placeholder: 事件标题
+  description:
+    type: text
+    label: 简述
+    placeholder: 一句话描述事件
+    maxLength: 200
+  content:
+    type: longtext
+    label: 详细内容
+    placeholder: 事件的具体描写...
+  storyTime:
+    type: text
+    label: 时间
+    icon: Clock
+    placeholder: "如：第三天傍晚 / 天元历127年秋"
+  eventType:
+    type: single
+    label: 事件类型
+    options: event-type
+  status:
+    type: single
+    label: 状态
+    options: event-status
+  importance:
+    type: single
+    label: 重要性
+    options:
+      - { value: "1", icon: Star, color: default }
+      - { value: "2", icon: Star, color: default }
+      - { value: "3", icon: Star, color: primary }
+      - { value: "4", icon: Star, color: warn }
+      - { value: "5", icon: Star, color: danger }
+  characterIds:
+    type: tagselect
+    label: 出场角色
+    entity: characters
+  locationIds:
+    type: tagselect
+    label: 地点
+    entity: locations
+  foreshadowingIds:
+    type: tagselect
+    label: 伏笔
+    entity: foreshadowings
+
+sections:
+  - type: card
+    title: 基本信息
+    icon: FileText
+    class: space-y-3
+    fields: [title, description, content, storyTime]
+  - type: card
+    title: 属性
+    icon: Tag
+    fields: [eventType, status, importance]
+  - type: card
+    title: 关联实体
+    icon: Link
+    fields: [characterIds, locationIds, foreshadowingIds]

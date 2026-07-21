@@ -19,6 +19,10 @@ fields:
     type: text
     label: 年龄
     placeholder: "如：25岁"
+  appearance:
+    type: text
+    label: 外貌描述
+    placeholder: 外貌特征描述
   identity:
     type: text
     label: 身份
@@ -103,7 +107,7 @@ sections:
       - type: card
         title: 基础信息
         icon: Info
-        fields: [age, identity, surfaceGoal, deepNeed, item ]
+        fields: [age, appearance, identity, surfaceGoal, deepNeed, item ]
       - type: tabs
         title: 角色原型
         children:

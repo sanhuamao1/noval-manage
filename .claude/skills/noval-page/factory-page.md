@@ -91,9 +91,18 @@ export default function NewTab() {
 **③ 在 page.tsx 的 TAB_COMPONENTS 中注册**：
 
 ```tsx
+/** 各 tab 的组件映射（Suspense 包裹实现按需加载） */
 const TAB_COMPONENTS: Record<string, React.ReactNode> = {
-  "enrich-settings": <EnrichSettings />,
-  "new-tab": <NewTab />,  // 新增
+  "enrich-settings": (
+    <Suspense fallback={<EditorSkeleton />}>
+      <EnrichSettings />
+    </Suspense>
+  ),
+  "gen-outline": (
+    <Suspense fallback={<EditorSkeleton />}>
+      <GenOutline />
+    </Suspense>
+  ),
 };
 ```
 

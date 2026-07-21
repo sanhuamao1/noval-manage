@@ -31,18 +31,6 @@ fields:
     type: single
     label: 基调
     options: tone
-  characterIds:
-    type: tagselect
-    label: 出场人物
-    entity: characters
-  locationIds:
-    type: tagselect
-    label: 地点
-    entity: locations
-  foreshadowingIds:
-    type: tagselect
-    label: 伏笔
-    entity: foreshadowings
 
 sections:  
   - type: card
@@ -54,7 +42,3 @@ sections:
     title: 时空基调
     icon: MapPin
     fields: [timeline, tone]
-  - type: card
-    title: 关联实体
-    icon: Link
-    fields: [characterIds, locationIds, foreshadowingIds]

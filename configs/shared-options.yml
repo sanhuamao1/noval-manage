@@ -182,6 +182,29 @@ location-type:
       功能：不对外开放或难以发现的非常规区域，用于藏匿、私密交易或躲避追踪，规则由掌控者决定，易触发意外事件。
       场景：下水道夹层、阁楼暗间、废弃电梯井、地下违建群、临时帐篷区。
 
+# ─── 事件类型 ──
+event-type:
+  - { value: 关键剧情, icon: Star, color: danger }
+  - { value: 日常, icon: Sun, color: yellow }
+  - { value: 转折, icon: GitFork, color: violet }
+  - { value: 战斗, icon: Swords, color: red }
+  - { value: 感情, icon: Heart, color: pink }
+  - { value: 伏笔揭示, icon: Lightbulb, color: teal }
+
+# ─── 事件状态 ──
+event-status:
+  - { value: 已规划, icon: Clock, color: neutral }
+  - { value: 进行中, icon: Pencil, color: primary }
+  - { value: 已完成, icon: CircleCheck, color: success }
+  - { value: 已弃用, icon: CircleOff, color: danger }
+
+# ─── 事件关系类型 ──
+event-connection-type:
+  - { value: 导致, icon: ArrowRight, color: blue }
+  - { value: 铺垫揭示, icon: BetweenHorizontalEnd, color: purple }
+  - { value: 平行对照, icon: Columns2, color: emerald }
+  - { value: 对比, icon: Contrast, color: orange }
+
 inner-motivation:
   - { value: 天真者, icon: Heart, description: 追求安全与简单，赤子之心，相信世界本善。 }
   - { value: 孤儿, icon: Home, description: 追求归属与连接，学会在残酷现实中依靠同伴。 }

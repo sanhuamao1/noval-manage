@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SlidingDrawer } from "@/components/ui/drawer";
 import { PageLayout } from "@/components/ui/page-layout";
+import { EditorForm } from "@/components/ui/editor-form";
+import type { EditorFormHandle } from "@/components/ui/editor-form";
 import { Edit3 } from "lucide-react";
-import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
+import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
-import type { NovelData } from "@/types";
-import { renderSections } from "@/lib/configs/render-utils";
-import { useDrawer } from "@/hooks/useDrawer";
 import { NovelOverviewPreview } from "./NovelOverviewPreview";
 import { useNovelStore } from "@/stores/useNovelStore";
 import { api } from "@/lib/api";
@@ -20,29 +19,38 @@ export default function NovelOverview() {
   const id = params.id as string;
   const novel = useNovelStore((s) => s.novel);
   const mutate = useNovelStore((s) => s.mutate);
-  const { fields, sections, defaults } = getEntry(ConfigEntity.NOVEL);
-  const [editorConfig, setEditorConfig] = useState<Record<string, unknown>>(defaults);
+  const { sections, defaults, fields } = getEntry(ConfigEntity.NOVEL);
 
-  const drawer = useDrawer();
+  const [open, setOpen] = useState(false);
+  const editorRef = useRef<EditorFormHandle>(null);
 
-  useEffect(() => {
-    if (novel) {
-      setEditorConfig(fillConfig<NovelData, Record<string, unknown>>(novel, defaults, fields));
-    }
-  }, [novel]);
+  const openEdit = useCallback(() => {
+    setOpen(true);
+    queueMicrotask(() => {
+      if (novel) {
+        editorRef.current?.setData(fillConfig(novel, defaults, fields));
+      }
+    });
+  }, [novel, defaults, fields]);
+
+  const close = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   async function handleSave() {
-    const title = String(editorConfig.title ?? "").trim();
+    const data = editorRef.current?.getData();
+    if (!data) return;
+    const title = String(data.title ?? "").trim();
     if (!title) return;
 
     await mutate(id, "novel", () =>
       api({
         url: `/api/novels/${id}`,
         method: "PATCH",
-        data: editorConfig as Record<string, unknown>,
+        data: data as Record<string, unknown>,
       }),
     );
-    drawer.close();
+    close();
   }
 
   if (!novel) {
@@ -57,16 +65,19 @@ export default function NovelOverview() {
     <PageLayout
       title="概览"
       handler={
-        <Button variant="link" size="sm" onClick={() => drawer.setOpen(true)}>
+        <Button variant="link" size="sm" onClick={openEdit}>
           <Edit3 className="mr-1.5 h-4 w-4" />
           编辑
         </Button>
       }
       drawer={
-        <SlidingDrawer open={drawer.open} onClose={drawer.close} onUpdate={handleSave}>
-          <div className="space-y-4">
-            {renderSections(sections, editorConfig, (c) => setEditorConfig(c))}
-          </div>
+        <SlidingDrawer open={open} onClose={close} onUpdate={handleSave}>
+          <EditorForm
+            ref={editorRef}
+            key={ConfigEntity.NOVEL}
+            sections={sections}
+            defaults={defaults}
+          />
         </SlidingDrawer>
       }
     >
