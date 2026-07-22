@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useEntityStore } from "./useEntityStore";
 import { usePolishStore } from "./usePolishStore";
 
-export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "foreshadowings" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations" | "frameworks" | "eventNodes" | "eventConnections" | "outlineEvents";
+export type RefreshKey = "novel" | "characters" | "organizations" | "locations" | "outlines" | "chapters" | "polishRules" | "polishSamples" | "relations" | "frameworks" | "eventNodes" | "eventConnections" | "outlineEvents";
 
 const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   novel: (id) => `/api/novels?id=${id}`,
@@ -13,7 +13,6 @@ const KEY_API: Record<RefreshKey, (novelId: string) => string> = {
   organizations: (id) => `/api/organizations?novelId=${id}`,
   locations: (id) => `/api/locations?novelId=${id}`,
   outlines: (id) => `/api/outlines?novelId=${id}`,
-  foreshadowings: (id) => `/api/foreshadowings?novelId=${id}`,
   chapters: (id) => `/api/chapters?novelId=${id}`,
   polishRules: () => "/api/polish/rules",
   polishSamples: () => "/api/polish/samples",
@@ -37,12 +36,11 @@ export const useNovelStore = create<NovelStore>((set) => ({
   novel: null,
 
   init: async (novelId) => {
-    const [novel, characters, organizations, locations, foreshadowings, outlines, chapters, polishRules, polishSamples, relations, frameworks, eventNodes, eventConnections, outlineEvents] = await Promise.all([
+    const [novel, characters, organizations, locations, outlines, chapters, polishRules, polishSamples, relations, frameworks, eventNodes, eventConnections, outlineEvents] = await Promise.all([
       api<NovelData>({ url: `/api/novels?id=${novelId}` }),
       api<{ id: string; name: string }[]>({ url: `/api/characters?novelId=${novelId}` }),
       api<OrganizationData[]>({ url: `/api/organizations?novelId=${novelId}` }),
       api<LocationData[]>({ url: `/api/locations?novelId=${novelId}` }),
-      api<{ id: string; name: string }[]>({ url: `/api/foreshadowings?novelId=${novelId}` }),
       api<OutlineData[]>({ url: `/api/outlines?novelId=${novelId}` }),
       api<ChapterSummary[]>({ url: `/api/chapters?novelId=${novelId}` }),
       api<PolishRuleData[]>({ url: "/api/polish/rules" }),
@@ -55,7 +53,7 @@ export const useNovelStore = create<NovelStore>((set) => ({
     ]);
     set({ novel });
     useEntityStore.getState().setAll({
-      characters, organizations, locations, foreshadowings,
+      characters, organizations, locations,
       outlines, chapters, relations, frameworks,
       eventNodes, eventConnections, outlineEvents,
     });

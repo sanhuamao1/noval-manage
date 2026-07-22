@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-21T15:42:33.804Z，勿手动编辑
+// 自动生成于 2026-07-22T17:47:48.620Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -2783,12 +2783,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "label": "地点",
             "type": "tagselect",
             "entity": "locations"
-          },
-          {
-            "key": "foreshadowingIds",
-            "label": "伏笔",
-            "type": "tagselect",
-            "entity": "foreshadowings"
           }
         ]
       }
@@ -2927,12 +2921,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
         "label": "地点",
         "type": "tagselect",
         "entity": "locations"
-      },
-      {
-        "key": "foreshadowingIds",
-        "label": "伏笔",
-        "type": "tagselect",
-        "entity": "foreshadowings"
       }
     ]
   }

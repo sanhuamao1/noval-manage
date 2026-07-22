@@ -11,7 +11,6 @@ export interface EventNodeData {
   importance?: number | null;
   characterIds?: string[];
   locationIds?: string[];
-  foreshadowingIds?: string[];
   notes?: string | null;
   createdAt?: string;
   updatedAt?: string;

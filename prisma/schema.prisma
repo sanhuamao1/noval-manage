@@ -33,9 +33,6 @@ model Novel {
   relations        Relation[]
   nodePositions    NodePosition[]
   conversations    FactoryConversation[]
-  foreshadowings   Foreshadowing[]
-  keyEvents        KeyEvent[]
-  characterEmotions CharacterEmotion[]
 }
 
 // ── 角色 ──
@@ -84,8 +81,6 @@ model Outline {
   novel      Novel          @relation(fields: [novelId], references: [id], onDelete: Cascade)
   chapters          Chapter[]
   eventLinks        OutlineEvent[]
-  keyEvents         KeyEvent[]
-  characterEmotions  CharacterEmotion[]
 
   @@index([novelId])
 }
@@ -107,53 +102,6 @@ model Chapter {
   outline Outline? @relation(fields: [outlineId], references: [id])
 
   @@index([novelId])
-}
-
-// ── 伏笔 ──
-model Foreshadowing {
-  id        String   @id
-  novelId   String
-  name      String   @default("")
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
-
-  @@index([novelId])
-}
-
-// ── 关键事件（大纲下的关键情节点） ──
-model KeyEvent {
-  id        String   @id
-  novelId   String
-  outlineId String
-  title     String   @default("")
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
-
-  @@index([novelId])
-  @@index([outlineId])
-}
-
-// ── 角色情绪（大纲下的情绪标注） ──
-model CharacterEmotion {
-  id        String   @id
-  novelId   String
-  outlineId String
-  data      String?  // JSON: 情绪数据
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  novel   Novel   @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  outline Outline @relation(fields: [outlineId], references: [id], onDelete: Cascade)
-
-  @@index([novelId])
-  @@index([outlineId])
 }
 
 // ── 地点 ──
@@ -213,7 +161,6 @@ model EventNode {
   // 关联现有实体
   characterIds      String?  // JSON: string[]
   locationIds       String?  // JSON: string[]
-  foreshadowingIds  String?  // JSON: string[]
 
   notes       String?  // JSON: 额外元数据
 

@@ -13,7 +13,6 @@ interface EntityState {
   characters: { id: string; name: string }[];
   organizations: OrganizationData[];
   locations: LocationData[];
-  foreshadowings: { id: string; name: string }[];
   outlines: OutlineData[];
   chapters: ChapterSummary[];
   relations: RelationsData;
@@ -37,7 +36,6 @@ const initial: EntityState = {
   characters: [],
   organizations: [],
   locations: [],
-  foreshadowings: [],
   outlines: [],
   chapters: [],
   relations: { links: [], positions: {} },

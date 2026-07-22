@@ -10,13 +10,11 @@ export async function GET(
   const novel = getNovel(id)
   if (!novel) return NextResponse.json({ error: '作品不存在' }, { status: 404 })
 
-  const [characters, locations, foreshadowings, outlines, keyEvents] = [
+  const [characters, locations, outlines] = await Promise.all([
     list('character', id),
     list('location', id),
-    list('foreshadowing', id),
     list('outline', id),
-    list('key-event', id),
-  ]
+  ])
 
   return NextResponse.json({
     novel: {
@@ -26,8 +24,6 @@ export async function GET(
     },
     characters,
     locations,
-    foreshadowings,
     outlines,
-    keyEvents,
   })
 }

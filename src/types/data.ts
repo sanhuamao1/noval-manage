@@ -54,7 +54,6 @@ export interface OutlineData {
   tone?: string | null;
   characterIds?: string[];
   locationIds?: string[];
-  foreshadowingIds?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
