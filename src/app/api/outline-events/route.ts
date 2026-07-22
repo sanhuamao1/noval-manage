@@ -81,18 +81,6 @@ async function handleDelete(req: NextRequest): Promise<NextResponse> {
   const id = searchParams.get("id")
   if (!id) return NextResponse.json({ error: "缺少 ID" }, { status: 400 })
 
-  // Also need to clean up eventNodeIds on the outline
-  const link = await get("outline-event", id)
-  if (link) {
-    const outlineId = (link as Record<string, unknown>).outlineId as string
-    const outline = await get("outline", outlineId)
-    if (outline) {
-      const eventNodeIds: string[] = (outline as Record<string, unknown>).eventNodeIds as string[] ?? []
-      const updatedIds = eventNodeIds.filter((eid) => eid !== (link as Record<string, unknown>).eventId)
-      await put("outline", outlineId, { eventNodeIds: JSON.stringify(updatedIds) })
-    }
-  }
-
   await remove("outline-event", id)
   return NextResponse.json({ success: true })
 }

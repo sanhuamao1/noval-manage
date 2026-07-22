@@ -18,7 +18,6 @@ async function customGet(req: NextRequest, _entity: string) {
 }
 
 const { GET, POST, PUT, DELETE } = createRoute("outline", {
-  useSortOrder: true,
   get: customGet,
   postDefaults: { status: "planned" },
   postValidate: (body) => (!body.name ? "名称不能为空" : null),

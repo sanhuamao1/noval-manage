@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { BookOpen, FileText, Sparkles, ScrollText, ChevronLeft, Package, Wand2, Timeline } from "lucide-react"
+import { BookOpen, FileText, Sparkles, ScrollText, ChevronLeft, Package, Wand2 } from "lucide-react"
 import Link from "next/link"
 import { useNovelStore } from "@/stores/useNovelStore"
 import { useEntityStore } from "@/stores/useEntityStore"
@@ -11,9 +11,8 @@ import { useEntityStore } from "@/stores/useEntityStore"
 const navItems = [
   { href: "", label: "概览", icon: BookOpen },
   { href: "/chapters", label: "章节", icon: FileText },
-  { href: "/outlines", label: "大纲", icon: ScrollText },
+  { href: "/outline-events", label: "大纲事件", icon: ScrollText },
   { href: "/resources", label: "资源库", icon: Package },
-  { href: "/events", label: "时间线", icon: Timeline },
   { href: "/polish", label: "润色", icon: Sparkles },
   { href: "/factory", label: "梦工厂", icon: Wand2 },
 ]

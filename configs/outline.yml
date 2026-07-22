@@ -22,11 +22,6 @@ fields:
       - { value: 已规划,  icon: Calendar, color: neutral }
       - { value: 进行中, icon: Pen, color: primary }
       - { value: 已完成,  icon: CheckCircle, color: success }
-  timeline:
-    type: text
-    label: 时间
-    icon: Clock
-    placeholder: "如：春·清晨 / 天元历127年三月廿·深夜"
   tone:
     type: single
     label: 基调
@@ -39,6 +34,6 @@ sections:
     class: space-y-3
     fields: [name, contentBrief, contentDetail, status]
   - type: card
-    title: 时空基调
+    title: 基调
     icon: MapPin
-    fields: [timeline, tone]
+    fields: [tone]

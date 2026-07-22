@@ -12,7 +12,7 @@ const JSON_FIELDS: Record<string, Set<string>> = {
     "narrativeFunction", "innerMotivation",
   ]),
   novel: new Set(["genre", "secondaryTones"]),
-  outline: new Set(["eventNodeIds"]),
+  outline: new Set([]),
   "event-node": new Set(["characterIds", "locationIds"]),
   location: new Set(["locationType"]),
   organization: new Set([

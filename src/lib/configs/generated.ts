@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-22T17:47:48.620Z，勿手动编辑
+// 自动生成于 2026-07-22T18:16:53.029Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";
@@ -1384,16 +1384,9 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
       },
       {
         "type": "card",
-        "title": "时空基调",
+        "title": "基调",
         "icon": "MapPin",
         "children": [
-          {
-            "key": "timeline",
-            "label": "时间",
-            "type": "text",
-            "placeholder": "如：春·清晨 / 天元历127年三月廿·深夜",
-            "icon": "Clock"
-          },
           {
             "key": "tone",
             "label": "基调",
@@ -1506,13 +1499,6 @@ export const CONFIGS: Record<ConfigEntity, EntityConfig> = {
             "color": "success"
           }
         ]
-      },
-      {
-        "key": "timeline",
-        "label": "时间",
-        "type": "text",
-        "placeholder": "如：春·清晨 / 天元历127年三月廿·深夜",
-        "icon": "Clock"
       },
       {
         "key": "tone",

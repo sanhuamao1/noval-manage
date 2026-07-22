@@ -63,26 +63,27 @@ model Character {
   targetRelations  Relation[] @relation("targetRelations")
 }
 
-// ── 大纲 ──
+// ── 大纲（parentId 构成单向链表，根节点 parentId = null）──
 model Outline {
   id              String   @id
   novelId         String
+  parentId        String?
   name            String   @default("")
   contentBrief    String?
   contentDetail   String?
   status          String   @default("已规划")
-  timeline        String?
   tone            String?
-  eventNodeIds    String?  // JSON: string[] — 关联的事件 ID 列表（冗余，保持与 OutlineEvent 一致）
-  sortOrder       Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   novel      Novel          @relation(fields: [novelId], references: [id], onDelete: Cascade)
-  chapters          Chapter[]
-  eventLinks        OutlineEvent[]
+  parent     Outline?       @relation("OutlineHierarchy", fields: [parentId], references: [id])
+  children   Outline[]      @relation("OutlineHierarchy")
+  chapters   Chapter[]
+  eventLinks OutlineEvent[]
 
   @@index([novelId])
+  @@index([parentId])
 }
 
 // ── 章节 ──

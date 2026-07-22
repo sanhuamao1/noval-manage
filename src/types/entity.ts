@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-22T17:47:48.614Z，勿手动编辑
+// 自动生成于 2026-07-22T18:16:53.024Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 export * from "./configs";

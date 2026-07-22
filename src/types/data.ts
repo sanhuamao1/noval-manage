@@ -47,13 +47,11 @@ export interface OutlineData {
   id: string;
   /** API 保证 name 必返 */
   name: string;
+  parentId?: string | null;
   contentBrief?: string | null;
   contentDetail?: string | null;
   status?: string | null;
-  timeline?: string | null;
   tone?: string | null;
-  characterIds?: string[];
-  locationIds?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
