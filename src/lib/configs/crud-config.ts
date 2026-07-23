@@ -1,5 +1,7 @@
 import { ConfigEntity } from "@/types";
-import type { RefreshKey } from "@/stores/useNovelStore";
+
+/** 实体 key（替代 useNovelStore.RefreshKey） */
+export type RefreshKey = string;
 
 /**
  * 单个实体的 CRUD 元数据

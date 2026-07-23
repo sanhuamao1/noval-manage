@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useEntityItems, type EntityItemBase } from "@/hooks/useEntityItems";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { api } from "@/lib/api";
+import { mutate } from "swr";
 import { Plus, X, Search, Loader2 } from "lucide-react";
 
 interface TagSelectProps {
@@ -30,7 +32,7 @@ export function TagSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { items, createFn } = useEntityItems(entity);
+  const { data: items = [], mutate: swrMutate } = useEntitySWR<any[]>(entity, novelId);
 
   // 点击外部关闭
   useEffect(() => {
@@ -49,12 +51,12 @@ export function TagSelect({
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  const getId = (item: EntityItemBase) => String(item[optionValue] ?? "");
-  const getName = (item: EntityItemBase) => String(item[optionLabel] ?? "");
+  const getId = (item: any) => String(item[optionValue] ?? "");
+  const getName = (item: any) => String(item[optionLabel] ?? "");
 
   const selectedNames = selectedIds
     .map((id) => items.find((o) => getId(o) === id))
-    .filter((v): v is EntityItemBase => !!v);
+    .filter((v): v is Record<string, unknown> => !!v);
 
   const filtered = input.trim()
     ? items.filter(
@@ -66,10 +68,15 @@ export function TagSelect({
 
   async function handleCreate() {
     const name = input.trim();
-    if (!name || creating || !createFn) return;
+    if (!name || creating) return;
     setCreating(true);
     try {
-      const created = await createFn(novelId, name);
+      const created = await api<any>({
+        url: `/api/${entity}`,
+        method: "POST",
+        data: { novelId, name },
+      });
+      swrMutate();
       onChange([...selectedIds, getId(created)]);
       setInput("");
       setOpen(false);
@@ -78,7 +85,7 @@ export function TagSelect({
     }
   }
 
-  function handleSelect(item: EntityItemBase) {
+  function handleSelect(item: any) {
     onChange([...selectedIds, getId(item)]);
     setInput("");
     setOpen(false);

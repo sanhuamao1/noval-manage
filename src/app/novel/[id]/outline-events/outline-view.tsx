@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { useEntityStore } from "@/stores/useEntityStore";
-import { useNovelStore } from "@/stores/useNovelStore";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { buildEntityKey } from "@/lib/swr-fetcher";
 import { api } from "@/lib/api";
+import { mutate } from "swr";
 import type { OutlineData } from "@/types/data";
 import { Trash2, Plus } from "lucide-react";
 
@@ -106,8 +107,10 @@ interface OutlineViewProps {
 export default function OutlineView({ onEditOutline }: OutlineViewProps) {
   const params = useParams();
   const novelId = params.id as string;
-  const outlines = useEntityStore((s) => s.outlines) as OutlineData[];
-  const mutate = useNovelStore((s) => s.mutate);
+  const { data: outlines = [] } = useEntitySWR<OutlineData[]>("outlines", novelId);
+  const refreshOutlines = useCallback(() => {
+    mutate(buildEntityKey("outlines", novelId));
+  }, [novelId]);
 
   // 构建链
   const chain = useMemo(() => buildChain(outlines), [outlines]);
@@ -122,47 +125,40 @@ export default function OutlineView({ onEditOutline }: OutlineViewProps) {
   const handlePaneDoubleClick = useCallback(async () => {
     const last = chain[chain.length - 1];
     const name = `新大纲 ${chain.length + 1}`;
-    await mutate(novelId, "outlines", () =>
-      api({
-        url: "/api/outlines",
-        method: "POST",
-        data: {
-          novelId,
-          name,
-          parentId: last?.id ?? null,
-        },
-      })
-    );
-  }, [novelId, chain, mutate]);
+    await api({
+      url: "/api/outlines",
+      method: "POST",
+      data: { novelId, name, parentId: last?.id ?? null },
+    });
+    refreshOutlines();
+  }, [novelId, chain, refreshOutlines]);
 
   // ── 点击 [+] 创建子节点 ──
   const handleAddChild = useCallback(
     async (parentId: string) => {
       if (hasChild(parentId)) return;
       const name = `新大纲 ${chain.length + 1}`;
-      await mutate(novelId, "outlines", () =>
-        api({
-          url: "/api/outlines",
-          method: "POST",
-          data: { novelId, name, parentId },
-        })
-      );
+      await api({
+        url: "/api/outlines",
+        method: "POST",
+        data: { novelId, name, parentId },
+      });
+      refreshOutlines();
     },
-    [novelId, chain.length, hasChild, mutate]
+    [novelId, chain.length, hasChild, refreshOutlines]
   );
 
   // ── 保存标题（双击内联编辑） ──
   const handleSaveTitle = useCallback(
     async (id: string, name: string) => {
-      await mutate(novelId, "outlines", () =>
-        api({
-          url: "/api/outlines",
-          method: "PUT",
-          data: { id, novelId, name },
-        })
-      );
+      await api({
+        url: "/api/outlines",
+        method: "PUT",
+        data: { id, novelId, name },
+      });
+      refreshOutlines();
     },
-    [novelId, mutate]
+    [novelId, refreshOutlines]
   );
 
   // ── 右键删除（带确认 + 重链子节点） ──
@@ -175,24 +171,21 @@ export default function OutlineView({ onEditOutline }: OutlineViewProps) {
 
       // 先重链子节点
       for (const child of children) {
-        await mutate(novelId, "outlines", () =>
-          api({
-            url: "/api/outlines",
-            method: "PUT",
-            data: { id: child.id, novelId, parentId: newParentId },
-          })
-        );
+        await api({
+          url: "/api/outlines",
+          method: "PUT",
+          data: { id: child.id, novelId, parentId: newParentId },
+        });
       }
 
       // 再删除节点
-      await mutate(novelId, "outlines", () =>
-        api({
-          url: `/api/outlines?id=${item.id}&novelId=${novelId}`,
-          method: "DELETE",
-        })
-      );
+      await api({
+        url: `/api/outlines?id=${item.id}&novelId=${novelId}`,
+        method: "DELETE",
+      });
+      refreshOutlines();
     },
-    [novelId, outlines, mutate]
+    [novelId, outlines, refreshOutlines]
   );
 
   return (

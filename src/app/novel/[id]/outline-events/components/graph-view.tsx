@@ -16,8 +16,9 @@ import ReactFlow, {
   type Connection,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { useEntityStore } from "@/stores/useEntityStore";
-import { useNovelStore } from "@/stores/useNovelStore";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { buildEntityKey } from "@/lib/swr-fetcher";
+import { mutate } from "swr";
 import { api } from "@/lib/api";
 import { getEventTypeStyle, getConnectionTypeStyle } from "@/lib/event-utils";
 import type { EventNodeData, EventConnectionData } from "@/types/event-data";
@@ -155,11 +156,10 @@ export default function GraphView({ onEventDoubleClick, onAddEvent }: GraphViewP
   const params = useParams();
   const novelId = params.id as string;
 
-  const events = useEntityStore((s) => s.eventNodes) as EventNodeData[];
-  const connections = useEntityStore((s) => s.eventConnections) as EventConnectionData[];
-  const characters = useEntityStore((s) => s.characters) as { id: string; name: string }[];
-  const locations = useEntityStore((s) => s.locations) as { id: string; name: string }[];
-  const mutate = useNovelStore((s) => s.mutate);
+  const { data: events = [] } = useEntitySWR<EventNodeData[]>("eventNodes", novelId);
+  const { data: connections = [] } = useEntitySWR<EventConnectionData[]>("eventConnections", novelId);
+  const { data: characters = [] } = useEntitySWR<{ id: string; name: string }[]>("characters", novelId);
+  const { data: locations = [] } = useEntitySWR<{ id: string; name: string }[]>("locations", novelId);
 
   const charMap = useMemo(() => {
     const m: Record<string, string> = {};
@@ -296,13 +296,12 @@ export default function GraphView({ onEventDoubleClick, onAddEvent }: GraphViewP
       const { source, target } = connection;
       if (!source || !target) return;
 
-      mutate(novelId, ["eventConnections"], () =>
-        api({
-          url: "/api/event-connections",
-          method: "POST",
-          data: { novelId, sourceId: source, targetId: target, type: "导致", strength: 1 },
-        }),
-      ).catch((err) => console.error("创建连接失败:", err));
+      api({
+        url: "/api/event-connections",
+        method: "POST",
+        data: { novelId, sourceId: source, targetId: target, type: "导致", strength: 1 },
+      }).then(() => mutate(buildEntityKey("eventConnections", novelId)))
+        .catch((err) => console.error("创建连接失败:", err));
     },
     [novelId, mutate],
   );
@@ -311,12 +310,11 @@ export default function GraphView({ onEventDoubleClick, onAddEvent }: GraphViewP
   const handleEdgeContextMenu = useCallback(
     (event: React.MouseEvent, edge: Edge) => {
       event.preventDefault();
-      mutate(novelId, ["eventConnections"], () =>
-        api({
-          url: `/api/event-connections?id=${edge.id}`,
-          method: "DELETE",
-        }),
-      ).catch((err) => console.error("删除连接失败:", err));
+      api({
+        url: `/api/event-connections?id=${edge.id}`,
+        method: "DELETE",
+      }).then(() => mutate(buildEntityKey("eventConnections", novelId)))
+        .catch((err) => console.error("删除连接失败:", err));
     },
     [novelId, mutate],
   );

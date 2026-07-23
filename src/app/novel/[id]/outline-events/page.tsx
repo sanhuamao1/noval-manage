@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation";
 import { PageLayout } from "@/components/ui/page-layout";
 import { SimpleTabs } from "@/components/ui/tabs";
@@ -10,8 +10,9 @@ import { EditorForm } from "@/components/ui/editor-form";
 import { useEntityCrud } from "@/hooks/useEntityCrud";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
-import { useNovelStore } from "@/stores/useNovelStore";
 import { api } from "@/lib/api";
+import { mutate } from "swr";
+import { buildEntityKey } from "@/lib/swr-fetcher";
 import type { OutlineData } from "@/types/data";
 import type { EditorFormHandle } from "@/components/ui/editor-form";
 import { ListOrdered, GitBranch } from "lucide-react";
@@ -31,22 +32,22 @@ export default function OutlineEventsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const mutate = useNovelStore((s) => s.mutate);
 
   const view = (searchParams.get("view") ?? "outline") as ViewMode;
 
   const setView = useCallback(
     (v: string) => {
-      const p = new URLSearchParams(searchParams.toString());
-      if (v === "outline") p.delete("view");
-      else p.set("view", v);
-      router.push(`${pathname}?${p.toString()}`);
+      const sp = new URLSearchParams(searchParams.toString());
+      if (v === "outline") sp.delete("view");
+      else sp.set("view", v);
+      const qs = sp.toString();
+      router.replace(`${pathname}${qs ? `?${qs}` : ""}`);
     },
-    [searchParams, router, pathname],
+    [router, pathname, searchParams],
   );
 
-  // ── 大纲 Drawer 状态 ──
-  const outlineEntry = useMemo(() => getEntry(ConfigEntity.OUTLINE), []);
+  // ── 大纲 CRUD ──
+  const outlineEntry = getEntry(ConfigEntity.OUTLINE);
   const [outlineDrawer, setOutlineDrawer] = useState<{
     mode: "edit";
     outline: OutlineData;
@@ -69,15 +70,14 @@ export default function OutlineEventsPage() {
     if (!outlineDrawer) return;
     const data = outlineEditorRef.current?.getData();
     if (!data) return;
-    await mutate(novelId, "outlines", () =>
-      api({
-        url: "/api/outlines",
-        method: "PUT",
-        data: { id: outlineDrawer.outline.id, novelId, ...data },
-      })
-    );
+    await api({
+      url: "/api/outlines",
+      method: "PUT",
+      data: { id: outlineDrawer.outline.id, novelId, ...data },
+    });
+    mutate(buildEntityKey("outlines", novelId));
     setOutlineDrawer(null);
-  }, [novelId, outlineDrawer, mutate]);
+  }, [novelId, outlineDrawer]);
 
   const handleCloseOutline = useCallback(() => {
     setOutlineDrawer(null);
@@ -118,6 +118,7 @@ export default function OutlineEventsPage() {
       key={String(currentEntity)}
       sections={eventSections}
       defaults={eventDefaults}
+      novelId={novelId}
     />
   ) : (
     <EditorForm
@@ -125,6 +126,7 @@ export default function OutlineEventsPage() {
       key="outline-editor"
       sections={outlineEntry.sections}
       defaults={outlineEntry.defaults}
+      novelId={novelId}
     />
   );
 

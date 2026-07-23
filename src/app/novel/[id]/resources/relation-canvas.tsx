@@ -16,8 +16,9 @@ import ReactFlow, {
   type Connection,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { useNovelStore } from "@/stores/useNovelStore";
-import { useEntityStore } from "@/stores/useEntityStore";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { buildEntityKey } from "@/lib/swr-fetcher";
+import { mutate } from "swr";
 import { api } from "@/lib/api";
 import type { RelationData, NodePosition } from "@/types/data";
 import { debounce } from "lodash-es";
@@ -157,15 +158,11 @@ function useDebouncedSavePositions(
         for (const n of currentNodes) {
           newPositions[n.id] = { x: n.position.x, y: n.position.y };
         }
-        useNovelStore
-          .getState()
-          .mutate(novelIdRef.current, "relations", () =>
-            api({
-              url: "/api/relations",
-              method: "PUT",
-              data: { novelId: novelIdRef.current, positions: newPositions },
-            }),
-          )
+        api({
+          url: "/api/relations",
+          method: "PUT",
+          data: { novelId: novelIdRef.current, positions: newPositions },
+        }).then(() => mutate(buildEntityKey("relations", novelIdRef.current)))
           .catch((err) => {
             console.error("保存位置失败:", err);
           });
@@ -193,12 +190,11 @@ export default function RelationCanvas({ onEditCharacter }: RelationCanvasProps)
   const novelId = params.id as string;
 
   // 从 store 获取数据
-  const characters: { id: string; name: string; role?: string }[] = useEntityStore((s) => s.characters) as any;
-  const relationsFromStore = useEntityStore((s) => s.relations); // RelationsData: { links, positions }
-  const mutate = useNovelStore((s) => s.mutate);
+  const { data: characters = [] } = useEntitySWR<{ id: string; name: string; role?: string }[]>("characters", novelId);
+  const { data: relationsFromStore } = useEntitySWR<{ links: RelationData[]; positions: Record<string, NodePosition> }>("relations", novelId);
 
-  const links = relationsFromStore.links;
-  const positions = relationsFromStore.positions;
+  const links = relationsFromStore?.links ?? [];
+  const positions = relationsFromStore?.positions ?? {}; // RelationsData: { links, positions }
 
   const [nodes, setNodes, onNodesChange] = useNodesState<CharacterNodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -240,11 +236,11 @@ export default function RelationCanvas({ onEditCharacter }: RelationCanvasProps)
       const updated = [...(links || []), newRelation];
 
       // 更新 store 的 relations 字段
-      mutate(novelId, "relations", () =>
-        api({ url: "/api/relations", method: "POST", data: { novelId, relations: updated } })
-      ).catch((err) => {
-        console.error("保存关系失败:", err);
-      });
+      api({ url: "/api/relations", method: "POST", data: { novelId, relations: updated } })
+        .then(() => mutate(buildEntityKey("relations", novelId)))
+        .catch((err) => {
+          console.error("保存关系失败:", err);
+        });
     },
     [novelId, links]
   );
@@ -255,11 +251,11 @@ export default function RelationCanvas({ onEditCharacter }: RelationCanvasProps)
       event.preventDefault();
       const edgeId = edge.id;
       const updated = (links || []).filter((r) => `${r.source}->${r.target}` !== edgeId);
-      mutate(novelId, "relations", () =>
-        api({ url: "/api/relations", method: "POST", data: { novelId, relations: updated } })
-      ).catch((err) => {
-        console.error("删除关系失败:", err);
-      });
+      api({ url: "/api/relations", method: "POST", data: { novelId, relations: updated } })
+        .then(() => mutate(buildEntityKey("relations", novelId)))
+        .catch((err) => {
+          console.error("删除关系失败:", err);
+        });
     },
     [novelId, links]
   );
@@ -307,11 +303,11 @@ export default function RelationCanvas({ onEditCharacter }: RelationCanvasProps)
       `${r.source}->${r.target}` === id ? { ...r, description: label } : r
     );
 
-    mutate(novelId, "relations", () =>
-      api({ url: "/api/relations", method: "POST", data: { novelId, relations: updated } })
-    ).catch((err) => {
-      console.error("更新关系描述失败:", err);
-    });
+    api({ url: "/api/relations", method: "POST", data: { novelId, relations: updated } })
+      .then(() => mutate(buildEntityKey("relations", novelId)))
+      .catch((err) => {
+        console.error("更新关系描述失败:", err);
+      });
 
     setEditingEdge(null);
   }, [editingEdge, novelId, links]);

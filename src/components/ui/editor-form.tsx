@@ -19,27 +19,15 @@ export interface EditorFormHandle {
 interface EditorFormProps {
   sections: ConfigSection[];
   defaults: Record<string, any>;
+  /** 可选：供 tagselect 等字段查询关联实体数据 */
+  novelId?: string;
 }
 
 /**
  * 编辑器表单 — 内部自管状态，父组件通过 ref 读写
- *
- * @example
- * ```tsx
- * const editorRef = useRef<EditorFormHandle>(null);
- *
- * // 打开创建
- * editorRef.current?.reset();
- *
- * // 打开编辑已有记录
- * editorRef.current?.setData(existingRecord);
- *
- * // 保存时取数据
- * const data = editorRef.current?.getData();
- * ```
  */
 export const EditorForm = forwardRef<EditorFormHandle, EditorFormProps>(
-  function EditorForm({ sections, defaults }, ref) {
+  function EditorForm({ sections, defaults, novelId }, ref) {
     const [config, setConfig] = useState<Record<string, any>>(defaults);
 
     useImperativeHandle(ref, () => ({
@@ -50,7 +38,7 @@ export const EditorForm = forwardRef<EditorFormHandle, EditorFormProps>(
 
     return (
       <div className="space-y-4">
-        {renderSections(sections, config, (c) => setConfig(c as Record<string, any>))}
+        {renderSections(sections, config, (c) => setConfig(c as Record<string, any>), novelId)}
       </div>
     );
   },

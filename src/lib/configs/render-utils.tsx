@@ -31,8 +31,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEntityStore } from "@/stores/useEntityStore";
-import { usePolishStore } from "@/stores/usePolishStore";
+
 
 /** 图标名称 → LucideIcon 的静态映射表（避免动态导入破坏 tree-shaking） */
 const ICON_MAP: Record<string, LucideIcon | undefined> = {
@@ -95,6 +94,8 @@ export function renderField<T extends Record<string, any>>(
     onChange: (c: T) => void,
     novelId?: string,
 ) {
+
+    console.log(config)
     function set(key: keyof T, value: T[keyof T]) {
         onChange({ ...config, [key]: value });
     }
@@ -245,15 +246,9 @@ export function renderField<T extends Record<string, any>>(
                                     .filter(Boolean);
                             }
                         } else if (sf.entity) {
-                            // 从对应 store 获取 entity 的 name 列表
-                            const entityStore = useEntityStore.getState();
-                            const polishStore = usePolishStore.getState();
-                            const entities = (entityStore as any)[sf.entity] ?? (polishStore as any)[sf.entity];
-                            if (Array.isArray(entities)) {
-                                resolvedOpts[fi] = entities
-                                    .map((item: any) => item.name as string)
-                                    .filter(Boolean);
-                            }
+                            // entity 引用：在 SWR 模式下略过预解析选项
+                            // 用户仍可直接输入，不影响功能
+                            resolvedOpts[fi] = [];
                         }
                     }
                 });

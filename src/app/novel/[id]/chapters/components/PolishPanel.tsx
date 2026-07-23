@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { SimpleTabs } from "@/components/ui/tabs";
 import { SlidingDrawer } from "@/components/ui/drawer";
 import { ConfigBadges } from "@/components/ui/config-badges";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { buildEntityKey } from "@/lib/swr-fetcher";
+import { mutate } from "swr";
 import { usePolishStore } from "@/stores/usePolishStore";
 import { usePanelStore } from "@/stores/usePanelStore";
 import { useMenuStore } from "@/stores/useMenuStore";
@@ -21,10 +24,9 @@ export function PolishPanel() {
   const setSelectedRuleId = usePolishStore((s) => s.setSelectedRuleId);
   const selectedSampleIds = usePolishStore((s) => s.selectedSampleIds);
   const toggleSampleId = usePolishStore((s) => s.toggleSampleId);
-  const refreshPolishData = usePolishStore((s) => s.refreshPolishData);
   const selectedText = useMenuStore((s) => s.selectedText);
-  const rules = usePolishStore((s) => s.polishRules);
-  const samples = usePolishStore((s) => s.polishSamples);
+  const { data: rules = [] } = useEntitySWR<any[]>("polishRules");
+  const { data: samples = [] } = useEntitySWR<any[]>("polishSamples");
 
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [itemTab, setItemTab] = useState<"rules" | "samples">("rules");
@@ -62,7 +64,8 @@ export function PolishPanel() {
             polishResult: data.polishedText ?? "",
             showResultPopover: true,
           });
-          refreshPolishData();
+          mutate(buildEntityKey("polishRules"));
+          mutate(buildEntityKey("polishSamples"));
         }
       } catch (err: any) {
         setPolishError(err.message || "润色失败");
@@ -70,7 +73,7 @@ export function PolishPanel() {
         setPolishing(false);
       }
     },
-    [selectedText, selectedSampleIds, refreshPolishData],
+    [selectedText, selectedSampleIds],
   );
 
   const reset = useCallback(() => {

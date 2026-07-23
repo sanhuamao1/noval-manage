@@ -7,13 +7,14 @@ import ReactMarkdown from "react-markdown";
 import { api } from "@/lib/api";
 import remarkGfm from "remark-gfm";
 import { useFactory } from "@/stores/useFactoryStore";
-import { useNovelStore } from "@/stores/useNovelStore";
+import { useParams } from "next/navigation";
 import { ErrorState } from "./components/error-state";
 import { EmptyState } from "./components/empty-state";
 
 export default function GenOutline() {
   const { error, loading, content, handleGenerate } = useFactory();
-  const novelId = useNovelStore((s) => s.novel?.id);
+  const params = useParams();
+  const novelId = params.id as string;
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);

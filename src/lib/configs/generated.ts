@@ -1,4 +1,4 @@
-// 自动生成于 2026-07-22T18:16:53.029Z，勿手动编辑
+// 自动生成于 2026-07-23T13:36:11.344Z，勿手动编辑
 // 由 scripts/generate-configs.cjs 从 configs/*.yml 生成
 
 import { ConfigEntity, EntityConfig } from "@/types/entity";

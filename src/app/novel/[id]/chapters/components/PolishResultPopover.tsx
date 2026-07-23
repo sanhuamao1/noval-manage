@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react"
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button"
 import { X, Check } from "lucide-react"
+import { useEntitySWR } from "@/hooks/useEntitySWR";
 import { usePolishStore } from "@/stores/usePolishStore"
 import { useMenuStore } from "@/stores/useMenuStore"
 
@@ -19,7 +20,7 @@ export function PolishResultPopover({ editContent, setEditContent }: PolishResul
   const selectedRuleId = usePolishStore((s) => s.selectedRuleId);
   const cancelPolish = usePolishStore((s) => s.cancelPolish);
   const selectedText = useMenuStore((s) => s.selectedText);
-  const rules = usePolishStore((s) => s.polishRules);
+  const { data: rules = [] } = useEntitySWR<any[]>("polishRules");
   const replaceSelection = useMenuStore((s) => s.replaceSelection);
   const resetMenu = useMenuStore((s) => s.resetMenu);
 

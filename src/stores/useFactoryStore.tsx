@@ -9,7 +9,9 @@ import type { SimpleTab } from "@/components/ui/tabs";
 import { Wand2, BookOpen } from "lucide-react";
 import { api } from "@/lib/api";
 import type { HttpMethod } from "@/lib/api";
-import { useNovelStore } from "@/stores/useNovelStore";
+import { mutate } from "swr";
+import { buildEntityKey } from "@/lib/swr-fetcher";
+
 
 // ── Types ──────────────────────────────────────────────
 
@@ -194,9 +196,7 @@ export const useFactoryStore = create<FactoryStore>()(
           if (!url) return;
 
           const cur = get().cache[tab];
-          const novelId = useNovelStore.getState().novel?.id;
           const finalBody: Record<string, unknown> = {
-            novelId,
             prompt: cur?.prompt ?? "",
             ...body,
           };
@@ -286,17 +286,15 @@ export const useFactoryStore = create<FactoryStore>()(
           try {
             const novelId = String(op.params.novelId ?? "");
 
-            await useNovelStore.getState().mutate(
-              novelId,
-              ["characters", "relations"],
-              () =>
-                api({
-                  url: op.api,
-                  method: op.method as HttpMethod,
-                  params: apiParams,
-                  data: op.method !== "DELETE" ? opData : undefined,
-                }),
-            );
+            await api({
+              url: op.api,
+              method: op.method as HttpMethod,
+              params: apiParams,
+              data: op.method !== "DELETE" ? opData : undefined,
+            });
+            // 刷新关联数据
+            mutate(buildEntityKey("characters", novelId));
+            mutate(buildEntityKey("relations", novelId));
 
             patchCurrentTab((c) => ({
               applied: c.applied.includes(index) ? c.applied : [...c.applied, index],

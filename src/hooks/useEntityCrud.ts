@@ -2,37 +2,19 @@
 
 import { useState, useMemo, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { useNovelStore } from "@/stores/useNovelStore";
-import { useEntityStore } from "@/stores/useEntityStore";
-import { usePolishStore } from "@/stores/usePolishStore";
+
 import { api } from "@/lib/api";
 import { getEntry, ConfigEntity } from "@/lib/configs/config-registry";
 import { getCrudMeta } from "@/lib/configs/crud-config";
 import { fillConfig } from "@/lib/configs/config-utils";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
 import type { EditorFormHandle } from "@/components/ui/editor-form";
 
 /**
  * 通用实体 CRUD 钩子
  *
  * 接管一个实体列表页的 drawer 状态（create/edit/close）和 C/R/U/D 操作。
- * 编辑区内部自管状态，父组件通过 editorRef 注入数据 / 取数据。
- *
- * @example 单实体页面（固定 entity）
- * ```tsx
- * const { items, mode, fieldsMap, sections, editorRef, defaults, currentEntity,
- *          openEdit, openAdd, createItem, updateItem, deleteItem, close } =
- *   useEntityCrud(ConfigEntity.CHARACTER);
- *
- * <SlidingDrawer ...>
- *   <EditorForm ref={editorRef} key={String(currentEntity)} sections={sections} defaults={defaults} />
- * </SlidingDrawer>
- * ```
- *
- * @example 多实体页面（运行时切换 entity）
- * ```tsx
- * const { ..., currentEntity, switchEntity } = useEntityCrud(ConfigEntity.CHARACTER);
- * // 切换到组织：switchEntity(ConfigEntity.ORGANIZATION) → 自动关闭 drawer + 重置表单
- * ```
+ * 使用 SWR 管理数据缓存，无需手动版本管理。
  */
 export function useEntityCrud(
   entity: ConfigEntity,
@@ -45,17 +27,13 @@ export function useEntityCrud(
 
   // ── 根据 currentEntity 派生配置 ──
   const meta = useMemo(() => getCrudMeta(currentEntity), [currentEntity]);
-  const { storeKey } = meta;
+  const { storeKey, needsNovelId } = meta;
   const entry = useMemo(() => getEntry(currentEntity), [currentEntity]);
   const { fields, sections, defaults, fieldsMap } = entry;
 
-  // ── 全局数据：根据 storeKey 从对应 store 读取 ──
-  const isPolish = storeKey === "polishRules" || storeKey === "polishSamples";
-  const items = (isPolish
-    ? usePolishStore((s) => (s as any)[storeKey] ?? [])
-    : useEntityStore((s) => (s as any)[storeKey] ?? [])
-  ) as any[];
-  const mutate = useNovelStore((s) => s.mutate);
+  // ── SWR 数据（替代 useEntityStore / usePolishStore）──
+  const swrNovelId = needsNovelId ? novelId : undefined;
+  const { data: items = [], mutate } = useEntitySWR<any[]>(storeKey, swrNovelId);
 
   // ── 编辑状态（模式 + 当前编辑 ID）──
   const [mode, setMode] = useState<"create" | "edit" | null>(null);
@@ -65,7 +43,7 @@ export function useEntityCrud(
   const editorRef = useRef<EditorFormHandle>(null);
 
   function switchEntity(next: ConfigEntity) {
-    if(next === currentEntity) return;
+    if (next === currentEntity) return;
     setMode(null);
     setEditingId(null);
     setCurrentEntity(next);
@@ -85,12 +63,13 @@ export function useEntityCrud(
   );
 
   const openAdd = useCallback(() => {
+    if (mode) return; // 已打开状态不做任何事
     setMode("create");
     setEditingId(null);
     queueMicrotask(() => {
       editorRef.current?.reset();
     });
-  }, []);
+  }, [mode]);
 
   function close() {
     setMode(null);
@@ -98,20 +77,18 @@ export function useEntityCrud(
   }
 
   const apiPath = meta.apiPath ?? `/api/${storeKey}`;
-  const needsNovelId = meta.needsNovelId !== false;
 
   async function createItem() {
     const data = editorRef.current?.getData();
     if (!data) return;
     const name = String(data.name ?? "").trim();
     if (!name) return;
-    await mutate(novelId, storeKey as any, async () => {
-      await api({
-        url: apiPath,
-        method: "POST",
-        data: needsNovelId ? { novelId, name, ...data } : { name, ...data },
-      });
+    await api({
+      url: apiPath,
+      method: "POST",
+      data: needsNovelId ? { novelId, name, ...data } : { name, ...data },
     });
+    mutate(); // SWR 重新验证
     close();
   }
 
@@ -121,28 +98,26 @@ export function useEntityCrud(
     if (!data) return;
     const name = String(data.name ?? "").trim();
     if (!name) return;
-    await mutate(novelId, storeKey as any, async () => {
-      await api({
-        url: apiPath,
-        method: "PUT",
-        data: needsNovelId ? { id: editingId, novelId, ...data } : { id: editingId, ...data },
-      });
+    await api({
+      url: apiPath,
+      method: "PUT",
+      data: needsNovelId ? { id: editingId, novelId, ...data } : { id: editingId, ...data },
     });
+    mutate(); // SWR 重新验证
     close();
   }
 
   async function deleteItem(itemId: string) {
     const { deleteLabel } = getCrudMeta(currentEntity);
     if (!confirm(`确定要删除这个${deleteLabel}吗？`)) return;
-    await mutate(novelId, storeKey as any, async () => {
-      const query = needsNovelId
-        ? `?id=${itemId}&novelId=${novelId}`
-        : `?id=${itemId}`;
-      await api({
-        url: `${apiPath}${query}`,
-        method: "DELETE",
-      });
+    const query = needsNovelId
+      ? `?id=${itemId}&novelId=${novelId}`
+      : `?id=${itemId}`;
+    await api({
+      url: `${apiPath}${query}`,
+      method: "DELETE",
     });
+    mutate(); // SWR 重新验证
     if (editingId === itemId) close();
   }
 

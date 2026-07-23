@@ -11,8 +11,8 @@ import {
 import { Button, AddButton } from "@/components/ui/button";
 import { SimpleTabs } from "@/components/ui/tabs";
 import type { ChapterSummary } from "@/types";
-import type { FilterTab, SortState } from "../hooks/useChapters";
-import { filterTabs } from "../hooks/useChapters";
+import type { FilterTab, SortState } from "../hooks/types";
+import { filterTabs } from "../hooks/types";
 
 interface ChapterListProps {
   chapters: ChapterSummary[];

@@ -11,14 +11,16 @@ import { Edit3 } from "lucide-react";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
 import { fillConfig } from "@/lib/configs/config-utils";
 import { NovelOverviewPreview } from "./NovelOverviewPreview";
-import { useNovelStore } from "@/stores/useNovelStore";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { buildEntityKey } from "@/lib/swr-fetcher";
 import { api } from "@/lib/api";
+import { mutate } from "swr";
+import type { NovelData } from "@/types/data";
 
 export default function NovelOverview() {
   const params = useParams();
   const id = params.id as string;
-  const novel = useNovelStore((s) => s.novel);
-  const mutate = useNovelStore((s) => s.mutate);
+  const { data: novel } = useEntitySWR<NovelData>("novel", id);
   const { sections, defaults, fields } = getEntry(ConfigEntity.NOVEL);
 
   const [open, setOpen] = useState(false);
@@ -43,13 +45,12 @@ export default function NovelOverview() {
     const title = String(data.title ?? "").trim();
     if (!title) return;
 
-    await mutate(id, "novel", () =>
-      api({
-        url: `/api/novels/${id}`,
-        method: "PATCH",
-        data: data as Record<string, unknown>,
-      }),
-    );
+    await api({
+      url: `/api/novels/${id}`,
+      method: "PATCH",
+      data: data as Record<string, unknown>,
+    });
+    mutate(buildEntityKey("novel", id));
     close();
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -10,30 +10,20 @@ import { SimpleTabs } from "@/components/ui/tabs";
 import { EditorSkeleton } from "@/components/skeleton";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useFactory } from "@/stores/useFactoryStore";
-import { useEntityStore } from "@/stores/useEntityStore";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import { lazyTab } from "@/components/lazy-tab";
 
-const EnrichSettings = lazy(() => import("./enrich-settings"));
-const GenOutline = lazy(() => import("./gen-outline"));
-
-/** 各 tab 的组件映射（Suspense 包裹实现按需加载） */
-const TAB_COMPONENTS: Record<string, React.ReactNode> = {
-  "enrich-settings": (
-    <Suspense fallback={<EditorSkeleton />}>
-      <EnrichSettings />
-    </Suspense>
-  ),
-  "gen-outline": (
-    <Suspense fallback={<EditorSkeleton />}>
-      <GenOutline />
-    </Suspense>
-  ),
+/** 各 tab 的组件映射（懒加载） */
+const TAB_CONTENT: Record<string, React.ReactNode> = {
+  "enrich-settings": lazyTab(() => import("./enrich-settings"), <EditorSkeleton />),
+  "gen-outline": lazyTab(() => import("./gen-outline"), <EditorSkeleton />),
 };
 
 export default function FactoryPage() {
   const params = useParams();
   const novelId = params?.id as string;
   const { prompt, setPrompt, loading, activeTab, tabs, handleGenerate, changeTab } = useFactory();
-  const frameworks = useEntityStore((s) => s.frameworks);
+  const { data: frameworks = [] } = useEntitySWR<any[]>("frameworks");
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [draftPrompt, setDraftPrompt] = useState("");
@@ -120,7 +110,7 @@ export default function FactoryPage() {
         </div>
       </div>
     }>
-      <div className="mt-4">{TAB_COMPONENTS[activeTab]}</div>
+      <div className="mt-4">{TAB_CONTENT[activeTab]}</div>
     </PageLayout>
   );
 }

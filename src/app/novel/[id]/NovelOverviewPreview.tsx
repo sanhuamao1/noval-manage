@@ -1,17 +1,21 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { BookOpen, Calendar, Hash, Tags, Clock } from "lucide-react";
 import { renderOptions } from "@/lib/configs/render-utils";
 import { formatDateStr, formatWordCount } from "@/lib/utils";
-import { useNovelStore } from "@/stores/useNovelStore";
 import { ConfigEntity, getEntry } from "@/lib/configs/config-registry";
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import type { NovelData } from "@/types/data";
 
 export function NovelOverviewPreview() {
-  const novel = useNovelStore((s) => s.novel);
+  const params = useParams();
+  const id = params.id as string;
+  const { data: novel } = useEntitySWR<NovelData | null>("novel", id);
   const { fieldsMap } = getEntry(ConfigEntity.NOVEL);
 
-  if (novel === null) {
+  if (!novel) {
     return <NovelOverviewSkeleton />;
   }
 

@@ -1,12 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { BookOpen, FileText, Sparkles, ScrollText, ChevronLeft, Package, Wand2 } from "lucide-react"
 import Link from "next/link"
-import { useNovelStore } from "@/stores/useNovelStore"
-import { useEntityStore } from "@/stores/useEntityStore"
+import { useEntitySWR } from "@/hooks/useEntitySWR";
+import type { NovelData } from "@/types/data";
 
 const navItems = [
   { href: "", label: "概览", icon: BookOpen },
@@ -26,14 +25,7 @@ export default function NovelLayout({
   const pathname = usePathname()
   const router = useRouter()
   const id = params.id as string
-  const novel = useNovelStore((s) => s.novel)
-  const chapters = useEntityStore((s) => s.chapters)
-  const init = useNovelStore((s) => s.init)
-
-  useEffect(() => {
-    if (novel?.id === id) return;
-    init(id);
-  }, [id, novel?.id, init])
+  const { data: novel } = useEntitySWR<NovelData>("novel", id)
 
   const currentPath = pathname.replace(`/novel/${id}`, "") || ""
 
@@ -65,9 +57,6 @@ export default function NovelLayout({
               >
                 <Icon className="w-4 h-4" />
                 <span className="flex-1">{item.label}</span>
-                {item.href === "/chapters" && (
-                  <span className="text-xs text-muted-foreground/60">{chapters.length}</span>
-                )}
               </Link>
             )
           })}
