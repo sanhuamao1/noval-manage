@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive: "text-danger hover:bg-danger/10",
         outline: "hover:bg-primary/10",
-        secondary: "text-secondary-foreground hover:bg-primary/90 hover:text-primary-foreground",
+        secondary: "text-muted-foreground hover:text-primary",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         radio: "text-muted-foreground",
@@ -43,7 +43,7 @@ const activeBgMap: Record<string, string> = {
   default: "bg-primary/90",
   destructive: "bg-danger/10",
   outline: "bg-primary/10",
-  secondary: "bg-primary/90 text-primary-foreground",
+  secondary: "text-primary",
   ghost: "bg-accent",
   link: "",
   radio: "text-primary"

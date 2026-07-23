@@ -9,7 +9,6 @@ import { mutate } from "swr";
 import { ChapterList } from "./ChapterList";
 import type { ChapterSummary } from "@/types";
 import type { FilterTab, SortState } from "../hooks/types";
-import { filterTabs } from "../hooks/types";
 
 function cycleSort(current: SortState): SortState {
   if (current === "none") return "asc";
@@ -19,10 +18,12 @@ function cycleSort(current: SortState): SortState {
 
 interface ChapterListPanelProps {
   selectedChapterId: string | null;
+  outlineEventOpen: boolean;
   onSelectChapter: (id: string | null) => void;
+  onToggleOutlineEvent: () => void;
 }
 
-export function ChapterListPanel({ selectedChapterId, onSelectChapter }: ChapterListPanelProps) {
+export function ChapterListPanel({ selectedChapterId, outlineEventOpen, onSelectChapter, onToggleOutlineEvent }: ChapterListPanelProps) {
   const params = useParams();
   const novelId = params.id as string;
   const { data: chapters = [] } = useEntitySWR<ChapterSummary[]>("chapters", novelId);
@@ -104,12 +105,14 @@ export function ChapterListPanel({ selectedChapterId, onSelectChapter }: Chapter
       filter={filter}
       nameSort={nameSort}
       timeSort={timeSort}
+      outlineEventOpen={outlineEventOpen}
       onSelectChapter={handleSelect}
       onDeleteChapter={handleDelete}
       onFilterChange={setFilter}
       onCreateChapter={handleCreate}
       onNameSort={handleNameSort}
       onTimeSort={handleTimeSort}
+      onToggleOutlineEvent={onToggleOutlineEvent}
     />
   );
 }

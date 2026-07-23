@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus, ScrollText } from "lucide-react";
 import {
   ArrowUpDown,
   ArrowUpAZ,
@@ -8,7 +8,7 @@ import {
   ArrowUpNarrowWide,
   ArrowDownWideNarrow,
 } from "lucide-react";
-import { Button, AddButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { SimpleTabs } from "@/components/ui/tabs";
 import type { ChapterSummary } from "@/types";
 import type { FilterTab, SortState } from "../hooks/types";
@@ -21,12 +21,14 @@ interface ChapterListProps {
   filter: FilterTab;
   nameSort: SortState;
   timeSort: SortState;
+  outlineEventOpen: boolean;
   onSelectChapter: (chapter: ChapterSummary) => void;
   onDeleteChapter: (id: string) => void;
   onFilterChange: (filter: FilterTab) => void;
   onCreateChapter: () => void;
   onNameSort: () => void;
   onTimeSort: () => void;
+  onToggleOutlineEvent: () => void;
 }
 
 const sortIcons = {
@@ -36,61 +38,72 @@ const sortIcons = {
 } as const;
 
 export function ChapterList({
-  chapters,
   sortedChapters,
   selectedChapterId,
   filter,
   nameSort,
   timeSort,
+  outlineEventOpen,
   onSelectChapter,
   onDeleteChapter,
   onFilterChange,
   onCreateChapter,
   onNameSort,
   onTimeSort,
+  onToggleOutlineEvent,
 }: ChapterListProps) {
   const NameIcon = sortIcons[nameSort].name;
   const TimeIcon = sortIcons[timeSort].time;
+  // 大纲事件浮层状态由外部管理
 
   return (
     <div className="w-72 flex-shrink-0 overflow-auto border-r p-4">
+      {/* 第一行：加号 + 大纲事件 */}
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-semibold">章节列表</h2>
-        <AddButton onClick={onCreateChapter} />
+        <Button size="sm" onClick={onCreateChapter}>
+          <Plus className="mr-1 h-3 w-3" />
+          章节
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          isActive={outlineEventOpen}
+          onClick={onToggleOutlineEvent}
+        >
+          <ScrollText className="mr-1 h-3.5 w-3.5" />
+          大纲事件
+        </Button>
       </div>
 
-      <SimpleTabs
-        tabs={filterTabs}
-        value={filter}
-        onChange={(k) => onFilterChange(k as FilterTab)}
-        counts={{
-          published: chapters.filter((ch) => ch.status === "published").length,
-          draft: chapters.filter((ch) => ch.status === "draft").length,
-        }}
-        className="mb-3"
-      />
+      {/* 第二行：筛选 + 排序 */}
+      <div className="mb-3 flex items-center gap-2">
+        <SimpleTabs
+          tabs={filterTabs}
+          value={filter}
+          onChange={(k) => onFilterChange(k as FilterTab)}
+          variant="segment"
+        />
 
-      {/* 排序栏 */}
-      <div className="mb-2 flex items-center px-1 text-xs text-muted-foreground">
-        <Button
-          variant="outline"
-          size="sm"
-          isActive={nameSort !== "none"}
-          onClick={onNameSort}
-        >
-          <NameIcon className="h-3 w-3" />
-          名称
-        </Button>
-
-        <Button
-          variant="outline"
-          isActive={timeSort !== "none"}
-          size="sm"
-          onClick={onTimeSort}
-        >
-          <TimeIcon className="h-3 w-3" />
-          时间
-        </Button>
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Button
+            variant="outline"
+            size="sm"
+            isActive={nameSort !== "none"}
+            onClick={onNameSort}
+          >
+            <NameIcon className="h-3 w-3" />
+            名称
+          </Button>
+          <Button
+            variant="outline"
+            isActive={timeSort !== "none"}
+            size="sm"
+            onClick={onTimeSort}
+          >
+            <TimeIcon className="h-3 w-3" />
+            时间
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-1">
